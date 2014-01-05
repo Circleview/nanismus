@@ -218,6 +218,27 @@
             //echo "letzer &Uuml;berlauf fand statt am: ", $ueberlaufzeit,"<br />";
         }
 
+        // Ermittle die letzte Zeit, bei der die Wassermenge im Wassertank gemessen wurde
+        $sql = "
+        SELECT $tabelle.timestamp
+        FROM $tabelle
+        WHERE ((($tabelle.sensorname)='Wassertank') AND (($tabelle.logtype)='Messwert'))
+        ORDER BY $tabelle.ID DESC LIMIT 1
+        ";
+
+        $db_erg = mysqli_query( $db_link, $sql );
+        if ( ! $db_erg )
+        {
+        die('Ungültige Abfrage: ' . mysqli_error($db_link));
+        }
+
+        while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
+        {
+            $wassertankmesszeit = $row['timestamp'];
+            //echo "&Uuml;berlaufwert: ", $ueberlaufwert,"<br /> ";
+            //echo "letzer &Uuml;berlauf fand statt am: ", $ueberlaufzeit,"<br />";
+        }
+
         // Ermittle den letzten Wert des Wassertanksensors, um zu entscheiden, ob noch genug Wasser im Tank ist.
         $sql = "
         SELECT $tabelle.value
