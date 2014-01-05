@@ -1,0 +1,241 @@
+body {
+	font-size: 62.5%;
+	margin: 0;
+	padding: 0;
+	background-repeat: no-repeat;
+	text-align: center;
+}
+
+#bg {
+    z-index: -10;
+
+    position: absolute;
+    top: -5px;
+    /*width: 110%;*/
+}
+
+#bgimage {
+    /*width: 110%;*/
+    height: 120%;
+}
+
+
+#block-slide {
+	height: 30px; /*höhe des block slide breiches*/
+	width: 100%;
+	text-align: center;
+	background: transparent; /*von mir geändert */ /* white */
+	position: relative;
+	overflow: visible;  /*von mir geändert*/ /*hidden*/
+}
+
+#block-slide > .img {
+	position: absolute;
+	left: -10px;
+	top: -10px;
+	-webkit-filter: blur(10px);
+	z-index: 5;   /*von mir geändert*/  /*-1*/
+}
+
+#pages {
+	margin: 0px auto;
+	position: relative; /*absolute; /* relative; /*von mir geändert  */
+}
+
+[class^='bpage'] {
+	background: white;    /*white von mir geändert */
+	top: 300px;    /*von wie weit von unten kommen die Bilder eingeflogen*/
+	position: absolute;
+	overflow-y: hidden;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	background: transparent; /* Hintergrundfarbe der einfliegenden Bilder*/ /* #f38cba /*von mir geändert*/
+	/*von mir eingefügt*/
+	border-radius: 5px; /*Rundung der Kanten der einfliegenden Bilder */  /*4*/
+}
+
+body > [class^='bpage'] {
+	overflow: visible;
+	box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+body > [class^='bpage'] .info, body > [class^='bpage'] img {
+	display: none;
+}
+
+[class^='bpage'] .info {
+	background: #333A44;
+	font-size: 1.4em;
+	font-family: sans-serif;
+	position: absolute;
+	width: 100%;
+	bottom: -100%;
+	box-sizing: border-box;
+	text-align: left;
+	-moz-box-sizing: border-box;
+	color: #fff;
+	-webkit-transition: all 0.4s linear;
+	transition: all 0.4s linear;
+	border-top: 3px solid rgba(0, 0, 0, 0.1);
+}
+
+[class^='bpage']:last-of-type {
+	margin-right: 0 !important;
+}
+
+[class^='bpage'] .info span {
+	display: block;
+	margin: 10px;
+	font-size: 1.2em;
+}
+[class^='bpage'] .info .active-button {
+	background: #2AB852;
+	border: none;
+	border-bottom: 2px solid #5BD37D;
+	box-shadow: inset 0 -20px 30px -30px rgba(0, 0, 0, 0.3);
+	padding: 10px;
+	width: 80%; /*Breite des "Mehr" OnMouseOver Buttons unter den einfliegenden Bildern*/
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	color: #fff;
+	font-size: 1.1em;
+	cursor: pointer;
+	margin: 10% 10% 10% 10%;
+	border-radius: 2px;
+	text-transform: uppercase;
+	text-align: center;
+	outline: none;
+	position: relative;
+}
+
+[class^='bpage'] .info .active-button:active {
+	top: 2px;
+	border-bottom: none;
+	border-top: 2px solid transparent;
+	outline: none;
+}
+
+[class^='bpage'] .info .active-button:hover {
+	background: #38c560;
+}
+
+[class^='bpage']:hover .info {
+	bottom: 0;
+}
+
+[class^='bpage'] .modal {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #F4FAFF;
+	width: 100%;
+	text-align: left;
+	height: 100%; /* Höhe des Blocks, der Den Text in dem Popup hält*/
+	display: none;
+	box-sizing: border-box;
+	text-align: justify;
+	font-size: 1.2em;
+	line-height: 25px;  /* Zeilenhöhe in der Popup-Textbox*/
+}
+
+[class^='bpage'] h1 {
+	font-size: 2.4em;
+	color: #4E585F;
+	padding: 5px 10px 15px 20px;
+	font-family: 'adelle-sans', sans-serif;
+}
+
+[class^='bpage'] p {
+	font-family: 'adelle-sans', sans-serif;
+	color: #ACB4BB;
+	padding: 0 20px;
+	font-size: 1.1em;
+}
+
+[class^='bpage'] .button {
+	font-family: 'adelle-sans', sans-serif;
+	background: #46CBDD;
+	text-transform: uppercase;
+	box-shadow: inset 0 -34px 33px -20px #49B7EB;
+	color: #FFF;
+	text-shadow: 0 1px 0 #5DA7D1;
+	float: right;
+	font-size: 1.3em;
+	bottom: 0; /*Abstand des Buttons in dem Popup zum unteren Rand der Box*/
+	width: 100%;
+	position: absolute;
+	cursor: pointer;
+	padding: 18px;
+	box-sizing: border-box;
+	text-align: center;
+	font-size: 1.8em;
+}
+[class^='bpage'] .button:hover {
+	box-shadow: inset 0 34px 33px -20px #49B7EB;
+}
+[class^='bpage'] .close {
+	background: #D7DFE4;
+	padding: 6px 7px 2px 8px;
+	display: inline-block;
+	position: absolute;
+	top: 20px;
+	cursor: pointer;
+	border-radius: 200px;    /*Rundung des Schließen X in dem Popup */
+	right: 20px;
+	color: #FFF;
+	font-family: 'SSStandard', sans-serif;
+	font-size: 1.4em;
+	font-weight: bold;
+}
+
+[class^='bpage'] .close:hover {
+	background: #222;
+}
+
+#block-slide .pseudoblanket {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.6);
+	z-index: 99999;
+	display: none;
+}
+
+[class^='bpage'] img {
+	width: 100%;
+	height: auto;
+}
+
+#block-slide .disappear {
+	z-index: 999999;
+	top: 50px;
+}
+
+
+[class^='bpage'] .mobile-button {
+	font-family: 'SSStandard', sans-serif;
+	position: absolute;
+	font-size: 3em;
+	top: 20%;
+	text-align: center;
+	cursor: pointer;
+	height: 100%;
+	z-index: 9999;
+	width: 100%;
+	left: 0;
+	color: #fff;
+	text-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+
+/* The class below is only used for IE8. If you're wondering what it is, it's for IE8. */
+#block-slide .opened { top: 50px !important; z-index: 999999 !important; }
+#block-slide .opened .back-page { display: block !important; }
+
+@media all and (max-width: 900px) {
+	[class^='bpage'] p {
+		font-size: 1em;
+	}
+}
