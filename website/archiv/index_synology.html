@@ -1,0 +1,116 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+
+
+<style>
+body  {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	color: #000000;
+	background-color: #FFFFFF;
+}
+td  {
+	font-family: "Arial", "Helvetica", "sans-serif";
+	font-size: 12px;
+}
+.title {
+	font-size: 14pt;
+	font-weight: bold;        
+}
+.header1 {
+	font-size: 12pt;
+	font-weight: bold;
+}
+.header2 {
+	font-size: 10pt;
+	font-weight: bold;        
+}
+ul {
+	margin-left: -5px;
+}
+.button {
+	font-weight: bold;
+}
+.note_head {
+	font-size: 13px;
+	font-weight: bold;
+	color: #FF0000;
+}
+.note_content {
+	color: #FF0000;         
+}
+.bold_general {
+	font-weight: bold;
+}
+.letterSpace5 {
+	letter-spacing: 5px;
+	color: #FF0000;
+}
+</style>
+<link href="../../css/help.css" rel="stylesheet" type="text/css" />
+
+<title>Hallo! Herzlich Willkommen bei Synology Web Station!</title>
+
+<script language="JavaScript" type="text/javascript">
+function UpdateURL()
+{
+	var link = 'http://' + document.location.hostname + ':5000/webman/help/enu/notice.html';
+
+	if (document.anchors['notice_url'] == null) {
+		// IE        
+		document.anchors("notice_url").href= link;
+	} else {
+		// FireFox
+		document.anchors["notice_url"].href= link;
+
+	}
+}
+</script>
+</head>
+<body>
+
+<p class="title">Hallo! Herzlich Willkommen bei Synology Web Station!</p>
+
+<p>Der Web Station Service ist aktiviert. Sie k&ouml;nnen jetzt Ihre eigene Website auf der DiskStation erstellen. Folgen Sie diesen Schritten, um Ihre Website Online aufzubauen und zu ver&ouml;ffentlichen.</p>
+
+<ol>
+
+  <li>Melden Sie sich im DiskStation Manager an und gehen Sie zur Seite <span class="button">Systemsteuerung</span> &gt; <span class="button">Gemeinsamer Ordner</span>. W&auml;hlen Sie den gemeinsamen Ordner <strong>web</strong> und klicken Sie auf <strong>Privilegien</strong>. Weisen Sie Benutzerrechte f&uuml;r den Zugriff auf den freigegebenen Ordner web zu.</li>
+
+  <li>(Erstellen Sie Webseiten und) Laden Sie Ihre Seiten auf den gemeinsamen Ordner <span class="bold_general">web</span> hoch.</li>
+
+  <li>Stellen Sie sicher, dass die Startseite Ihrer Website mit <span class="bold_general">index.php</span>, <span class="bold_general">index.htm</span> oder <span class="bold_general">index.html</span> benannt ist.</li>
+
+  <li>Verbinden Sie sich mit einem Webbrowser mit <span class="bold_general">http://servername/</span>, um Ihre Website anzusehen.</li>
+  
+</ol>
+
+<p class="header1">Wie ver&ouml;ffentliche ich meine Website?</p>
+
+<p>Um Ihre Website zu ver&ouml;ffentlichen und Menschen &uuml;ber das Internet zur Verf&uuml;gung zu stellen, m&uuml;ssen Sie Ihre DiskStation so einstellen, dass sie externe IP-Adressen benutzt.</p>
+
+  <ol>    
+  
+   <li>Melden Sie sich als <strong>admin</strong> oder als ein Benutzer der Gruppe <strong>Administratoren</strong> bei Ihrer Synology DiskStation an.</li>
+
+   <li>Rufen Sie <strong>Hauptmen&uuml;</strong> &gt; <strong>EZ-Internet</strong> auf, um den Assistenten auszuf&uuml;hren, der Ihnen bei der Einrichtung des Internetzugangs der DiskStation helfen wird.</li>
+   <li>Folgen Sie den Anweisungen auf dem Bildschirm, um den Einrichtungsvorgang abzuschlie&szlig;en.</li>
+   <ul>
+     <li>W&auml;hlen Sie die Netzwerkumgebung, die Sie gegenw&auml;rtig nutzen:</li>
+     <ul><li>Direkt mit dem Internet verbinden: Verbinden Sie sich &uuml;ber DSL oder ein Kabelmodem oder LAN, das keinen Benutzernamen und kein Kennwort ben&ouml;tigt.</li>
+       <li>Breitband (PPPoE): Verbinden Sie sich mit einem DSL- oder Kabelmoden, das einen Benutzernamen und ein Kennworts Ihres Internet Service Providers (ISP) erfordert.</li>
+       <li>&Uuml;ber einen Router: Verbinden Sie sich mit einem Router und richten Sie die Portweiterleitungen ein.</li>
+     </ul>
+     <li>Gehen Sie durch die Einstellungen wie Firewall, Portweiterleitung und DDNS Dienst, je nachdem in welcher Netzwerkumgebung Sie sich befinden.</li>
+     <li>Einstellungen best&auml;tigen.</li>
+    </ul>
+   <li>Fertig!</li>
+</ol>
+<p>Jetzt k&ouml;nnen Menschen im Internet Ihre Website durchsuchen, indem sie in ihren Browser <span class="bold_general">http://serverIP/</span> oder <span class="bold_general">http://DDNS_hostname/</span> eingeben. </p>
+
+</body>
+
+</html>
