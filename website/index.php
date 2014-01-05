@@ -244,7 +244,7 @@ $(document).ready(function() {
 						echo "+"; echo '"<p>Mein Wassertank ist leer!"';
 						echo "+"; echo '"</p>"';
 						echo "+"; echo '"<p>Letzte Messung: ';
-						$zeit = strtotime($ueberlaufzeit); echo date("d.m.Y H:i:s", $zeit);
+						$zeit = strtotime($wassertankmesszeit); echo date("d.m.Y H:i:s", $zeit);
                         echo 'Uhr"';
                         echo "+"; echo'"</p>"';
                         echo "+"; echo '"<p>So kann nicht mehr gew&auml;ssert werden."';
@@ -252,9 +252,7 @@ $(document).ready(function() {
 						//+"<div class='button'>Weiterlesen</div>"
 					echo "+";echo '"</div>"'; echo ",";
 
-                }
-                
-                
+                }                
                 ?>
 
 		        <?php
