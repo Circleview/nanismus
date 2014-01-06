@@ -44,21 +44,24 @@ global $delay;
 
 <head>
     <title>Nanismus - Bananenbew&auml;sserung</title>
-    
+
     <!-- Scripte für den Slider-Effekt -->
     <script type="text/javascript" src="//use.typekit.net/vue1oix.js"></script>
-    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-    
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>        
     <script src="src/jquery-1.10.2.min.js"></script>
     <script src="src/modernizr.js"></script>
-    <script src="src/block_slider_javascript.js"></script>
+    <script src="src/block_slider_javascript.js"></script>  
+
+    <!-- Skript für das iPod Rad zum Bestimmen der Wassermenge -->
+    <!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script-->
+    <script src="src/jquery.knob.js"></script>
+    <script src="src/jquery.ipodwheel.js"></script>    
     
     <!-- Stylesheets -->
     <!-- Fremdlink - Sollte noch auf den eigenen Server umgezogen werden
     das war aber auf die Schnelle nicht möglich, weil es Probleme mit der Darstellung des Webfonts gab -->
     <link rel="stylesheet" href="http://www.inserthtml.com/demos/layout/icons/ss-standard.css" />
     <link rel="stylesheet" href="css/style_umbau.css" />
-
 
 	<!-- // Homebildschirm-Icon
     http://www.winfuture-forum.de/index.php?showtopic=191412 -->
@@ -79,7 +82,6 @@ global $delay;
     <meta name="description" content="" />
     <meta name="author" content="" />
     <meta name="keywords" content="Bew&auml;sserung, Arduino, Gardening, Selfmade, Pflanzenbew&auml;sserung" />
-    <meta name="generator" content="Webocton - Scriptly (www.scriptly.de)" />
     
     <!-- Für Testzwecke -->
     <!-- http://iphone4simulator.com/ -->
@@ -272,7 +274,29 @@ $(document).ready(function() {
 		echo "'images/watertap.png' :    "; echo '"<h1>Lass es regnen!</h1>"';
 						echo "+"; echo '"<p>Pflanzen brauchen Zuneigung und Wasser."';
 						echo "+"; echo '"</p>"';
-						echo "+"; echo '"<p>Lass das k&uuml;hle Nass um die Wurzeln der Banane flie&szlig;en."';
+						echo "+"; echo '"<p>Lege die Wassermenge durch drehen am Rad fest."';
+                        // Einbeinden des Scrollrads über iframe, ich bekomme das gerade nicht anders hin, 
+                        // da die javascripte für den Slider und das iPodrad geegenseitig stören
+                        echo "+"; echo '"<iframe src='; echo "'./src/wasser/ipod.html'name='iPod wheel' class='ipodiframe' scrolling='no' "; echo '>"';
+                        echo "+"; echo '"<p>Ihr Browser kann leider keine eingebetteten Frames anzeigen: Sie k&ouml;nnen die eingebettete Seite &uuml;ber den folgenden Verweis aufrufen: <a href='; echo "'pod.html'"; echo '>Link</a></p>"';
+                        echo "+"; echo '"</iframe>"';                      
+                        /*
+                         * 
+                        echo "+"; echo '"<div class='; echo "'ipodframe'"; echo'>"';
+                        echo "+"; echo '"     <form class='; echo "'ipodform' method='post' action=''"; echo '>"';
+                        echo "+"; echo '"         <div class='; echo "'ishow'"; echo '> <!-- Bereich, der die zu wässernden Milliliter anzeigt -->"';
+                        echo "+"; echo '"             auto"';
+                        echo "+"; echo '"         </div>"';
+                        echo "+"; echo '"         <div class='; echo "'wheel'"; echo '>"';
+                        echo "+"; echo '"             <input class='; echo "'infinite' data-width='150' data-thickness='.5' data-fgColor='#AAAAAA' data-bgColor='#FFFFFF' data-displayInput='false' data-cursor=true"; echo ' />"';
+                        echo "+"; echo '"             <input type='; echo "'submit' name='waessern' value='      ' class='ipodbutton'"; echo ' />"';
+                        echo "+"; echo '"             <div class='; echo "'idir'"; echo '> <!-- Bereich, der das Plus- oder Minuszeichen anzeigt -->"';
+                        echo "+"; echo '"             </div>"';
+                        echo "+"; echo '"         </div>"';
+                        echo "+"; echo '"         <textarea class='; echo "'ival' name='menge'"; echo '>0</textarea><!-- Bereich, der die unsichtbare Textarea hält, die für die Datenübertragung an das Arduino wichtig ist -->"';
+                        echo "+"; echo'"     </form>"';
+                        echo "+"; echo'"</div>"';
+                        /*
                         echo "+"; echo'"</p>"';
                         echo "+"; echo '"<form name=';
                         echo "'wasser' method='post' action=''";
@@ -287,8 +311,9 @@ $(document).ready(function() {
                         //Aufruf mit php über die Seite mit dem Ladebalken
                         echo "'button' href ='./src/wasser/wasser.php'";
                         echo '>Wasser marsch!</a>"';
-						//+"<div class='button'>Weiterlesen</div>"
-					echo "+";echo '"</div>"'; echo ",";
+						//+"<div class='button'>Weiterlesen</div>" */
+					//echo "+";echo '"</div>"'; echo ",";
+					echo ",";
 
                 }
                 ?>
@@ -298,8 +323,7 @@ $(document).ready(function() {
 						+"<div id='tempchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Temperatur
 						//+"<div class='button'>Zeige Messewerte</div>"
 					+"</div>",
-
-                <?php
+                                                                                                                                                                      <?php
 
                 // Wenn keine Verbindung zum Arduino mehr zu bestehen scheint,
                 // dann soll dieses Sybol angezeigt werden, sonst nicht.
@@ -338,7 +362,7 @@ $(document).ready(function() {
     
 </head>
 
-<body>
+<body scroll="no" style="overflow:hidden;">
 
 <div align="center" id="bg">
     <!-- "Hintergrundfoto hinter der Slider - Animation" -->
