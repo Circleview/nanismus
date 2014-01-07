@@ -126,7 +126,7 @@ $(document).ready(function() {
 		                  
 		                  // Bei Bedarf kann die Anzahl der anzuzeigenden Nachrichten
 		                  // hier angepasst werden
-		                  $msgcount = 3;
+		                  // $msgcount = 3;
 		                
                           for ($i = 0; $i < $msgcount; $i++)
                           {
