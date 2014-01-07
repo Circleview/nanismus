@@ -117,7 +117,7 @@
         // Wie lauteten die letzten Nachricht, die die Banane gesendet hat?
         // Um das zu ermitteln, müssen wir zuerst die Nachrichten-ID der letzten Nachricht ermitteln
         // Wann hat die Banane das letzte Mal eine Nachricht verschickt?
-        $msgcount = 4; // Anzahl der Nachrichten aus der Vergangenheit anzeigen
+        $msgcount = 3; // Anzahl der Nachrichten aus der Vergangenheit anzeigen
         // 100 und 99 werden als Nachrichten ausgeklammert, da diese keine echten Nachrichten sind
         $sql = "
         SELECT $tabelle.value, $tabelle.timestamp
@@ -152,15 +152,15 @@
                 die('Ungültige Abfrage: ' . mysqli_error($db_link));
             }
 
-            // Wenn die MsgID eine Nachricht enthält, die sagt, dass gewässert wurde)
+            // Wenn die MsgID eine Nachricht enth?lt, die sagt, dass gew?ssert wurde
             // dann soll die Gießmenge noch mit ausgegeben und der eigentlichen Nachricht angefügt werden
             if ($msgid == 4 || $msgid == 5 || $msgid == 6 ||
-                $msgid == 47 || $msgid == 48 || $msgid == 49 ||$msgid == 68 || $msgid == 69)
+            $msgid == 47 || $msgid == 48 || $msgid == 49 || $msgid == 68 || $msgid == 69)
             {
                 $sql3 = "
                 SELECT $tabelle.value
                 FROM $tabelle
-                WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Giessmenge'))
+                WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Giessmenge') AND (($tabelle.timestamp) <= '$msgtime[$i]'))
                 ORDER BY $tabelle.ID DESC LIMIT 1
                 ";
                 
