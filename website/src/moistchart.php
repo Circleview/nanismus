@@ -55,13 +55,13 @@
           vAxis: {                      // Temperatur
               title: '',
               format: '# %',
-              ticks: [0, 0.25, 0.50, 0.75, 1.00],
+              ticks: [0.30, 0.40, 0.50, 0.60],
               textStyle: {
                 color: '#0B0500', 
                 fontSize: 9
               }, 
               gridlines: {
-                  count: 5
+                  count: 4
               }
           },
           hAxis: {                      // Wochentage

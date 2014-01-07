@@ -20,7 +20,7 @@
         */ 
         // Das Array lasse ich von PHP aufbauen
         <?php 
-        include("tempdata.php");
+            include("tempdata.php");
         ?>
 
         // Dokumentation
@@ -55,13 +55,13 @@
           vAxis: {                      // Temperatur
               title: '',
               format: '#.## °C',
-              ticks: [16, 18, 20, 22, 24],
+              ticks: [20, 22, 24, 26],
               textStyle: {
                 color: '#0B0500', 
                 fontSize: 9
               }, 
               gridlines: {
-                  count: 5
+                  count: 4
               }
           },
           hAxis: {                      // Wochentage
