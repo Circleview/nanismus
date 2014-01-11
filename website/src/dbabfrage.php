@@ -138,6 +138,13 @@
             $msgid = $row['value'];
             $msgtime[$i] = $row['timestamp'];
             //echo "aktuelle Temperatur: ", $value,"<br /><br />";
+            
+            if ($i == 0)
+            {
+                // Die letzte Nachricht ist wichtig, um zu wissen, ob die letzte
+                // Wässerung ausgereicht hat.
+                $lastmsgid = $msgid;                
+            }
                 
             // Diese Nachrichten-ID nutzen wir, um die entsprechende Nachricht aus der Datenbank abzufragen
             $sql2 = "
