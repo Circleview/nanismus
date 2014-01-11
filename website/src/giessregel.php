@@ -77,7 +77,9 @@
                 
             // Teststufe 2
             // Wie feucht ist die Erde? Ist sie feuchter als 40%?
-            if ($Feuchte < 40)
+            // Oder war die die letzte Nachricht der Pflanze, dass die Wässerung nicht ausreichte?
+            // Die Nachrichten sind in der MySQL Tabelle gespeichert.
+            if ($Feuchte < 40 || $lastmsgid == 6 || $lastmsgid = 49)
             {
                 // Die Erde ist Trocken. Also könnte gegossen werden
                 // Es muss voher noch geprüft werden, ob schon Wasser im Übertopf ist
@@ -101,15 +103,25 @@
                         echo "giesspause: $giesspause <br />";
                         echo "stichzeit: $stichzeit <br />";
                         echo "letzte Gie&szlig;ung: $letzte_Giessung <br />";
+                        echo "letzte Nachrichten ID der Pflanze: $lastmsgid <br />";
                     }
     
                     // Es darf nur gegossen werden, wenn oben der Wassertank 
                     // nicht leer ist und eine Gießung daher schon ausgeschlossen ist
-                    if ($letzte_Giessung < $stichzeit)
+                    // Oder war die die letzte Nachricht der Pflanze, dass die Wässerung nicht ausreichte?
+                    // Die Nachrichten sind in der MySQL Tabelle gespeichert.                    
+                    if ($letzte_Giessung < $stichzeit || $lastmsgid == 6 || $lastmsgid = 49)
                     {
                         if ($debug)
                         {
-                            echo "liegt l&auml;nger als $giesspause zur&uuml;ck <br />";
+                            if ($letzte_Giessung < $stichzeit)
+                            {
+                                echo "liegt l&auml;nger als $giesspause zur&uuml;ck <br />";
+                            }
+                            else if ($lastmsgid == 6 || $lastmsgid = 49)
+                            {
+                                echo "Die letzte Nachricht wollte mehr Wasser <br />";
+                            }
                         }
                         
                         // Wenn nicht bei der Wassertankprüfung bereits festgestellt wurde, 
