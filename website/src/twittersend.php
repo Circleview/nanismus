@@ -26,18 +26,21 @@ else
                $access_key, 
                $access_secret
                );
-	$max = "140";
+	$max = "135";  // Länge, die maximal zulässig ist bevor Twitter die Nachricht
+	// blockt. 
         //$link = get_fazzt_url($url); /* URL verkuerzen */
-	$bitlink=strlen($url);
-	$lenuser = strlen($user);
+	$bitlink=strlen($url)+1;           // URL plus Leerzeichen	
+	$lenuser = strlen($user)+1;        // User und Leerzeichen	
+	$msglen = strlen($message)+1;      // Message und Leerzeichen
 	
-	if (strlen($message) > ($max-$bitlink-$lenuser)) 
+	if ($msglen > ($max-$bitlink-$lenuser)) 
     { 
-  			$message = substr($message, 0, ($max-3)).'...';
+        $message = substr($message, 0, ($max-$bitlink-$lenuser-3)).'...';
 	}
 	$twitter->post('statuses/update', array('status' => utf8_encode($message).' '.$user.' '.$url));
 	
-    //echo "erledigt";	
+	//echo "verschickte Nachricht: $message $user $url <br />";
+    echo "erledigt <br />";	
 }
 //postSignupToTwitter("dies ist ein Tweet,","");
 ?>
