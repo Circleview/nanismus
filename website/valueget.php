@@ -19,6 +19,9 @@ $test = false;  // bei true werden die Daten in die Testdatenbank geschrieben
 // eingebunden, die sich mit Twitter via oAuth verbindet
 include ("src/twittersend.php");
 
+// für die Bewässerungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
+include ("src/dbabfrage.php");
+
 $table = "plant_log";
 $msgtabelle = "plant_messages";
 
@@ -35,8 +38,7 @@ include("src/db.php");
         {         
             $twitteruser = '@kklessmann';                                  
         }
-        
- 
+
         // Erhaltene Daten des Arduino Http Get in die MySQL Datenbank speichern
                 
         // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=99&key=c3781633f1fb1ddca77c9038d4994345
@@ -81,38 +83,61 @@ include("src/db.php");
             // Diese Nachrichten-ID nutzen wir, um die entsprechende Nachricht aus der Datenbank abzufragen
             $msgid = $value;
             
-            // nur bei bestimmten Nachrichten soll noch ein User angesprochen werden
-            // und eine URL angefügt werden
-            // wenn ich das hier nicht filtere und mit den Nachrichten abspeichere, 
-            // dann steht das auch auf der Website und das ist unschön
-            if ($msgid == 2 || $msgid == 3 || $msgid == 6 || $msgid == 13 || $msgid == 49)
-            {
-                $user = $twitteruser;
-                $url = 'http://nanismus.de';    
-            }
-            else 
-            {
-                $user = ''; // Zeige einfach keinen User
-                $url = '';  // Zeige einfach keine URL    
-            }
             $sql = "
             SELECT $msgtabelle.msg
             FROM $msgtabelle
             WHERE (($msgtabelle.msgid=$msgid))
             ";  
-            
+
             $db_erg = mysqli_query( $db_link, $sql );
             if ( ! $db_erg )
             {
                 die('Ungültige Abfrage: ' . mysqli_error($db_link));
             }
-            
+
             while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
             {
-                // doppelt codieren, sonst gehen Umlaute, Sonder und Leerzeichen nicht
                 $msg = $row['msg'];
-                echo "Nachricht: ", $msg.' '.$user.' '.$url,"<br /><br />";
             }            
+
+            // nur bei bestimmten Nachrichten soll noch ein User angesprochen werden
+            // und eine URL angefügt werden
+            // wenn ich das hier nicht filtere und mit den Nachrichten abspeichere,
+            // dann steht das auch auf der Website und das ist unschön
+            if ($msgid == 2 || $msgid == 3 || $msgid == 6 || $msgid == 13 || $msgid == 49)
+            {
+                $user = $twitteruser;
+                $url = 'http://nanismus.de';
+            }
+            else
+            {
+                $user = ''; // Zeige einfach keinen User
+                $url = '';  // Zeige einfach keine URL
+            }
+            
+            // Bei Nachrichten, die sich auf eine Wässerung beziehen sollen die Wässerungsmenge 
+            // im Tweet enthalten 
+            // Hier kann man die die Wassermenge manipulieren, um der Filterung von 
+            // doppelten Tweets vorzubeugen
+            //$menge = 350;
+            
+            switch ($msgid) 
+            {
+            case 6:
+            case 49: 
+                $msg = $msg." ".$menge." ml reichten nicht.";
+                break;
+            case 68:
+            case 69:
+                $msg = $msg." ".$menge." ml waren zu viel.";
+                break;
+            case 4:
+            case 47:
+                $msg = $msg." ".$menge." ml waren genau was ich brauchte.";
+                break;
+            }                 
+
+            echo "Nachricht: ", $msg.' '.$user.' '.$url,"<br /><br />";
                       
             // Es wird nun eine Funktion aufgerufen, die oben eingebunden
             // wurde, und die eine Nachricht an Twitter sendet
