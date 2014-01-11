@@ -48,21 +48,21 @@ If ($_GET['status'] == 0) // Beim ersten Aufrufen der Funktion
     // Sende den Gießbefehl an das Arduino Board
     // arduino_send($arduino_ip,$arduino_port,"P".chr($menge));
 	if ($wassermenge == 0) {
-		arduino_send($arduino_ip,$arduino_port,"P".chr($menge));
+		arduino_send($arduino_ip,$arduino_port,"P".chr($wassermenge));
 	}
 	else if ($wassermenge <= 255) {
-		arduino_send($arduino_ip,$arduino_port,"Q".chr($menge));
+		arduino_send($arduino_ip,$arduino_port,"Q".chr($wassermenge));
 	}
 	else {
 		$menge = $wassermenge - 255;
-		arduino_send($arduino_ip,$arduino_port,"R".chr($menge));
+		arduino_send($arduino_ip,$arduino_port,"R".chr($wassermenge));
 	}    
     // Gießung anordnen
 	// Warte x * 1.000.000 Mikro-Sekunden
     usleep($delay); // to avoid connection refusal  
     
     // für Testzwecke kann der $returnvalue hier manupuliert werden    
-    //$returnvalue = 8; 
+    // $returnvalue = 9; 
 }
 
 if ($returnvalue == 8) // Wenn die Erde jetzt doch noch feucht genug ist, dann
@@ -91,9 +91,9 @@ else // Wenn die Erde trocken war, dann
 
     // Eine von Nachricht an dem Benutzer aus PHP
     if($php_array['status'] != $maxfortschritt) {
-    	$php_array['message'] = '<h1>bzzzzzz...</h1><p>'.$php_array['status']*$mljeprozentpunkt.' ml von '.$wassermenge.' ml</p>'; //, verbleibend: '.($wassermenge-$php_array['status']*$mlje100);
+    	$php_array['message'] = '<h1>Yaaay, gleich bin ich undurstig!</h1><p>'.$php_array['status']*$mljeprozentpunkt.' ml von '.$wassermenge.' ml</p>'; //, verbleibend: '.($wassermenge-$php_array['status']*$mlje100);
     } else {
-    	$php_array['message'] = '<h1>W&auml;sserung abgeschlossen</h1><p><a href="../../index.php" target="_top">zur&uuml;ck zur Nani</a></p>';
+    	$php_array['message'] = '<h1>Yippie! Danke f&uuml;r das Wasser.</h1><p><a href="../../index.php" target="_top">zur&uuml;ck zur Nani</a></p>';
     }   
 }
 // Ausgabe des PHP Arrays als JSON Objekt
