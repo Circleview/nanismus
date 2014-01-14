@@ -79,7 +79,7 @@
             // Wie feucht ist die Erde? Ist sie feuchter als 40%?
             // Oder war die die letzte Nachricht der Pflanze, dass die Wässerung nicht ausreichte?
             // Die Nachrichten sind in der MySQL Tabelle gespeichert.
-            if ($Feuchte < 40 || $lastmsgid == 6 || $lastmsgid = 49)
+            if ($Feuchte < 40)
             {
                 // Die Erde ist Trocken. Also könnte gegossen werden
                 // Es muss voher noch geprüft werden, ob schon Wasser im Übertopf ist
