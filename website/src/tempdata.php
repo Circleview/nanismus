@@ -7,7 +7,7 @@
         
         //http://www.ayom.com/topic-7692.html
         //http://de.php.net/strtotime
-        $vergleichsdatum = "-24 days";
+        $vergleichsdatum = "-15 days";
         $now = strtotime($vergleichsdatum);
 
         $datum = date("Y-m-d H:i:s", $now);
