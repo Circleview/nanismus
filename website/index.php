@@ -95,7 +95,6 @@ global $delay;
 
 <!-- PHP, um das Temperatur-Diagramm aufbauen zu können -->
 <?php include("src/tempchart.php"); ?>
-
 <!-- PHP, um das Feuchtigkeits-Diagramm aufbauen zu können -->
 <?php include("src/moistchart.php"); ?>
 
@@ -165,28 +164,28 @@ $(document).ready(function() {
                         {
                             echo "Meine Erde ist, ehrlich gesagt, gerade zu feucht.";
                             echo '</p>"'; 
-                            echo "+"; echo '"<p>So feucht war die Erde in den letzten 24 Tagen."';
+                            echo "+"; echo '"<p>So feucht war die Erde in den letzten '.$auswertzeitraum.' Tagen."';
                             echo "+"; echo '"</p>"';
                         }
                         else if ($Feuchte >=40) 
                         {
                             echo "Meine Erde ist ausreichend feucht.";
                             echo '</p>"';
-                            echo "+"; echo '"<p>So feucht war die Erde in den letzten 24 Tagen."';
+                            echo "+"; echo '"<p>So feucht war die Erde in den letzten '.$auswertzeitraum.' Tagen."';
                             echo "+"; echo '"</p>"';                            
                         }
                         else if ($Feuchte >= 25)
                         {
                             echo "Meine Erde ist schon ziemlich trocken.";
                             echo '</p>"';
-                            echo "+"; echo '"<p>So feucht war die Erde in den letzten 24 Tagen."';
+                            echo "+"; echo '"<p>So feucht war die Erde in den letzten '.$auswertzeitraum.' Tagen."';
                             echo "+"; echo '"</p>"';                            
                         }
                         else 
                         {
                             echo "Meine Erde ist sehr trocken!";
                             echo '</p>"';
-                            echo "+"; echo '"<p>So feucht war die Erde in den letzten 24 Tagen."';
+                            echo "+"; echo '"<p>So feucht war die Erde in den letzten '.$auswertzeitraum.' Tagen."';
                             echo "+"; echo '"</p>"';                            
                         }?>
                         +"<div id='moistchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Feuchtigkeit"
@@ -319,7 +318,7 @@ $(document).ready(function() {
                 ?>
 
 		'images/thermometer.png' :    "<h1>Temperatur: <?php echo "$temperatur °C"; ?></h1>"
-						+"<p>So warm war es der Nani in den letzten 24 Tagen.</p>"
+						+"<p>So warm war es der Nani in den letzten 15 Tagen.</p>"
 						+"<div id='tempchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Temperatur
 						//+"<div class='button'>Zeige Messewerte</div>"
 					+"</div>",
