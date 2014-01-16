@@ -128,7 +128,7 @@
 				
 				
 				var $appendedData = '<div class="bpage-'+x+'"style="width: '+this.options.width+'px; height: '+this.options.height+'px;">'
-						$appendedData += '<img src="'+key+'" alt="" />'
+						$appendedData += '<img id="bild" src="'+key+'" alt="" />'
 						
 						if(this.mob === true) {
 						

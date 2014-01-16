@@ -72,7 +72,7 @@ body > [class^='bpage'] {  /*Einstellungen der Popup Box*/
 	box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
-body > [class^='bpage'] .info, body > [class^='bpage'] img {
+body > [class^='bpage'] .info, body > [class^='bpage'] .bild {
 	display: none;
 }
 
