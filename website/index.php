@@ -97,6 +97,8 @@ global $delay;
 <?php include("src/tempchart.php"); ?>
 <!-- PHP, um das Feuchtigkeits-Diagramm aufbauen zu können -->
 <?php include("src/moistchart.php"); ?>
+<!-- PHP, um die Fotos der IP Cam zu laden -->
+<?php include("src/ipcamfotos.php"); ?>
 
 <!-- Script zum absenden von Formulardaten mit einem Klick auf einen Link --> 
 <!--script type="text/javascript">
@@ -188,7 +190,7 @@ $(document).ready(function() {
                             echo "+"; echo '"<p>So feucht war die Erde in den letzten '.$auswertzeitraum.' Tagen."';
                             echo "+"; echo '"</p>"';                            
                         }?>
-                        +"<div id='moistchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Feuchtigkeit"
+                        +"<div id='moistchart_div'></div>" // Einbindung des Diagramms der Feuchtigkeit"
                         <?php /*echo "+"; echo '"<p>Letzter Messwert vom: '; $zeit = strtotime($letztes_Lebenszeichen); echo date("d.m.Y H:i:s", $zeit); echo '"'; 
                         echo "+"; echo '"</p>"';
                         */?>                        
@@ -279,39 +281,6 @@ $(document).ready(function() {
                         echo "+"; echo '"<iframe src='; echo "'./src/wasser/ipod.html'name='iPod wheel' class='ipodiframe' scrolling='no' "; echo '>"';
                         echo "+"; echo '"<p>Ihr Browser kann leider keine eingebetteten Frames anzeigen: Sie k&ouml;nnen die eingebettete Seite &uuml;ber den folgenden Verweis aufrufen: <a href='; echo "'pod.html'"; echo '>Link</a></p>"';
                         echo "+"; echo '"</iframe>"';                      
-                        /*
-                         * 
-                        echo "+"; echo '"<div class='; echo "'ipodframe'"; echo'>"';
-                        echo "+"; echo '"     <form class='; echo "'ipodform' method='post' action=''"; echo '>"';
-                        echo "+"; echo '"         <div class='; echo "'ishow'"; echo '> <!-- Bereich, der die zu wässernden Milliliter anzeigt -->"';
-                        echo "+"; echo '"             auto"';
-                        echo "+"; echo '"         </div>"';
-                        echo "+"; echo '"         <div class='; echo "'wheel'"; echo '>"';
-                        echo "+"; echo '"             <input class='; echo "'infinite' data-width='150' data-thickness='.5' data-fgColor='#AAAAAA' data-bgColor='#FFFFFF' data-displayInput='false' data-cursor=true"; echo ' />"';
-                        echo "+"; echo '"             <input type='; echo "'submit' name='waessern' value='      ' class='ipodbutton'"; echo ' />"';
-                        echo "+"; echo '"             <div class='; echo "'idir'"; echo '> <!-- Bereich, der das Plus- oder Minuszeichen anzeigt -->"';
-                        echo "+"; echo '"             </div>"';
-                        echo "+"; echo '"         </div>"';
-                        echo "+"; echo '"         <textarea class='; echo "'ival' name='menge'"; echo '>0</textarea><!-- Bereich, der die unsichtbare Textarea hält, die für die Datenübertragung an das Arduino wichtig ist -->"';
-                        echo "+"; echo'"     </form>"';
-                        echo "+"; echo'"</div>"';
-                        /*
-                        echo "+"; echo'"</p>"';
-                        echo "+"; echo '"<form name=';
-                        echo "'wasser' method='post' action=''";
-                        echo '>"';
-                        echo "+"; echo '"<input type=';
-                        echo "'hidden' name='waessern' value='Wasser los!' class='button'";
-                        echo '/>"';
-                        echo "+"; echo '"</form>"';
-                        echo "+"; echo '"<a class=';
-                        //Aufruf mit Javascript über die main index.php
-                        //echo "'button' href ='#' onClick='document.wasser.submit()'";
-                        //Aufruf mit php über die Seite mit dem Ladebalken
-                        echo "'button' href ='./src/wasser/wasser.php'";
-                        echo '>Wasser marsch!</a>"';
-						//+"<div class='button'>Weiterlesen</div>" */
-					//echo "+";echo '"</div>"'; echo ",";
 					echo ",";
 
                 }
@@ -322,7 +291,15 @@ $(document).ready(function() {
 						+"<div id='tempchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Temperatur
 						//+"<div class='button'>Zeige Messewerte</div>"
 					+"</div>",
-                                                                                                                                                                      <?php
+
+		'images/camera.png' :    "<h1>Bitte l&auml;cheln!</h1>"
+						+"<p>Jeden Tag ein neues Foto.</p>"
+						+"<div style='margin-left: auto; margin-right: auto; width: 90%; position: relative; top: 10px;'><a href='<?php echo $dateiinfo['dirname']."/".$dateiinfo['basename'];?>'>"
+                        +"<img src='<?php echo $ordner."/".$dateiinfo['basename'] ?>' width='300px'/></a></div>"
+						//+"<div class='button'>Zeige Messewerte</div>"
+					+"</div>",                                                                                                                                                                      
+                
+                <?php
 
                 // Wenn keine Verbindung zum Arduino mehr zu bestehen scheint,
                 // dann soll dieses Sybol angezeigt werden, sonst nicht.
