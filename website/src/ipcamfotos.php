@@ -19,7 +19,7 @@
 // http://sevenx.de/blog/tutorial-einfach-mit-php-ordner-auslesen-und-dateien-und-bilder-anzeigen/
 
 // Ordnername
-$ordner = "../images/nanifoto"; //auch komplette Pfade möglich ($ordner = "download/files";)
+$ordner = "images/nanifoto"; //auch komplette Pfade möglich ($ordner = "download/files";)
  
 // Ordner auslesen und Array in Variable speichern
 $alledateien = scandir($ordner, 1); // Sortierung A-Z
