@@ -45,12 +45,17 @@ global $delay;
 <head>
     <title>Nanismus - Bananenbew&auml;sserung</title>
 
+    <!-- Scripte für die Foto Gallerie -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+    <script src="src/galleria/galleria-1.3.3.min.js"></script>
+ 
     <!-- Scripte für den Slider-Effekt -->
     <script type="text/javascript" src="//use.typekit.net/vue1oix.js"></script>
     <script type="text/javascript">try{Typekit.load();}catch(e){}</script>        
-    <script src="src/jquery-1.10.2.min.js"></script>
+    <!--script src="src/jquery-1.10.2.min.js"></script-->
     <script src="src/modernizr.js"></script>
-    <script src="src/block_slider_javascript.js"></script>  
+    <script src="src/block_slider_javascript.js"></script>
+  
 
     <!-- Skript für das iPod Rad zum Bestimmen der Wassermenge -->
     <!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script-->
@@ -97,8 +102,6 @@ global $delay;
 <?php include("src/tempchart.php"); ?>
 <!-- PHP, um das Feuchtigkeits-Diagramm aufbauen zu können -->
 <?php include("src/moistchart.php"); ?>
-<!-- PHP, um die Fotos der IP Cam zu laden -->
-<?php include("src/ipcamfotos.php"); ?>
 
 <!-- Script zum absenden von Formulardaten mit einem Klick auf einen Link --> 
 <!--script type="text/javascript">
@@ -294,10 +297,7 @@ $(document).ready(function() {
 
 		'images/camera.png' :    "<h1>Bitte l&auml;cheln!</h1>"
 						+"<p>Jeden Tag ein neues Foto.</p>"
-						+"<div style='margin-left: auto; margin-right: auto; width: 90%; position: relative; top: 10px;'><a href='<?php echo $dateiinfo['dirname']."/".$dateiinfo['basename'];?>'>"
-                        +"<img src='<?php echo $ordner."/".$dateiinfo['basename'] ?>' width='300px'/></a></div>"
-						//+"<div class='button'>Zeige Messewerte</div>"
-					+"</div>",                                                                                                                                                                      
+                        <?php include("src/ipcamfotos.php"); ?>                                                                                                                                                            
                 
                 <?php
 
@@ -334,12 +334,22 @@ $(document).ready(function() {
 });
 
 </script>
+<script>
 
+
+        Galleria.loadTheme('src/galleria/themes/classic/galleria.classic.min.js');
+        Galleria.configure({
+            thumbnails: false,
+            fullscreenDoubleTap: false
+        });
+        Galleria.run('.galleria');
+       
+</script>
     
 </head>
 
-<body scroll="no" style="overflow:hidden;">
-
+<body>
+   
 <div align="center" id="bg">
     <!-- "Hintergrundfoto hinter der Slider - Animation" -->
     <!-- http://www.free-solutions.de/js/dokument_bildformat_dynamisch_erzwingen.html -->
