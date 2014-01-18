@@ -377,3 +377,16 @@ body > [class^='bpage'] .info, body > [class^='bpage'] .bild {
 	border-style:solid; border-color:#000; border-width: 1px;
 }
 /************************************ Ende Wheel *********************/
+
+/** CSS Style für die Fotogallerie */
+
+.galleria
+{   
+    width: 100%;
+    height: 100%; 
+}
+
+#fotorahmen
+{
+    margin-left: auto; margin-right: auto; width: 95%; height: 300px;    
+}
