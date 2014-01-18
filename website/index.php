@@ -340,7 +340,8 @@ $(document).ready(function() {
         Galleria.loadTheme('src/galleria/themes/classic/galleria.classic.min.js');
         Galleria.configure({
             thumbnails: false,
-            fullscreenDoubleTap: false
+            fullscreenDoubleTap: false, 
+            wait: true      //http://galleria.io/docs/options/wait/
         });
         Galleria.run('.galleria');
        
