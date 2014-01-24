@@ -13,6 +13,11 @@
  * Wasser bis ganz durchgesickert ist)
  * Wenn der letzte Versuch zu Wässern nicht abgebrochen wurde, weil die Erde doch schon zu feucht war
  */
+ // für die Bewässerungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
+include ("src/dbabfrage.php");
+
+$table = "plant_log";
+include("src/db.php");  
 
     // Hier speichere ich das Ergebnis der Testläufe
     // Darf über die Website gegossen werden?
@@ -178,6 +183,27 @@
             }
             $giessenerlaubt = false;
             $VerbindungArduino = false; // Die Verbindung zum Arduino ist gerissen, das werte ich in der Index.php aus.
+            
+            // Für Logzwecke wird diese Nichterreichbarkeit in die MySQL Datenbank eingetragen
+            // http://stackoverflow.com/questions/1995562/now-function-in-php
+            $timestamp = date("Y-m-d H:i:s");
+            $name = "Banane";
+            $type = "Verbindung";
+            $value = 0; 
+                     
+            $sql = "
+              INSERT INTO $table
+              (
+              sensorname , logtype , value , timestamp
+              )
+              VALUES
+              (
+              '$name', '$type', $value, '$timestamp'
+              )
+            ";
+            $db_erg = mysqli_query($db_link, $sql)
+                or die("<p>Anfrage fehlgeschlagen</p>" . mysqli_error($db_link));
+                    
         }
         else 
         {
