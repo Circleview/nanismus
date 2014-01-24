@@ -77,7 +77,7 @@
                     logScale: false,
                     title: '',
                     format: '# %',
-                    ticks: [0.30, 0.40, 0.50, 0.60],
+                    ticks: [0.30, 0.45, 0.60, 0.75],
                     textStyle:
                     {
                         color: '#0B0500',
@@ -86,7 +86,7 @@
                     viewWindowMode: 'explicit',
                     viewWindow:
                     {
-                        max: 0.6,
+                        max: 0.75,
                         min: 0.3
                     }
                 },
