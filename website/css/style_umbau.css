@@ -23,8 +23,16 @@ input [type=submit] {
     -webkit-appearance: none;/* Durch mich eingefügt */
 }
 
-A:link {text-decoration: none}  /*http://www.echoecho.com/csslinks.htm*/
-A:visited {text-decoration: none}
+A:link 
+{
+    color: #4E585F;
+    text-decoration: none;
+}  /*http://www.echoecho.com/csslinks.htm*/
+A:visited 
+{
+    text-decoration: none;
+	color: #4E585F;
+}
 A:active {text-decoration: none}
 A:hover {text-decoration: none;}
 

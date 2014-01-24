@@ -9,21 +9,16 @@ $ordner = "images/nanifoto"; //auch komplette Pfade möglich ($ordner = "download
 $alledateien = scandir($ordner, 1); // Sortierung A-Z
 // Sortierung Z-A mit scandir($ordner, 1)                               
 
-//$anzahldateien = 0;
-//$anzahldateienmax = 8; 
+$anzahldateien = 0;
+$anzahldateienmax = 0; 
 // Schleife um Array "$alledateien" aus scandir Funktion auszugeben
 // Einzeldateien werden dabei in der Variabel $datei abgelegt
 
 ?>
-+"<div id='fotorahmen'>"
-    +"<div class='galleria'>"
 
 <?php 
 foreach ($alledateien as $datei) 
 {
-
-    //if($anzahldateien == $anzahldateienmax) break;
-
     // Zusammentragen der Dateiinfo
     $dateiinfo = pathinfo($ordner."/".$datei);
     //Folgende Variablen stehen nach pathinfo zur Verfügung
@@ -31,6 +26,14 @@ foreach ($alledateien as $datei)
     // $dateiinfo['dirname'] = Verzeichnisname
     // $dateiinfo['extension'] = Dateityp -/endung
     // $dateiinfo['basename'] = voller Dateiname mit Dateiendung
+ 
+     if($anzahldateien == $anzahldateienmax && $dateiinfo['extension'] == "jpg")
+    {
+        // in the first loop build a link to the last picture
+        echo '+"<p>Jeden Tag ein neues <b><a href='.$ordner."/".$dateiinfo['basename']." target='_blank'>".'Foto.</b></a></p>"';
+        echo '+"<div id='; echo "'fotorahmen'>"; echo '"';
+        echo '+"<div class='; echo "'galleria'>"; echo '"';
+    }
  
     // Größe ermitteln zur Ausgabe
     $size = ceil(filesize($ordner."/".$datei)/1024);

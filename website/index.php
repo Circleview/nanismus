@@ -296,7 +296,6 @@ $(document).ready(function() {
 					+"</div>",
 
 		'images/camera.png' :    "<h1>Bitte l&auml;cheln!</h1>"
-						+"<p>Jeden Tag ein neues Foto.</p>"
                         <?php include("src/ipcamfotos.php"); ?>                                                                                                                                                            
                 
                 <?php
