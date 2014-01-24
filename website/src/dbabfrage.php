@@ -143,6 +143,7 @@
             {
                 // Die letzte Nachricht ist wichtig, um zu wissen, ob die letzte
                 // Wässerung ausgereicht hat.
+                // die Variable prüfe ich bei den Gießregeln ab
                 $lastmsgid = $msgid;                
             }
                 
