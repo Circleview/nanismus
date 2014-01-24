@@ -81,12 +81,12 @@ include("src/db.php");
             
             // Dazu nutzen wir die Nachrichten ID, die das Arduino sendet
             // Diese Nachrichten-ID nutzen wir, um die entsprechende Nachricht aus der Datenbank abzufragen
-            $msgid = $value;
+            $messageID = $value;
             
             $sql = "
             SELECT $msgtabelle.msg
             FROM $msgtabelle
-            WHERE (($msgtabelle.msgid=$msgid))
+            WHERE (($msgtabelle.msgid=$messageID))
             ";  
 
             $db_erg = mysqli_query( $db_link, $sql );
@@ -97,14 +97,14 @@ include("src/db.php");
 
             while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
             {
-                $msg = $row['msg'];
+                $message = $row['msg'];
             }            
 
             // nur bei bestimmten Nachrichten soll noch ein User angesprochen werden
             // und eine URL angefügt werden
             // wenn ich das hier nicht filtere und mit den Nachrichten abspeichere,
             // dann steht das auch auf der Website und das ist unschön
-            if ($msgid == 2 || $msgid == 3 || $msgid == 6 || $msgid == 13 || $msgid == 49)
+            if ($messageID == 2 || $messageID == 3 || $messageID == 6 || $messageID == 13 || $messageID == 49)
             {
                 $user = $twitteruser;
                 $url = 'http://nanismus.de';
@@ -121,26 +121,28 @@ include("src/db.php");
             // doppelten Tweets vorzubeugen
             //$menge = 350;
             
-            switch ($msgid) 
+            switch ($messageID) 
             {
             case 6:
             case 49: 
-                $msg = $msg." ".$menge." ml reichten nicht.";
+                $message = $message." ".$menge." ml reichten nicht.";
                 break;
             case 68:
             case 69:
-                $msg = $msg." ".$menge." ml waren zu viel.";
+                $message = $message." ".$menge." ml waren zu viel.";
                 break;
             case 4:
             case 47:
-                $msg = $msg." ".$menge." ml waren genau was ich brauchte.";
+                $message = $message." ".$menge." ml waren genau was ich brauchte.";
+                break;
+            default: 
                 break;
             }                 
 
-            echo "Nachricht: ", $msg.' '.$user.' '.$url,"<br /><br />";
+            echo "Nachricht: ", $message.' '.$user.' '.$url,"<br /><br />";
                       
             // Es wird nun eine Funktion aufgerufen, die oben eingebunden
             // wurde, und die eine Nachricht an Twitter sendet
-            postSignupToTwitter($msg, $user, $url, $test);
+            postSignupToTwitter($message, $user, $url, $test);
         }
 ?>
