@@ -41,7 +41,7 @@
             // speichere den Tag in einem Array, der String der Tageszahl ist der Ident des Arrays
             // Zu diesem Identen werden dann die Prozentfeuchte und die Wassermenge gespeichert
             
-            $anzeigetag[$row['tag']] = $t;
+            $anzeigetag[$row['tag']] = $t.".";
             //echo "t: ".$t."<br />";
             //$moisture = $row['avgmoisture'];                
 

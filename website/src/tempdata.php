@@ -7,7 +7,7 @@
         
         //http://www.ayom.com/topic-7692.html
         //http://de.php.net/strtotime
-        $vergleichsdatum = "-15 days";
+        $vergleichsdatum = "-14 days";
         $now = strtotime($vergleichsdatum);
 
         $datum = date("Y-m-d H:i:s", $now);
@@ -52,7 +52,7 @@
         while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
         {
         $tag = $row['Tag'];
-        $tag = str_pad($tag, 2,'0', STR_PAD_LEFT); // der Tag des Monats soll mit einer führenden Null geschrieben werden
+        $tag = str_pad($tag, 2,'0', STR_PAD_LEFT)."."; // der Tag des Monats soll mit einer führenden Null geschrieben werden
 
         //$moisture = $row['avgmoisture'];
 
