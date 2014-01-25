@@ -45,7 +45,7 @@ foreach ($alledateien as $datei)
     if ($dateiinfo['extension'] == "jpg") 
     {
     
-        //$anzahldateien++; ?>
+        $anzahldateien++; ?>
         +"<img src='<?php echo $ordner."/".$dateiinfo['basename'] ?>'/>"                                            
 <?php
     };    
