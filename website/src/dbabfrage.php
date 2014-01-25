@@ -72,9 +72,12 @@
         }
 
         // Ermittlung des letzten Datenbankeintrags
+        // Datenbankeinträge, die von der Website erzeugt wurden, um zu speichern, 
+        // dass keine Verbindung bestand, sollen dabei ignoriert werden
         $sql = "
         SELECT $tabelle.timestamp
         FROM $tabelle
+        WHERE ((($tabelle.logtype)!='Verbindung'))
         ORDER BY $tabelle.ID DESC LIMIT 1
         ";
 
