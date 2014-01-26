@@ -20,9 +20,9 @@ $test = false;  // bei true werden die Daten in die Testdatenbank geschrieben
 include ("src/twittersend.php");
 
 // für die Bewässerungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
-include ("src/dbabfrage.php");
+//include ("src/dbabfrage.php");
 
-$table = "plant_log";
+$tabelle = "plant_log";
 $msgtabelle = "plant_messages";
 
 //Datenbank-Verbindung herstellen
@@ -54,7 +54,7 @@ include("src/db.php");
         // http://stackoverflow.com/questions/1995562/now-function-in-php
         $timestamp = date("Y-m-d H:i:s");
         $sql = "
-          INSERT INTO $table
+          INSERT INTO $tabelle
           ( 
           sensorname , logtype , value , timestamp
           ) 
@@ -107,7 +107,11 @@ include("src/db.php");
             if ($messageID == 2 || $messageID == 3 || $messageID == 6 || $messageID == 13 || $messageID == 49)
             {
                 $user = $twitteruser;
-                $url = 'http://nanismus.de';
+                $url = ''; // Zur Zeit blockiert twitter Nachrichten mit der nanismus website
+                // mal gucken, ob ich die Adresse irgendwann wieder verwenden kann. 
+                // bis dahin muss die URL leider draußen bleiben.
+                // Den Twitter Support habe ich am 26.01.2014 angeschrieben und um Entsperrung gebeten
+                //$url = "http://nanismus.de";
             }
             else
             {
@@ -120,23 +124,75 @@ include("src/db.php");
             // Hier kann man die die Wassermenge manipulieren, um der Filterung von 
             // doppelten Tweets vorzubeugen
             //$menge = 350;
+
+            // Wenn die MsgID eine Nachricht enthält, die sagt, dass gewässert wurde
+            // dann soll die Gießmenge noch mit ausgegeben und der eigentlichen Nachricht angefügt werden
+            if ($messageID == 4  || $messageID == 6 ||
+            $messageID == 47 || $messageID == 49 || $messageID == 68 || $messageID == 69)
+            {
+            
+                // Wie lauteten die letzten Nachricht, die die Banane gesendet hat?
+                // Um das zu ermitteln, müssen wir zuerst die Nachrichten-ID der letzten Nachricht ermitteln
+                // Wann hat die Banane das letzte Mal eine Nachricht verschickt?
+                $msgcount = 1; // Anzahl der Nachrichten aus der Vergangenheit anzeigen
+                // 100 und 99 werden als Nachrichten ausgeklammert, da diese keine echten Nachrichten sind
+                $sql = "
+                SELECT $tabelle.value, $tabelle.timestamp
+                FROM $tabelle
+                WHERE (($tabelle.sensorname = 'Banane') AND ($tabelle.logtype = 'Nachricht') AND ($tabelle.value != 100) AND ($tabelle.value != 99))
+                ORDER BY $tabelle.ID DESC LIMIT $msgcount
+                ";
+        
+                $db_erg = mysqli_query( $db_link, $sql );
+                if ( ! $db_erg )
+                {
+                    die('Ungültige Abfrage: ' . mysqli_error($db_link));
+                }
+        
+                while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
+                {
+                    //$msgid = $row['value'];
+                    $msgtime = $row['timestamp'];
+                    //echo "msgtime: ". $msgtime."<br />";
+                    //echo "msgid: ". $msgid."<br />";
+                }
+            
+                $sql = "
+                SELECT $tabelle.value
+                FROM $tabelle
+                WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Giessmenge') AND (($tabelle.timestamp) <= '$msgtime'))
+                ORDER BY $tabelle.ID DESC LIMIT 1
+                ";
+
+                $db_erg = mysqli_query( $db_link, $sql );
+                if ( ! $db_erg )
+                {
+                    die('Ungültige Abfrage: ' . mysqli_error($db_link));
+                }
+
+                while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
+                {
+                    $menge = $row['value'];
+                    //echo "aktuelle Menge: ". $menge."<br /><br />";
+                }
+            }
             
             switch ($messageID) 
             {
-            case 6:
-            case 49: 
-                $message = $message." ".$menge." ml reichten nicht.";
-                break;
-            case 68:
-            case 69:
-                $message = $message." ".$menge." ml waren zu viel.";
-                break;
-            case 4:
-            case 47:
-                $message = $message." ".$menge." ml waren genau was ich brauchte.";
-                break;
-            default: 
-                break;
+                case 6:
+                case 49: 
+                    $message = $message." ".$menge." ml reichten nicht.";
+                    break;
+                case 68:
+                case 69:
+                    $message = $message." ".$menge." ml waren zu viel.";
+                    break;
+                case 4:
+                case 47:
+                    $message = $message." ".$menge." ml waren genau was ich brauchte.";
+                    break;
+                default: 
+                    break;
             }                 
 
             echo "Nachricht: ", $message.' '.$user.' '.$url,"<br /><br />";
