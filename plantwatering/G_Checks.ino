@@ -10,20 +10,20 @@ void tempcheck()
 
   temp = analogRead(temppin);                      // sensorvalue
   // converting that reading to voltage, for 3.3v arduino use 3.3
-  temp = +6 + (temp * (5000/1024)/10);              // sensorvalue in millivolts in °C including a correction value due to some measure errors
-
+  temp = (temp * (5000/1024)/10);              // sensorvalue in millivolts in °C including a correction value due to some measure errors
+  
+  // Send the value to the MySQL database
+  HttpSend(99, 1, temp);
+  
   if(debug)
   {
-    printtime();
+    //printtime();
     RedFly.disable(); 
     Serial.print("Temperatur: "); 
     Serial.print(temp);
     Serial.println(" °C");
     RedFly.enable(); 
   }
-
-  // Send the value to the MySQL database
-  HttpSend(99, 1, temp);
 }
 
 //function for checking for watering events

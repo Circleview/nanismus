@@ -4,7 +4,7 @@ int MoistMeasureInterval(int nr)
   // 1. Moist Measurement
   if(nr == 0)
   {
-    return(1 * MOIST_SAMPLES() * 60); // seconds in debug mode
+    return(2 * MOIST_SAMPLES() * 60); // seconds in debug mode
   }
   else if(nr == 1)
   {
@@ -104,17 +104,17 @@ int DRYVAL(int sensor)                 // What DRY means depends on the values o
   {
   case 0:                              // plant 1
 
-    val = 335;
+    val = 340; // 335;
     break;
 
   case 2:                              // plant 2
 
-      val = 335;
+      val = 340; // 335;
     break;
 
   case 4:                              // plant 3
 
-    val = 335;
+    val = 340; // 335;
     break;
   }  
 
@@ -134,12 +134,12 @@ int MOISTVAL(int sensor)
 
   case 2:                              // plant 2
 
-    val = 340;
+    val = 340; 
     break;
 
   case 4:                              // plant 3
 
-    val = 340;
+    val = 340; 
     break;
   }  
 
@@ -154,17 +154,17 @@ int TOOMOISTVAL(int sensor)              // What TOOMOIST means depends on the v
   {
   case 0:                              // plant 1
 
-    val = 360;
+    val = 400; // 360
     break;
 
   case 2:                              // plant 2
 
-    val = 360;
+    val = 400; // 360;
     break;
 
   case 4:                              // plant 3
 
-    val = 360;
+    val = 400; // 360;
     break;
   }  
 

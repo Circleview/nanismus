@@ -50,7 +50,9 @@ void WiFlyConnect()
         log(now(), 1, PSTR("WiFi Verbindung"), PSTR("Verbindung hergestellt"));
         
         // Now that we are connected to the Router, we have to try to reach a webserver over the internet. 
-        internetconnectionerror = RedFly.getip(HOSTNAME, domainserver);  // Check if we can reach the server to which we want     
+        // I dont want to access the server via DNS, thats why I manipulate the returnvalue to zero
+        internetconnectionerror = 0; //RedFly.getip(HOSTNAME, domainserver);  // Check if we can reach the server to which we want            
+        
         if (internetconnectionerror != 0)
         {
           WiFlyConnection = false;

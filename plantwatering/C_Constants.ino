@@ -16,13 +16,13 @@ byte mac[]       = {
   0xDE, 0xAD, 0xBC, 0xAF, 0xFE, 0xED };
 // MAC address
 byte domainserver[]    = { 
-  0, 0, 0, 0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+  192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
 
 #define Network "WLAN-Kabel"         
 #define NetworkPW "1604644462468036" 
 
 // Host of nanismus website to send data to
-#define HOSTNAME "nanismus.no-ip.org"  //host
+#define HOSTNAME "192.168.178.24" //"nanismus.no-ip.org"  // //host
 
 // state
 #define WATER_OVERFLOW 5               // There is water on the ground of the pot 

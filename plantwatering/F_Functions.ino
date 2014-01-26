@@ -11,7 +11,8 @@ void WiFiConnect()
   // if (now() > lastwifichecktime + wifichecktime) // This if statement is not needed anymore, because the HTTP Send function 
   // triggers this internet connection check just in time when it is needed
   //{
-    internetconnectionerror = RedFly.getip(HOSTNAME, domainserver);  // Check if we can reach the server to which we want
+    // I want to adress the server without DNS, thats why I manipulate the returnvalue to zero
+    internetconnectionerror = 0; //RedFly.getip(HOSTNAME, domainserver);  // Check if we can reach the server to which we want
     // to upload the data
     // It returns 0 or an error message. 0 Means that the connection is established proberly
     
@@ -23,12 +24,35 @@ void WiFiConnect()
     }
   //}
 
+  // Nach 20 vergeblichen Versuchen soll der Code ersteinmal normal ausgeführt werden
+  // Siehe https://github.com/Circleview/nanismus/issues/42
+
+  // Wie breche ich aus einer do while Funktion aus? http://torrentula.to.funpic.de/dokumentation/2011/11/page/2/
+  int count = 0;                       // conter to quit the void after 20 unsuccessful connections
+  
   if(!WiFlyConnection)
   {
     do //(!WiFlyConnection)
-    { 
+    {
       blinkLED(WiFiStatusPin, 5, 100);  // Show that there is a try to connect       
+      log(now(), 1, PSTR("Nanismus Server"), PSTR("Verbindungsversuch"));   // Log the event on the SD Card // void log(long timestamp, int logtype, char * detail, char * result)
+      
       WiFlyConnect();       // Connect the WiFi Shield 
+      count++; 
+      
+      int connectiontrymax = 5; 
+      // check if we should quit the void 
+      if (count >= connectiontrymax)
+      {
+        
+        log(now(), 1, PSTR("20 Verbindungsversuche"), PSTR("erfolglos"));   // Log the event on the SD Card // void log(long timestamp, int logtype, char * detail, char * result)
+                                                                            // the following logtypes are defined
+                                                                            // logtype  | definition  
+                                                                            // 0        | Event 
+                                                                            // 1        | gateway or if statement
+                                                                            // 3        | Messwert        
+        return;                                                             // quit the void, it seems to be useless to try it endless
+      }
     } 
     while (!WiFlyConnection);
   }// if
@@ -40,7 +64,7 @@ void WiFiConnect()
 
 void spo2(char *s, boolean line) // Abrv. "spo" ... Serialprintout with usage of flash memory
 {
-  boolean on = false;       // to avoid serial printout if not nessessary deactivate it on demand
+  boolean on = debug;       // to avoid serial printout if not nessessary deactivate it on demand
 
   if (on)
   {
@@ -67,7 +91,7 @@ void spo2(char *s, boolean line) // Abrv. "spo" ... Serialprintout with usage of
 
 void spo(char *s, boolean line) // Abrv. "spo" ... Serialprintout
 {
-  boolean on = false;       // to avoid serial printout if not nessessary deactivate it on demand
+  boolean on = debug;       // to avoid serial printout if not nessessary deactivate it on demand
 
   if (on)
   {

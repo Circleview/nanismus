@@ -58,9 +58,21 @@ void HttpSend(int sensor_int, int type_int, int value)
      */
   
     WiFiConnect(); // Check if the WiFi Shield is connected. If not, try to connect
+    
+    // If we've tried to connect 20 times in a row without any success we should stop here
+    // With a successful internetconnection the internetconnectionerror should return 0
+    // Without success it returns an error message different than 0
+    if (internetconnectionerror != 0)
+    {
+        log(now(), 1, PSTR("HttpSend"), PSTR("ohne Verbindung abgebrochen"));     // Log the event on the SD Card      
+        return; 
+    }
   
     // freememorycheck();
-    if(RedFly.getip(HOSTNAME, domainserver) == 0) //get ip
+   
+    // I dont want to access the server via DNS, thats why I manipulate the returnvalue to zero
+    
+    //if(RedFly.getip(HOSTNAME, domainserver) == 0) //get ip
     {
       
       log(now(), 1, PSTR("HttpSend"), PSTR("IP erhalten - OK"));     // Log the event on the SD Card
@@ -87,7 +99,11 @@ void HttpSend(int sensor_int, int type_int, int value)
            sensor_string = "Wassertank";
            break;
          case 98:
-           sensor_string = "RAM";          
+           sensor_string = "RAM";
+           log(now(), 1, PSTR("HttpSend"), PSTR("RAM nicht senden - Abbruch"));     // Log the event on the SD Card
+           phpclient.flush();
+           phpclient.stop();              
+           return;                                             // You don't need to send the RAM to the webserver. That's why we can exit here
            break;
          case 99:
            sensor_string = "Temperatur";         
@@ -140,9 +156,16 @@ void HttpSend(int sensor_int, int type_int, int value)
         // http://miscsolutions.wordpress.com/2011/10/16/five-things-i-never-use-in-arduino-projects/
         
         char * GetRequest;
+        const char * get1;
         
-        const char * get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
-        //const char * get1 = "GET /nanismus_test/valueget.php"; // Zugang zum Testsystem
+        if (!debug)
+        {
+          get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
+        }
+        else
+        {
+          get1 = "GET /nanismus_test/valueget.php"; // Zugang zum Testsystem
+        }
         const char * get2 = "?name=";
         const char * get3 = "&type=";
         const char * get4 = "&value=";
@@ -185,6 +208,8 @@ void HttpSend(int sensor_int, int type_int, int value)
         spo2(PSTR("fertig!"), 1);
   
         log(now(), 1, PSTR("HttpSend"), PSTR("Daten uergeben"));     // Log the event on the SD Card
+        phpclient.flush();
+        phpclient.stop();         
       }
       else
       {

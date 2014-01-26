@@ -42,20 +42,23 @@ void log(long timestamp, int logtype, char * detail, char * result)
 {
   RedFly.disable();
   
-  spo2(PSTR("Logging gestartet."), 1); 
-  //freememorycheck();                // Print the available RAM memory out  
-  
-  spo2(PSTR("timestamp: "), 0); 
-  Serial.println(timestamp);
-  spo2(PSTR("logtype: "), 0);
-  Serial.println(logtype); 
-  spo2(PSTR("detail: "), 0); 
-  spo2(detail, 1);
-  spo2(PSTR("result: "), 0); 
-  spo2(result, 1);
-  // First we convert the time 
-  // Format 16.11.2013 11:07:09
-  
+  if (debug)
+  {
+    spo2(PSTR("Logging gestartet."), 1); 
+    //freememorycheck();                // Print the available RAM memory out  
+    
+    spo2(PSTR("timestamp: "), 0); 
+    Serial.println(timestamp);
+    spo2(PSTR("logtype: "), 0);
+    Serial.println(logtype); 
+    spo2(PSTR("detail: "), 0); 
+    spo2(detail, 1);
+    spo2(PSTR("result: "), 0); 
+    spo2(result, 1);
+    // First we convert the time 
+    // Format 16.11.2013 11:07:09
+  }
+    
   const char * dot = ".";
   const char * space = " ";
   const char * colon = ":";
