@@ -2,6 +2,8 @@ void WiFiConnect()
 {
 
   log(now(), 0, PSTR("Funktion WiFiConnect"), PSTR("gestartet"));     // Log the event on the SD Card
+  WiFlyConnection = false;  // If we cannot connect to the webserver, we mark the WiFi connection to be reestablished  
+  
   // Dokumentation of the RedFly Shield and its functions
   // https://github.com/watterott/RedFly-Shield/blob/master/src/docu.md
  
@@ -12,16 +14,16 @@ void WiFiConnect()
   // triggers this internet connection check just in time when it is needed
   //{
     // I want to adress the server without DNS, thats why I manipulate the returnvalue to zero
-    internetconnectionerror = 0; //RedFly.getip(HOSTNAME, domainserver);  // Check if we can reach the server to which we want
+    //internetconnectionerror = 0; //RedFly.getip(HOSTNAME, domainserver);  // Check if we can reach the server to which we want
     // to upload the data
     // It returns 0 or an error message. 0 Means that the connection is established proberly
     
-    if (internetconnectionerror != 0)
+    /*if (internetconnectionerror != 0)
     {
       WiFlyConnection = false;  // If we cannot connect to the webserver, we mark the WiFi connection to be reestablished 
       // we have to quess that the reason for the error is a problem with the WiFi connection
       log(now(), 1, PSTR("Nanismus Server"), PSTR("nicht erreicht"));     // Log the event on the SD Card
-    }
+    }*/
   //}
 
   // Nach 20 vergeblichen Versuchen soll der Code ersteinmal normal ausgeführt werden
@@ -29,7 +31,7 @@ void WiFiConnect()
 
   // Wie breche ich aus einer do while Funktion aus? http://torrentula.to.funpic.de/dokumentation/2011/11/page/2/
   int count = 0;                       // conter to quit the void after 20 unsuccessful connections
-  
+  int connectiontrymax = 5;   
   if(!WiFlyConnection)
   {
     do //(!WiFlyConnection)
@@ -37,15 +39,13 @@ void WiFiConnect()
       blinkLED(WiFiStatusPin, 5, 100);  // Show that there is a try to connect       
       log(now(), 1, PSTR("Nanismus Server"), PSTR("Verbindungsversuch"));   // Log the event on the SD Card // void log(long timestamp, int logtype, char * detail, char * result)
       
-      WiFlyConnect();       // Connect the WiFi Shield 
       count++; 
+      WiFlyConnect();       // Connect the WiFi Shield 
       
-      int connectiontrymax = 5; 
       // check if we should quit the void 
       if (count >= connectiontrymax)
-      {
-        
-        log(now(), 1, PSTR("20 Verbindungsversuche"), PSTR("erfolglos"));   // Log the event on the SD Card // void log(long timestamp, int logtype, char * detail, char * result)
+      {        
+        log(now(), 1, PSTR("5 Verbindungsversuche"), PSTR("erfolglos"));   // Log the event on the SD Card // void log(long timestamp, int logtype, char * detail, char * result)
                                                                             // the following logtypes are defined
                                                                             // logtype  | definition  
                                                                             // 0        | Event 
@@ -54,12 +54,12 @@ void WiFiConnect()
         return;                                                             // quit the void, it seems to be useless to try it endless
       }
     } 
-    while (!WiFlyConnection);
+    while(!WiFlyConnection);
   }// if
-  else
+  /*else
   {
     log(now(), 1, PSTR("Nanismus Server"), PSTR("erreicht - OK"));     // Log the event on the SD Card
-  }
+  }*/
 }
 
 void spo2(char *s, boolean line) // Abrv. "spo" ... Serialprintout with usage of flash memory

@@ -42,7 +42,8 @@ void HttpSend(int sensor_int, int type_int, int value)
 
     digitalWrite(CosmComLED, HIGH);    // Show the work in Progress
     
-    if (debug) {
+    if (debug) 
+    {
       spo2(PSTR("HttpSend started"), 1);
     }
     
@@ -56,17 +57,15 @@ void HttpSend(int sensor_int, int type_int, int value)
      byte server[]    = { 0, 0, 0, 0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
      which are definded as constants already
      */
-  
-    WiFiConnect(); // Check if the WiFi Shield is connected. If not, try to connect
-    
+      
     // If we've tried to connect 20 times in a row without any success we should stop here
     // With a successful internetconnection the internetconnectionerror should return 0
     // Without success it returns an error message different than 0
-    if (internetconnectionerror != 0)
+    /*if (internetconnectionerror != 0)
     {
         log(now(), 1, PSTR("HttpSend"), PSTR("ohne Verbindung abgebrochen"));     // Log the event on the SD Card      
         return; 
-    }
+    }*/
   
     // freememorycheck();
    
@@ -75,7 +74,7 @@ void HttpSend(int sensor_int, int type_int, int value)
     //if(RedFly.getip(HOSTNAME, domainserver) == 0) //get ip
     {
       
-      log(now(), 1, PSTR("HttpSend"), PSTR("IP erhalten - OK"));     // Log the event on the SD Card
+      //log(now(), 1, PSTR("HttpSend"), PSTR("IP erhalten - OK"));     // Log the event on the SD Card
       
       if(phpclient.connect(domainserver, 80))
       {
@@ -213,8 +212,9 @@ void HttpSend(int sensor_int, int type_int, int value)
       }
       else
       {
-        spo2(PSTR("CLIENT ERR"), 1);
+        spo2(PSTR("PHP Server - nicht verbunden"), 1);
         log(now(), 1, PSTR("HttpSend"), PSTR("PHP Server - nicht verbunden "));     // Log the event on the SD Card
+        WiFiConnect(); // Check if the WiFi Shield is connected. If not, try to connect
       }
     }
     
