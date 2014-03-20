@@ -47,7 +47,7 @@
 
             // Wenn der heutige Tag angezeigt wird, dann soll das Wort "Jetzt" angezeigt werden
             // Und es soll der letzte gemessene Wert dargestellt werden
-            $heuteTag = str_pad(date(d, time()), 2,'0', STR_PAD_LEFT);          
+            $heuteTag = str_pad(date('d', time()), 2,'0', STR_PAD_LEFT);          
             if ($heuteTag == $t)
             {
                 $anzeigetag[$row['tag']] = "Jetzt";
@@ -120,7 +120,7 @@
         {
             $vergleichsdatum = "-".$daycount." days";
             $now = strtotime($vergleichsdatum);
-            $datum = date("j", $now);
+            $datum = date('j', $now);
 
             //echo "datum: ".$datum."<br />";
             // Wenn kein Datensatz mehr kommt, dann beende die Schleife
@@ -131,6 +131,13 @@
             {
                 $ml[$datum] = 0;
             }
+            if (empty($moisture[$datum]))
+            {
+                $moisture[$datum] = 0.7;
+            }
+            
+            $anzeigetag[$datum] = "01.";
+            
             echo ",['". $anzeigetag[$datum]. "', " ,$moisture[$datum]. ", ". $ml[$datum]. "]";   // Aufbau des Arrays für die GoogleChart Daten            
         }
 

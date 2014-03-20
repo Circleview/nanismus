@@ -108,7 +108,7 @@ global $delay;
     window.onload = function(){
 	document.testform.submit();
 }
-</script>
+</script-->
 
  
 <!-- Script das den Slider-Effekt und den Text ermöglicht. -->    
@@ -413,9 +413,9 @@ else {
             letzte NachrichtID: <?php  echo $msgid; ?></span></p>                       
 		<p style="text-align: center;">
 			<span style="font-size:9px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            letzte Nachricht: <?php  echo $msg; ?></span></p>	
+            letzte Nachricht: <?php  //echo $msg; ?></span></p>	
 </div>
            		
-	</body>
+</body>
 
 </html>

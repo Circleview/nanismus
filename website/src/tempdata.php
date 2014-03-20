@@ -58,7 +58,7 @@
 
         // Wenn der heutige Tag angezeigt wird, dann soll das Wort "Jetzt" angezeigt werden
         // Und es soll der letzte gemessene Wert dargestellt werden
-        if (date(d, time()) == ($tag))
+        if (date('d', time()) == ($tag))
         {
             $tag = "Jetzt";
             

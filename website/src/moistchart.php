@@ -1,6 +1,3 @@
-<!--html>
-  <head-->
-  
     <!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->  
     <!-- ggf. Alternative http://www.phplot.com/ -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -125,8 +122,3 @@
       }
       google.setOnLoadCallback(drawVisualization);
     </script>
-  <!--/head>
-  <body>
-    <div id="moistchart_div" style="width: 900px; height: 500px;"></div>
-  </body>
-</html>

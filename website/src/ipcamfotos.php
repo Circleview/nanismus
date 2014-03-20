@@ -27,6 +27,10 @@ foreach ($alledateien as $datei)
     // $dateiinfo['extension'] = Dateityp -/endung
     // $dateiinfo['basename'] = voller Dateiname mit Dateiendung
  
+    // Größe ermitteln zur Ausgabe
+    //$size = ceil(filesize($ordner."/".$datei)/1024);
+    //1024 = kb | 1048576 = MB | 1073741824 = GB
+ 
      if($anzahldateien == $anzahldateienmax && $dateiinfo['extension'] == "jpg")
     {
         // in the first loop build a link to the last picture
@@ -35,16 +39,11 @@ foreach ($alledateien as $datei)
         echo '+"<div class='; echo "'galleria'>"; echo '"';
     }
  
-    // Größe ermitteln zur Ausgabe
-    $size = ceil(filesize($ordner."/".$datei)/1024);
-    //1024 = kb | 1048576 = MB | 1073741824 = GB
- 
     // scandir liest alle Dateien im Ordner aus, zusätzlich noch "." , ".." als Ordner
     // Nur echte Dateien anzeigen lassen und keine "Punkt" Ordner
     // _notes ist eine Ergänzung für Dreamweaver Nutzer, denn DW legt zur besseren Synchronisation diese Datei in den Orndern ab
     if ($dateiinfo['extension'] == "jpg") 
-    {
-    
+    {  
         $anzahldateien++; ?>
         +"<img src='<?php echo $ordner."/".$dateiinfo['basename'] ?>'/>"                                            
 <?php
