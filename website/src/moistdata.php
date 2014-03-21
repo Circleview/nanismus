@@ -131,12 +131,12 @@
             {
                 $ml[$datum] = 0;
             }
-            if (empty($moisture[$datum]))
+            /*if (empty($moisture[$datum]))
             {
                 $moisture[$datum] = 0.7;
             }
-            
-            $anzeigetag[$datum] = "01.";
+            */
+            //$anzeigetag[$datum] = "01.";
             
             echo ",['". $anzeigetag[$datum]. "', " ,$moisture[$datum]. ", ". $ml[$datum]. "]";   // Aufbau des Arrays für die GoogleChart Daten            
         }
