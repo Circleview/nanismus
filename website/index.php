@@ -1,25 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="de" lang="de">
 
 <?php
 
-//header('Content-Type: text/html; charset=utf-8');
+header('Content-Type: text/html; charset=utf-8');
 
 /* Problem mit utf-8 Konvertierung und Zeichenanzeige im
  * Zusammenhang mit einer MYSQL Datenbank, konnte durch den
  * HTML Tag weiter unten nicht abgefangen werden
  * http://www.winfuture-forum.de/index.php?showtopic=193063
- * brachte die Lösung mit dem PHP Header Tag.
+ * brachte die LÃ¶sung mit dem PHP Header Tag.
  */
   
 //session_start();
 
 // Funktionen
-
-//$arduino_ip="nanismus.no-ip.org";
-//$arduino_ip="192.168.178.30";
-//$arduino_port="24";
-
 $debug = 0;             // throws additional information if true
 $test = 0;               // grab different data from different databases due to the testcontext
 
@@ -29,7 +24,7 @@ global $delay;
        $delay = $delay * 1000000; // convert into microseconds
 
 /*
- * Arduino States für Feuchtigkeit und Wohlbefinden der Pflanze
+ * Arduino States fÃ¼r Feuchtigkeit und Wohlbefinden der Pflanze
  * // state
     #define WATER_OVERFLOW 5               // There is water on the ground of the pot 
     #define NO_WATER_OVERFLOW 4            // There is no Water on the ground                                         
@@ -45,11 +40,11 @@ global $delay;
 <head>
     <title>Nanismus - Bananenbew&auml;sserung</title>
 
-    <!-- Scripte für die Foto Gallerie -->
+    <!-- Scripte fÃ¼r die Foto Gallerie -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
     <script src="src/galleria/galleria-1.3.3.min.js"></script>
  
-    <!-- Scripte für den Slider-Effekt -->
+    <!-- Scripte fÃ¼r den Slider-Effekt -->
     <script type="text/javascript" src="//use.typekit.net/vue1oix.js"></script>
     <script type="text/javascript">try{Typekit.load();}catch(e){}</script>        
     <!--script src="src/jquery-1.10.2.min.js"></script-->
@@ -57,14 +52,14 @@ global $delay;
     <script src="src/block_slider_javascript.js"></script>
   
 
-    <!-- Skript für das iPod Rad zum Bestimmen der Wassermenge -->
+    <!-- Skript fÃ¼r das iPod Rad zum Bestimmen der Wassermenge -->
     <!--script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script-->
     <script src="src/jquery.knob.js"></script>
     <script src="src/jquery.ipodwheel.js"></script>    
     
     <!-- Stylesheets -->
     <!-- Fremdlink - Sollte noch auf den eigenen Server umgezogen werden
-    das war aber auf die Schnelle nicht möglich, weil es Probleme mit der Darstellung des Webfonts gab -->
+    das war aber auf die Schnelle nicht mÃ¶glich, weil es Probleme mit der Darstellung des Webfonts gab -->
     <link rel="stylesheet" href="http://www.inserthtml.com/demos/layout/icons/ss-standard.css" />
     <link rel="stylesheet" href="css/style_umbau.css" />
 
@@ -80,27 +75,24 @@ global $delay;
     http://www.1x1px.me/ -->
     
     <!-- Metadaten der Seite -->
-    <!-- Wie wird mit mobilen Endgeräten umgegangen? -->
+    <!-- Wie wird mit mobilen EndgerÃ¤ten umgegangen? -->
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-    
-    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="keywords" content="Bew&auml;sserung, Arduino, Gardening, Selfmade, Pflanzenbew&auml;sserung" />
     
-    <!-- Für Testzwecke -->
+    <!-- FÃ¼r Testzwecke -->
     <!-- http://iphone4simulator.com/ -->
  
-<!-- PHP für die Bewässerungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
+<!-- PHP fÃ¼r die BewÃ¤sserungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
 <?php include ("src/dbabfrage.php");
 ?>
 
-<!-- PHP, um zu ermitteln, ob das Gießen über die Website überhaupt erlaubt ist -->
+<!-- PHP, um zu ermitteln, ob das GieÃŸen Ã¼ber die Website Ã¼berhaupt erlaubt ist -->
 <?php include ("src/giessregel.php");?>
 
-<!-- PHP, um das Temperatur-Diagramm aufbauen zu können -->
+<!-- PHP, um das Temperatur-Diagramm aufbauen zu kÃ¶nnen -->
 <?php include("src/tempchart.php"); ?>
-<!-- PHP, um das Feuchtigkeits-Diagramm aufbauen zu können -->
+<!-- PHP, um das Feuchtigkeits-Diagramm aufbauen zu kÃ¶nnen -->
 <?php include("src/moistchart.php"); ?>
 
 <!-- Script zum absenden von Formulardaten mit einem Klick auf einen Link --> 
@@ -111,7 +103,7 @@ global $delay;
 </script-->
 
  
-<!-- Script das den Slider-Effekt und den Text ermöglicht. -->    
+<!-- Script das den Slider-Effekt und den Text ermÃ¶glicht. -->    
 <script>
 
 $(document).ready(function() {
@@ -203,7 +195,7 @@ $(document).ready(function() {
 	
 		        <?php
 		        
-                // Wenn eine Überflutung (das Wasser lief bis in den Untertopf)
+                // Wenn eine Ãœberflutung (das Wasser lief bis in den Untertopf)
                 // vorliegt, dann soll dieses Sybol angezeigt werden, sonst nicht.
 
                 // Zu Testzwecken kann der Topfwert (Also der Wasserstand im Untertopf) manipuliert werden
@@ -263,7 +255,7 @@ $(document).ready(function() {
 
 		        <?php
 
-                // Wenn eine Wässerung möglich ist, dann soll das Symbol angezeigt werden, sonst nicht
+                // Wenn eine WÃ¤sserung mÃ¶glich ist, dann soll das Symbol angezeigt werden, sonst nicht
 
                 // Zu Testzwecken kann der Topfwert (Also der Wasserstand im Untertopf) manipuliert werden
                 //echo "&Uuml;berlaufwert: $ueberlaufwert";
@@ -279,8 +271,8 @@ $(document).ready(function() {
 						echo "+"; echo '"<p>Pflanzen brauchen Zuneigung und Wasser."';
 						echo "+"; echo '"</p>"';
 						echo "+"; echo '"<p>Lege die Wassermenge durch drehen am Rad fest."';
-                        // Einbeinden des Scrollrads über iframe, ich bekomme das gerade nicht anders hin, 
-                        // da die javascripte für den Slider und das iPodrad geegenseitig stören
+                        // Einbeinden des Scrollrads Ã¼ber iframe, ich bekomme das gerade nicht anders hin, 
+                        // da die javascripte fÃ¼r den Slider und das iPodrad geegenseitig stÃ¶ren
                         echo "+"; echo '"<iframe src='; echo "'./src/wasser/ipod.html'name='iPod wheel' class='ipodiframe' scrolling='no' "; echo '>"';
                         echo "+"; echo '"<p>Ihr Browser kann leider keine eingebetteten Frames anzeigen: Sie k&ouml;nnen die eingebettete Seite &uuml;ber den folgenden Verweis aufrufen: <a href='; echo "'pod.html'"; echo '>Link</a></p>"';
                         echo "+"; echo '"</iframe>"';                      
@@ -289,7 +281,7 @@ $(document).ready(function() {
                 }
                 ?>
 
-		'images/thermometer.png' :    "<h1>Temperatur: <?php echo "$temperatur °C"; ?></h1>"
+		'images/thermometer.png' :    "<h1>Temperatur: <?php echo "$temperatur Â°C"; ?></h1>"
 						+"<p>So warm war es der Nani in den letzten 15 Tagen.</p>"
 						+"<div id='tempchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Temperatur
 						//+"<div class='button'>Zeige Messewerte</div>"
@@ -303,7 +295,7 @@ $(document).ready(function() {
                 // Wenn keine Verbindung zum Arduino mehr zu bestehen scheint,
                 // dann soll dieses Sybol angezeigt werden, sonst nicht.
                 // Die Verbindung scheint immer dann nicht zu bestehen, wenn der
-                // letzte Datenbankeintrag läger als 40 Minuten in der Vergangenheit liegt
+                // letzte Datenbankeintrag lÃ¤ger als 40 Minuten in der Vergangenheit liegt
                 
                 // Zu Testzwecken kann der Verbindungswert manipuliert werden
                 //$VerbindungArduino = false;
@@ -354,7 +346,7 @@ $(document).ready(function() {
     <!-- "Hintergrundfoto hinter der Slider - Animation" -->
     <!-- http://www.free-solutions.de/js/dokument_bildformat_dynamisch_erzwingen.html -->
     
-    <script language="javascript" type="text/javascript">      //Die Auflösung des Hintergrundbildes soll von der Anzeigebreite des Bildschirms abhänig sein.
+    <script language="javascript" type="text/javascript">      //Die AuflÃ¶sung des Hintergrundbildes soll von der Anzeigebreite des Bildschirms abhÃ¤nig sein.
     if(window.innerWidth <= 340) 
     {
       document.write("<img src='images/nanifoto_400.jpg' id='bgimage' />");
@@ -390,7 +382,7 @@ else {
             </p>
 		<p style="text-align: center;">
 			<span style="font-size:15px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            Lufttemperatur: <?php  echo $temperatur," °C"; ?></span></p>
+            Lufttemperatur: <?php  echo $temperatur," Â°C"; ?></span></p>
 		<p style="text-align: center;">
 			<span style="font-size:15px; font-family:lucida sans unicode,lucida grande,sans-serif;">
             Bodenfeuchte: <?php  echo $Feuchte," %"; ?></span></p>

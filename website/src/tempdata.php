@@ -27,32 +27,32 @@
         $db_erg = mysqli_query( $db_link, $sql );
         if ( ! $db_erg )
         {
-        die('Ungültige Abfrage: ' . mysqli_error($db_link));
+        die('UngÃ¼ltige Abfrage: ' . mysqli_error($db_link));
         }
         
-        // Im Folgenden wird das Array aufgebaut, das die Daten für das kleine Diagramm 
-        // der Temperaturwerte hält
+        // Im Folgenden wird das Array aufgebaut, das die Daten fÃ¼r das kleine Diagramm 
+        // der Temperaturwerte hÃ¤lt
         /* Dazu wird der Wochentag des Datenbanktimestamps in das Deutsche konvertiert
-         * Dann wird der Tag des Monats mit einer führenden Null gespeichert
-         * Anschließend wird die Kombination aus Wochentag und Tag im Monat 
+         * Dann wird der Tag des Monats mit einer fÃ¼hrenden Null gespeichert
+         * AnschlieÃŸend wird die Kombination aus Wochentag und Tag im Monat 
          * mit dem heutigen Datum verglichen. 
          * Sind die Zahlenkombinationen identisch, dann soll im Array statt 
          * des aktuellen Wochentags das Wort "Heute" gespeichert werden. 
          * Der Vergleich auf der Basis der Kombination von Wochentag und Tag im Monat
-         * ist ausreichend zuverlässig, da in den Diagramm auf der Website zur die Daten 
-         * der zurückliegenden Tage angezeigt werden sollen.
+         * ist ausreichend zuverlÃ¤ssig, da in den Diagramm auf der Website zur die Daten 
+         * der zurÃ¼ckliegenden Tage angezeigt werden sollen.
          */
-        // Wie fülle ich mit PHP führende Nullen auf? 
+        // Wie fÃ¼lle ich mit PHP fÃ¼hrende Nullen auf? 
         // http://www.strassenprogrammierer.de/php-nullen-auffuellen_tipp_505.html
         
         // Einbinden der Bibliotheken von GoogleChart
         echo "var data = google.visualization.arrayToDataTable([";
-        echo "['Tag', '°C'],"; // Tabellenkopf
+        echo "['Tag', 'Â°C'],"; // Tabellenkopf
         
         while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
         {
         $tag = $row['Tag'];
-        $tag = str_pad($tag, 2,'0', STR_PAD_LEFT)."."; // der Tag des Monats soll mit einer führenden Null geschrieben werden
+        $tag = str_pad($tag, 2,'0', STR_PAD_LEFT)."."; // der Tag des Monats soll mit einer fÃ¼hrenden Null geschrieben werden
 
         //$moisture = $row['avgmoisture'];
 
@@ -72,7 +72,7 @@
             $db_erg = mysqli_query( $db_link, $sql );
             if ( ! $db_erg )
             {
-            die('Ungültige Abfrage: ' . mysqli_error($db_link));
+            die('UngÃ¼ltige Abfrage: ' . mysqli_error($db_link));
             }
             
             while($rowjetzt = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
@@ -90,7 +90,7 @@
         /*while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
         {
         $tag = $row['Tag'];
-        $tag = str_pad($tag, 2,'0', STR_PAD_LEFT); // der Tag des Monats soll mit einer führenden Null geschrieben werden
+        $tag = str_pad($tag, 2,'0', STR_PAD_LEFT); // der Tag des Monats soll mit einer fÃ¼hrenden Null geschrieben werden
         
         $Wochentag = $row['WT'];                
 
@@ -137,7 +137,7 @@
         ]);
         */
                 
-        echo "['", $tag, "', " ,$avgtemp,"],";   // Aufbau des Arrays für die GoogleChart Daten
+        echo "['", $tag, "', " ,$avgtemp,"],";   // Aufbau des Arrays fÃ¼r die GoogleChart Daten
         
         }
         

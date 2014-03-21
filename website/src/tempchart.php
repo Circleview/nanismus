@@ -51,8 +51,8 @@
                                         // 'function' - The angles of the line will be smoothed.
           vAxis: {                      // Temperatur
               title: '',
-              format: '#.## °C',
-              ticks: [20, 22, 24, 26],
+              format: '#.## Â°C',
+              ticks: [20, 22, 24, 26, 28, 30],
               textStyle: {
                 color: '#0B0500', 
                 fontSize: 9
