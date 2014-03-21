@@ -37,7 +37,10 @@ else
     { 
         $message = substr($message, 0, ($max-$bitlink-$lenuser-3)).'...';
 	}
-	$twitter->post('statuses/update', array('status' => utf8_encode($message).' '.$user.' '.$url));
+
+    $message = $message.' '.$user.' '.$url;
+    //$message=rawurlencode(utf8_encode($message)); // Thx to http://frank-it-beratung.com/blog/2011/07/16/oauth-probleme-mit-umlauten-losungen-fur-php-perl-c/	
+	$twitter->post('statuses/update', array('status' => $message));
 	
 	//echo "verschickte Nachricht: $message $user $url <br />";
     echo "erledigt <br />";	
