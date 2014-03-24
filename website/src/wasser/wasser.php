@@ -149,6 +149,44 @@
 		
 </head>
 <body style="background: #F4FAFF;">
+
+<?php 
+/* Eintragen in die Datenbank, dass eine Wässerung stattgefunden hat. 
+ * Das verhindert unmittelbar nach dem neu Laden der Website, dass erneut
+ * gegossen werden kann. 
+ * Eigentlich nimmt das Arduino selbst diesen Eintrag auch vor, doch dauert
+ * das unter Umständen zu lange, um eine doppelte Wässerung zu verhindern.
+ */
+
+// Festlegen welche Datenbank verwendet werden soll
+$test = false;  // bei true werden die Daten in die Testdatenbank geschrieben
+$tabelle = "plant_log";
+$name = "Banane";
+$type = "Giessung";
+$value = "1";
+
+//Datenbank-Verbindung herstellen
+//--------------------------------
+include("../db.php");
+
+        // http://stackoverflow.com/questions/1995562/now-function-in-php
+        $timestamp = date("Y-m-d H:i:s");
+        $sql = "
+          INSERT INTO $tabelle
+          (
+          sensorname , logtype , value , timestamp
+          )
+          VALUES
+          (
+          '$name', '$type', $value, '$timestamp'
+          )
+        ";
+        //http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
+        $db_erg = mysqli_query($db_link, $sql)
+            or die("<p>Anfrage fehlgeschlagen</p>" . mysqli_error($db_link));
+            //or die("0 \r\n" . mysqli_error($db_link));
+
+ ?>
     <div id="wasserfortschritt" 
         style="position: relative; top: -5px; left: -8px; height: 185px; width: 97.5%; text-align: center;
         margin-left: -8px; margin-right: auto; border-style: solid; padding-left: 8px;
