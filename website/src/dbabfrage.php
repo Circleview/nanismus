@@ -120,7 +120,7 @@
         // Wie lauteten die letzten Nachricht, die die Banane gesendet hat?
         // Um das zu ermitteln, müssen wir zuerst die Nachrichten-ID der letzten Nachricht ermitteln
         // Wann hat die Banane das letzte Mal eine Nachricht verschickt?
-        $msgcount = 3; // Anzahl der Nachrichten aus der Vergangenheit anzeigen
+        $msgcount = 4; // Anzahl der Nachrichten aus der Vergangenheit anzeigen
         // 100 und 99 werden als Nachrichten ausgeklammert, da diese keine echten Nachrichten sind
         $sql = "
         SELECT $tabelle.value, $tabelle.timestamp
