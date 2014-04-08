@@ -43,7 +43,7 @@
 		incwidth : 360,
 		
 		// The increased width after the user clicks on it
-		incheight : 400, // von mir geändert 320
+		incheight : 500, // von mir geändert 320
 		
 		// The margin between the boxes
 		margin : 20,  // 40
