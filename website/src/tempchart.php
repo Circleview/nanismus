@@ -43,7 +43,7 @@
           lineWidth: 4,                 // Data line width in pixels. Use zero to hide all lines and show only the points. You can override values for individual series using the series property.
           pointSize: 5,                 // Diameter of displayed points in pixels. Use zero to hide all points. You can override values for individual series using the series property.
           width: 356,                   // Width of the chart, in pixels.
-          height: 190,                  // Height of the chart, in pixels.
+          height: 330,                  // Height of the chart, in pixels.
           backgroundColor: '#F4FAFF',   //,   // The background color for the main area of the chart. Can be either a simple HTML color string, for example: 'red' or '#00cc00', or an object with the following properties.
           colors: ['#DE7700'],          // The colors to use for the chart elements. An array of strings, where each element is an HTML color string, for example: colors:['red','#004411'].
           curveType: 'function',        // Controls the curve of the lines when the line width is not zero. Can be one of the following:

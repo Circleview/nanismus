@@ -31,7 +31,7 @@
             lineWidth: 4,                   // Data line width in pixels. Use zero to hide all lines and show only the points. You can override values for individual series using the series property.
             pointSize: 5,                   // Diameter of displayed points in pixels. Use zero to hide all points. You can override values for individual series using the series property.
             width: 330,                     // Width of the chart, in pixels.
-            height: 190,                    // Height of the chart, in pixels.
+            height: 320,                    // Height of the chart, in pixels.
             backgroundColor: '#F4FAFF',     //,   // The background color for the main area of the chart. Can be either a simple HTML color string, for example: 'red' or '#00cc00', or an object with the following properties.
             colors: ['#2188FF', '#68AFFF'],            // The colors to use for the chart elements. An array of strings, where each element is an HTML color string, for example: colors:['red','#004411'].
             curveType: 'function',          // Controls the curve of the lines when the line width is not zero. Can be one of the following:
@@ -74,7 +74,7 @@
                     logScale: false,
                     title: '',
                     format: '# %',
-                    ticks: [0.30, 0.45, 0.60, 0.75],
+                    ticks: [0.30, 0.45, 0.60, 0.75, 0.90],
                     textStyle:
                     {
                         color: '#0B0500',
@@ -83,7 +83,7 @@
                     viewWindowMode: 'explicit',
                     viewWindow:
                     {
-                        max: 0.75,
+                        max: 0.90,
                         min: 0.3
                     }
                 },
@@ -91,7 +91,7 @@
                     logScale: false,
                     title: '',
                     format: '# ml',
-                    ticks: [50, 250, 450, 650],
+                    ticks: [50, 200, 350, 500, 650],
                     textStyle:
                     {
                         color: '#0B0500',
