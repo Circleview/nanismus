@@ -1,4 +1,4 @@
-    <!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->  
+﻿    <!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->
     <!-- ggf. Alternative http://www.phplot.com/ -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -16,7 +16,7 @@
           ['2008/09',  136,      691,         629,             1026,          366,      569.6]
         ]);
         */
-        // Das Array lasse ich von PHP aufbauen
+        // Das Array lasse ich in PHP aufbauen
         <?php
         include("moistdata.php");
         ?>
@@ -33,13 +33,13 @@
             width: 330,                     // Width of the chart, in pixels.
             height: 320,                    // Height of the chart, in pixels.
             backgroundColor: '#F4FAFF',     //,   // The background color for the main area of the chart. Can be either a simple HTML color string, for example: 'red' or '#00cc00', or an object with the following properties.
-            colors: ['#2188FF', '#68AFFF'],            // The colors to use for the chart elements. An array of strings, where each element is an HTML color string, for example: colors:['red','#004411'].
+            colors: ['#2188FF', '#DE7700', '#68AFFF'],            // The colors to use for the chart elements. An array of strings, where each element is an HTML color string, for example: colors:['red','#004411'].
             curveType: 'function',          // Controls the curve of the lines when the line width is not zero. Can be one of the following:
                                             // 'none' - Straight lines without curve.
                                             // 'function' - The angles of the line will be smoothed.
             bar:
             {
-                groupWidth: '100%'
+                groupWidth: '80%'
             },
             legend:
             {
@@ -49,7 +49,7 @@
             {
                 width: '65%',
                 height: '80%',
-                top: 10
+                top: 10,
             },
             titleTextStyle:
             {
@@ -66,6 +66,7 @@
             series:
             [
                 {targetAxisIndex:0, type: "line", dataOpacity: 1.0},
+                {targetAxisIndex:1, type: "line", dataOpacity: 0.7, lineWidth: 0},
                 {targetAxisIndex:1, type: "bars", dataOpacity: 0.5}
             ],
             vAxes:  // Thx to http://lamages.blogspot.de/2013/04/how-to-set-axis-options-in-googlevis.html
@@ -90,7 +91,7 @@
                 {
                     logScale: false,
                     title: '',
-                    format: '# ml',
+                    format: '# ml/°C',
                     ticks: [50, 200, 350, 500, 650],
                     textStyle:
                     {

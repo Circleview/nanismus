@@ -90,8 +90,6 @@ global $delay;
 <!-- PHP, um zu ermitteln, ob das Gießen über die Website überhaupt erlaubt ist -->
 <?php include ("src/giessregel.php");?>
 
-<!-- PHP, um das Temperatur-Diagramm aufbauen zu können -->
-<?php include("src/tempchart.php"); ?>
 <!-- PHP, um das Feuchtigkeits-Diagramm aufbauen zu können -->
 <?php include("src/moistchart.php"); ?>
 
@@ -122,7 +120,7 @@ $(document).ready(function() {
 		                  
 		                  // Bei Bedarf kann die Anzahl der anzuzeigenden Nachrichten
 		                  // hier angepasst werden
-		                  // $msgcount = 3;
+		                  // $msgcount = 4;
 		                
                           for ($i = 0; $i < $msgcount; $i++)
                           {
@@ -275,17 +273,11 @@ $(document).ready(function() {
                         // da die javascripte für den Slider und das iPodrad geegenseitig stören
                         echo "+"; echo '"<iframe src='; echo "'./src/wasser/ipod.html'name='iPod wheel' class='ipodiframe' scrolling='no' "; echo '>"';
                         echo "+"; echo '"<p>Ihr Browser kann leider keine eingebetteten Frames anzeigen: Sie k&ouml;nnen die eingebettete Seite &uuml;ber den folgenden Verweis aufrufen: <a href='; echo "'pod.html'"; echo '>Link</a></p>"';
-                        echo "+"; echo '"</iframe>"';                      
+                        echo "+"; echo '"</iframe>"';
 					echo ",";
 
                 }
                 ?>
-
-		'images/thermometer.png' :    "<h1>Temperatur: <?php echo "$temperatur °C"; ?></h1>"
-						+"<p>So warm war es der Nani in den letzten 15 Tagen.</p>"
-						+"<div id='tempchart_div' style='width: 100%; '></div>" // Einbindung des Diagramms der Temperatur
-						//+"<div class='button'>Zeige Messewerte</div>"
-					+"</div>",
 
 		'images/camera.png' :    "<h1>Bitte l&auml;cheln!</h1>"
                         <?php include("src/ipcamfotos.php"); ?>                                                                                                                                                            
@@ -368,45 +360,6 @@ $(document).ready(function() {
 
 </div>
 			
-<div style="visibility: 
-<?php if ($debug){
-    echo "visible;";
-} 
-else {
-    echo "hidden";
-}?>;">
-
-		<p style="text-align: center;">
-			<span style="font-family:lucida sans unicode,lucida grande,sans-serif;">
-            <br /><br /><br /><br /><br /><img alt="Bild einer kleinen Bananenpflanze" src="http://www.maastrek-werbeartikel.de/img/artikel/big/624Banane.jpg" style="width: 200px; height: 200px; margin-top: 10px; margin-bottom: 10px;" /></span>
-            </p>
-		<p style="text-align: center;">
-			<span style="font-size:15px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            Lufttemperatur: <?php  echo $temperatur," °C"; ?></span></p>
-		<p style="text-align: center;">
-			<span style="font-size:15px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            Bodenfeuchte: <?php  echo $Feuchte," %"; ?></span></p>
-		<p style="text-align: center;">
-			<span style="font-size:15px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            Wasser&uuml;berlauf: 
-            <?php
-                if ($Topfwert >=50) {echo "ja";}
-                else {echo "nein";} ?>
-            </span></p>
-		<p style="text-align: center;">
-			<span style="font-size:9px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            letztes Lebenszeichen: <?php // http://php.net/manual/de/function.date.php
-            $zeit = strtotime($letztes_Lebenszeichen); echo date("d.m.Y H:i:s", $zeit); ?></span></p> 
-		<p style="text-align: center;">
-			<span style="font-size:9px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            letzte W&auml;sserung: <?php  echo $letzte_Giessung; ?></span></p>            
-		<p style="text-align: center;">
-			<span style="font-size:9px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            letzte NachrichtID: <?php  echo $msgid; ?></span></p>                       
-		<p style="text-align: center;">
-			<span style="font-size:9px; font-family:lucida sans unicode,lucida grande,sans-serif;">
-            letzte Nachricht: <?php  //echo $msg; ?></span></p>	
-</div>
            		
 </body>
 
