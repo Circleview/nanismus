@@ -13,7 +13,7 @@
          */
         //http://www.ayom.com/topic-7692.html
         //http://de.php.net/strtotime
-        $auswertzeitraum = 21; // Wie viele Tage wollen wir in die Vergangenheit gucken?
+        $auswertzeitraum = 13; // Wie viele Tage wollen wir in die Vergangenheit gucken?
         $vergleichsdatum = "-".$auswertzeitraum." days";
         $vergleichsdatum = strtotime($vergleichsdatum);
         $datum = date("Y-m-d H:i:s", $vergleichsdatum);
