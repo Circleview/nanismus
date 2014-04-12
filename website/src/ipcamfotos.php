@@ -33,8 +33,10 @@ foreach ($alledateien as $datei)
  
      if($anzahldateien == $anzahldateienmax && $dateiinfo['extension'] == "jpg")
     {
+        // Da ich den Dateinamen des aktuellen Fotos noch einmal brauche speiche ich den mal weg
+        $fotopfad = $ordner."/".$dateiinfo['basename'];
         // in the first loop build a link to the last picture
-        echo '+"<p>Jeden Tag ein neues <b><a href='.$ordner."/".$dateiinfo['basename']." target='_blank'>".'Foto.</b></a></p>"';
+        echo '+"<p>Jeden Tag ein neues <b><a href='. $fotopfad ." target='_blank'>".'Foto.</b></a></p>"';
         echo '+"<div id='; echo "'fotorahmen'>"; echo '"';
         echo '+"<div class='; echo "'galleria'>"; echo '"';
     }

@@ -82,7 +82,7 @@ global $delay;
     
     <!-- Für Testzwecke -->
     <!-- http://iphone4simulator.com/ -->
- 
+
 <!-- PHP für die Bewässerungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
 <?php include ("src/dbabfrage.php");
 ?>
@@ -100,8 +100,7 @@ global $delay;
 }
 </script-->
 
- 
-<!-- Script das den Slider-Effekt und den Text ermöglicht. -->    
+<!-- Script das den Slider-Effekt und den Text ermöglicht. -->
 <script>
 
 $(document).ready(function() {
@@ -280,7 +279,7 @@ $(document).ready(function() {
                 ?>
 
 		'images/camera.png' :    "<h1>Bitte l&auml;cheln!</h1>"
-                        <?php include("src/ipcamfotos.php"); ?>                                                                                                                                                            
+                        <?php include("src/ipcamfotos.php"); ?>
                 
                 <?php
 
@@ -329,38 +328,28 @@ $(document).ready(function() {
         Galleria.run('.galleria');
        
 </script>
+
+<style type="text/css">
+  body
+  {
+      background: url(<?php echo "./". $fotopfad; ?>) no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      font-size: 62.5%;
+  }
+</style>
     
 </head>
 
 <body>
-   
-<div align="center" id="bg">
-    <!-- "Hintergrundfoto hinter der Slider - Animation" -->
-    <!-- http://www.free-solutions.de/js/dokument_bildformat_dynamisch_erzwingen.html -->
-    
-    <script language="javascript" type="text/javascript">      //Die Auflösung des Hintergrundbildes soll von der Anzeigebreite des Bildschirms abhänig sein.
-    if(window.innerWidth <= 340) 
-    {
-      document.write("<img src='images/nanifoto_400.jpg' id='bgimage' />");
-    }
-    else if (window.innerWidth <= 800) 
-    {
-      document.write("<img src='images/nanifoto_800.jpg' id='bgimage' />");
-    }
-    else 
-    {
-      document.write("<img src='images/nanifoto_1500.jpg' id='bgimage' />");  
-    }
 
-    </script>
-</div>
-		
-<!-- http://www.inserthtml.com/2013/08/modal-image-slider/ -->
-<div id="block-slide">
+    <!-- http://www.inserthtml.com/2013/08/modal-image-slider/ -->
+    <div id="block-slide">
 
-</div>
-			
-           		
+    </div>
+
 </body>
 
 </html>

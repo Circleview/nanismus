@@ -1,23 +1,5 @@
-body {
-	font-size: 62.5%;
-	margin: 0;
-	padding: 0;
-}
 /*von mir eingefügt start*/
 
-/*http://www.mediaevent.de/tutorial/farbcodes.html*/
-/* http://www.hexfarben.de/ */
-#bg{
-
-    width: 100%;
-    position: absolute;
-    z-index: -10;
-    top: 0px;
-}
-
-#bgimage{
-    width: 100%;
-}
 
 input [type=submit] {
     -webkit-appearance: none;/* Durch mich eingefügt */
@@ -39,12 +21,12 @@ A:hover {text-decoration: none;}
 /*von mir eingefügt ende*/
 
 #block-slide {
-	height: 100px; /*höhe des block slide breiches*/ /*von mir geändert*/
+	height: 500px; /*höhe des block slide breiches*/ /*von mir geändert*/
 	width: 100%;
 	text-align: center;
 	background: transparent; /*von mir geändert */ /* white */
-	position: relative;
-	overflow: visible;  /*von mir geändert*/ /*hidden*/
+	position: absolute;
+	overflow: hidden;
 }
 
 #block-slide > .img {
