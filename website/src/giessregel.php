@@ -5,43 +5,43 @@
 
 // Festlegung ob, gegossen werden darf:
 /* Es darf gegossen werden, wenn:
- * Es in den letzten 40 Minuten vom Arduino ein Lebenszeichen gab und wir davon ausgehen können, dass die
+ * Es in den letzten 40 Minuten vom Arduino ein Lebenszeichen gab und wir davon ausgehen kÃ¶nnen, dass die
  * Verbindung zum Arduino intakt ist
  * Die letzte in der Datenbank gespeicherte Prozentfeuchte unter 40% liegt
- * Das Arduino keinen Wasserüberlauf gemeldet hat
+ * Das Arduino keinen WasserÃ¼berlauf gemeldet hat
  * Nicht gerade erst (also vor z.B. 3 Stunden) gegossen wurde (manchmal dauert es etwas bis das
  * Wasser bis ganz durchgesickert ist)
- * Wenn der letzte Versuch zu Wässern nicht abgebrochen wurde, weil die Erde doch schon zu feucht war
+ * Wenn der letzte Versuch zu WÃ¤ssern nicht abgebrochen wurde, weil die Erde doch schon zu feucht war
  */
 
  /* Wann darf gegossen werden? 
   * 1. Wenn die Verbindung zwischen Webserver und Arduino besteht ($VerbindungArduino)
   * 2. Wenn der Wassertank voll ist. ($tankleer)
-  * 3. Wenn die letzte Wässerung länger als die Gießpause zurück liegt, und
+  * 3. Wenn die letzte WÃ¤sserung lÃ¤nger als die GieÃŸpause zurÃ¼ck liegt, und
   *     die Pause nicht durch eine Nachricht vom Arduino aufgehoben wurde ($PauseLetzteGiessung)
-  * 4. Wenn der Topf nicht übergelaufen ist.  ($KeinUeberlauf)
-  * 5. Wenn die Feuchtigkeit geringer als 40% beträgt  ($IstTrocken)
+  * 4. Wenn der Topf nicht Ã¼bergelaufen ist.  ($KeinUeberlauf)
+  * 5. Wenn die Feuchtigkeit geringer als 40% betrÃ¤gt  ($IstTrocken)
   */
    
 
- // für die Bewässerungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
+ // fÃ¼r die BewÃ¤sserungsregeln und zum Laden der Seiteninhalte aus der MySQL Datenbank -->
 include ("src/dbabfrage.php");
 
 $table = "plant_log";
 include("src/db.php");
 
-// Hier speichere ich das Ergebnis der Testläufe
-// Darf über die Website gegossen werden?
-$giessenerlaubt = false;   // Grundsätzlich ist das Gießen nicht erlaubt. Es kann
+// Hier speichere ich das Ergebnis der TestlÃ¤ufe
+// Darf Ã¼ber die Website gegossen werden?
+$giessenerlaubt = false;   // GrundsÃ¤tzlich ist das GieÃŸen nicht erlaubt. Es kann
 // ausgehend von den untenstehenden Regel jedoch erlaubt werden.
-$VerbindungArduino = false; // Ich gehe zunächst davon aus, dass die Verbindung besteht
-// Die Prüfungen unten können das dann aber widerlegen
-$PauseLetzteGiessung = false; // Ich gehe davon aus, das die letzte Gießung gerade erst stattgefunden hat, 
+$VerbindungArduino = false; // Ich gehe zunÃ¤chst davon aus, dass die Verbindung besteht
+// Die PrÃ¼fungen unten kÃ¶nnen das dann aber widerlegen
+$PauseLetzteGiessung = false; // Ich gehe davon aus, das die letzte GieÃŸung gerade erst stattgefunden hat, 
 // diese Annahme kann widergelgt werden
-$KeinUeberlauf = false; // Ich gehe davon aus, dass kein Wasser im Übertopf ist 
+$KeinUeberlauf = false; // Ich gehe davon aus, dass kein Wasser im Ãœbertopf ist 
 $IstTrocken = false; // Ich gehe davon aus, dass die Erde nicht trocken ist
 
-// wie spät ist es eigentlich?
+// wie spÃ¤t ist es eigentlich?
 $now = date("Y-m-d H:i:s");
 
 if ($debug){echo "now: $now <br />";}
@@ -67,11 +67,11 @@ if ($debug){echo "now: $now <br />";}
             echo "Die Verbindung zum Arduino besteht noch.<br />";
         }
     
-        $VerbindungArduino = true; // Ja, die Verbindung zum Arduino steht noch. Das werte ich später aus.
+        $VerbindungArduino = true; // Ja, die Verbindung zum Arduino steht noch. Das werte ich spÃ¤ter aus.
     }
     else
     {
-        // Für Logzwecke wird diese Nichterreichbarkeit in die MySQL Datenbank eingetragen
+        // FÃ¼r Logzwecke wird diese Nichterreichbarkeit in die MySQL Datenbank eingetragen
         // http://stackoverflow.com/questions/1995562/now-function-in-php
         $timestamp = date("Y-m-d H:i:s");
         $name = "Banane";
@@ -117,7 +117,7 @@ if ($debug){echo "now: $now <br />";}
         }
     }
 
- /* 3. Wenn die letzte Wässerung länger als die Gießpause zurück liegt, oder
+ /* 3. Wenn die letzte WÃ¤sserung lÃ¤nger als die GieÃŸpause zurÃ¼ck liegt, oder
   *     die Pause durch eine Nachricht vom Arduino aufgehoben wurde*/
     // Teststufe 3
     // Wurde in den letzten Stunden bereits gegossen?
@@ -136,7 +136,7 @@ if ($debug){echo "now: $now <br />";}
         echo "letzte Nachrichten ID der Pflanze: $lastmsgid <br />";
     }
     
-    // Oder war die die letzte Nachricht der Pflanze, dass die Wässerung nicht ausreichte?
+    // Oder war die die letzte Nachricht der Pflanze, dass die WÃ¤sserung nicht ausreichte?
     // Die Nachrichten sind in der MySQL Tabelle gespeichert.
     if ($letzte_Giessung < $pausezeit)
     {
@@ -160,9 +160,9 @@ if ($debug){echo "now: $now <br />";}
     }
 
 
-// 4. Wenn der Topf nicht übergelaufen ist. 
-    // Es muss voher noch geprüft werden, ob schon Wasser im Übertopf ist
-    // Ein messwert größer als 50 wird als relevante Wassermenge interpretiert
+// 4. Wenn der Topf nicht Ã¼bergelaufen ist. 
+    // Es muss voher noch geprÃ¼ft werden, ob schon Wasser im Ãœbertopf ist
+    // Ein messwert grÃ¶ÃŸer als 50 wird als relevante Wassermenge interpretiert
     if ($Topfwert < $ueberlaufwert)
     {
         if ($debug)
@@ -170,10 +170,10 @@ if ($debug){echo "now: $now <br />";}
             echo "Es ist kein Wasser im &Uuml;bertopf. <br />";
         }
         
-        $KeinUeberlauf = true; // Es ist kein Wasser im Übertopf, also kann weiter geprüft werden
+        $KeinUeberlauf = true; // Es ist kein Wasser im Ãœbertopf, also kann weiter geprÃ¼ft werden
     }
         
-// 5. Wenn die Feuchtigkeit geringer als 40% beträgt  
+// 5. Wenn die Feuchtigkeit geringer als 40% betrÃ¤gt  
     // Wie feucht ist die Erde? Ist sie feuchter als 40%?
     //$Feuchte = 39;
     if ($Feuchte < 40)
@@ -186,8 +186,8 @@ if ($debug){echo "now: $now <br />";}
         $IstTrocken = true; 
     }
   
-// Hier findet die eigentlich Prüfung statt, ob wieder gegossen werden darf
-if ($VerbindungArduino && !$tankleer && $PauseLetzteGiessung && $KeinUeberlauf && $IstTrocken)
+// Hier findet die eigentlich PrÃ¼fung statt, ob wieder gegossen werden darf
+if ($VerbindungArduino && $PauseLetzteGiessung && $KeinUeberlauf && $IstTrocken)
 {
     $giessenerlaubt = true; 
 }
