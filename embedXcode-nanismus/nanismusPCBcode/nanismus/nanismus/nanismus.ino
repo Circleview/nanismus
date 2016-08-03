@@ -195,8 +195,6 @@ void PerformMoistureMeasurement(){
 }
 
 
-
-
 /* Measure the moisture of the soil
  * but only if it is already time to do the measurement
  */
@@ -215,8 +213,6 @@ void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
         PerformMoistureMeasurement();
     }
 }
-
-
 
 
 // Decide if we need to switch the Dryness Warning LED on or off based on the interpretation of the moisture sensor analog input
