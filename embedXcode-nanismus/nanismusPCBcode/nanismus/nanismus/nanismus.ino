@@ -10,7 +10,7 @@
 // Date			01.08.16 14:31
 // Version		0.65.0
 //
-// Copyright	Stefan Willuda, 2016
+// Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
 //
 // See         ReadMe.txt for references
@@ -37,11 +37,10 @@
 
 // Include Libraries ###########################################################
 
-
 #include <Arduino.h>
 
-// Calculate or store constants that are uses several times in the codebase
 
+// Calculate or store constants that are uses several times in the codebase
 
 // When we apply voltage to the moisture sensor it takes a short time for the sensor to adjust
 unsigned long SoilMoistureMeasurementWaitDuration = 2000; // milliseconds 1.000 milliseconds = 1 second
@@ -49,19 +48,16 @@ unsigned long SoilMoistureMeasurementWaitDuration = 2000; // milliseconds 1.000 
 
 // Define used variables, constants and calculations
 
-
 // Every how many milliseconds are we going to perform a moisture measurement?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
 // 30 minutes * 60 seconds * 1000 milliseconds
 unsigned long MoistMeasureInterval = 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
-
 
 // store the most recent time when the moisture measurement took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
  * which leads to an immediate measurement of the soil when the board is connected to the power supply
  */
 long lastMoistMeasureTime = -1 * MoistMeasureInterval;
-
 
 /* Store the indicator of the soil moisture
  * When we run the loop for the first time we consider the soil to be 1 = moist;
@@ -70,7 +66,6 @@ int MoistureIndicator = 1;
 
 
 // Setup Start
-
 
 void setup() {
     
@@ -85,7 +80,6 @@ void setup() {
     digitalWrite(SoilDryWarningLED, LOW);
     
 }
-
 
 boolean IsTimeForMoistureMeasurement() {
     
@@ -161,7 +155,6 @@ void PerformMoistureMeasurement(){
     // idicate with an LED that a measurement is currently performed
     digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
     
-    
     // apply voltage to soil moisture sensor
     digitalWrite(SoilMeasureVoltagePin, HIGH);
     
@@ -233,7 +226,6 @@ void DecisionToSwitchSoilDryWaringLED(int Indicator){
             break;
     }
 }
-
 
 void loop() {
     // put your main code here, to run repeatedly:
