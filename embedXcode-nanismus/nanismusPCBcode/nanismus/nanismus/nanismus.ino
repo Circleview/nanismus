@@ -22,16 +22,19 @@
 
 // Declarations for status indicators LEDs
 
-// D6
-#define SoilMeasureVoltagePin 6 // Pin to start the moisture measurement
+// D5
+#define SoilMeasureVoltagePin 5 // Pin to start the moisture measurement
 
 // D7
 #define SoilDryWarningLED 7 // LED that indicated dryness in the soil
 
+// D11
+#define PumpVoltagePin 11 // Pin to start the waterpump to water the soil
+
 // D13
 #define CurrentlyMoistureMeasurementIndicatorLED 13 // LED that indicates that right now a moisture measurement is performed
 
-// A5
+// A4
 #define MoistureMeasurementAnalogInputPin 4
 
 
@@ -43,7 +46,7 @@
 // Calculate or store constants that are uses several times in the codebase
 
 // When we apply voltage to the moisture sensor it takes a short time for the sensor to adjust
-unsigned long SoilMoistureMeasurementWaitDuration = 2000; // milliseconds 1.000 milliseconds = 1 second
+unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 milliseconds = 1 second
 
 
 // Define used variables, constants and calculations
@@ -59,10 +62,19 @@ unsigned long MoistMeasureInterval = 1800000; // 30 * 60 * 1000; // milliseconds
  */
 long lastMoistMeasureTime = -1 * MoistMeasureInterval;
 
-/* Store the indicator of the soil moisture
- * When we run the loop for the first time we consider the soil to be 1 = moist;
+
+// Define the thresholds of different analog input values to decide if they can be considered as dry, moist and so on...
+/* In the Array we store different tresholds
+ * position 0 --> the indicator for "urgently dry" - triggers self watering event
+ * position 1 --> the indicator for "dry" - triggers the red warning lamp that asks for manual watering
+ * position 2 --> the indicator for "moist" - everything is ok
  */
-int MoistureIndicator = 1;
+int MoistureIndicators[] = {0, 1, 2};
+
+/* Store the indicator of the soil moisture
+ * When we run the loop for the first time we consider the soil to be "moist";
+ */
+int MoistureIndicator = MoistureIndicators[2];
 
 
 // Setup Start
@@ -72,11 +84,12 @@ void setup() {
     // Define pins and functions of these pins
     pinMode(SoilDryWarningLED, OUTPUT);  // to switch on or off the LED for dryness indication
     pinMode(SoilMeasureVoltagePin, OUTPUT); // to apply voltage to the moisture sensor
-    pinMode(CurrentlyMoistureMeasurementIndicatorLED, OUTPUT);
+    pinMode(CurrentlyMoistureMeasurementIndicatorLED, OUTPUT); // to switch on or off the LED for measurement indication
+    pinMode(PumpVoltagePin, OUTPUT);
     
     // Blink once to show that we have the new version of the code
     digitalWrite(SoilDryWarningLED, HIGH);
-    delay(200);
+    delay(400);
     digitalWrite(SoilDryWarningLED, LOW);
     
 }
@@ -102,7 +115,9 @@ boolean IsTimeForMoistureMeasurement() {
     }
 }
 
-
+/* Interprete the return percentage value into an LED light indication if the soil is dry
+ *
+ */
 // Interprete the analog input from the moisture sensor
 void InterpreteMoistureMeasurementAnalogInput(int Input) {
     
@@ -111,19 +126,14 @@ void InterpreteMoistureMeasurementAnalogInput(int Input) {
     
     // How to calculate the actual voltage input is well described at https://www.arduino.cc/en/Tutorial/ReadAnalogVoltage
     
-    // Define the thresholds of different analog input values to decide if they can be considered as dry, moist and so on...
-    /* In the Array we store different tresholds
-     * position 0 --> threshold for dry ; 0 is also the indicator for "dry"
-     * position 1 --> currently no threshold needed ; 1 is the indicator for "moist"
-     */
-    int MoistureIndicators[] = {0, 1};
-    
     /* to define the thresholds for the analogInput value of the moisture sensor
      * I've measured the voltage input in a glass of water, which I consider to be wet and it was 0.7 volts input
      * Considering the formular: voltage= sensorValue * (5.0 / 1023.0)
      * I've measured different states of moisture to collect example data
      * If the moisture sensor sticks in a glass of water I can measure with a multimeter 2.6 Volts input
      *		100% moist = 2.6 V = 532 analogInput
+     * If the moisture sensor sticks to really dry soil = 10% wet = 1,0 V
+     *      10% moist = 1,00 V = 205 analogInput
      * If the moisture sensor sticks in soil that is considered 40% wet = 1,66 V
      *		40% moist = 1,66 V = 340 analogInput
      * If the moisture sensor sticks in soil that has been watered right now = 2,16 V
@@ -132,19 +142,28 @@ void InterpreteMoistureMeasurementAnalogInput(int Input) {
      *		90% moist = 2,35 V = 481 analogInput
      * I can assume that 100 analogInput indicates wet soil
      */
-    int ThresholdsForAnalogInputValues[] = {340};
     
-    // Check if the analog input value from the moisture sensor is considered to indicate a dry soil
+    // "urgently dry", "dry"
+    int ThresholdsForAnalogInputValues[] = {260, 340};
+    
+    // Check if the analog input value from the moisture sensor is considered to indicate an "urgently dry" soil
     if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[0]]){
         
-        // retun that the soil is considered "dry"
+        // retun that the soil is considered "urently dry"
         MoistureIndicator = MoistureIndicators[0];
+        
+    }
+    // Check if the analog input value from the moisture sensor is considered to indicate a "dry" soil
+    else if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[1]]){
+        
+        // retun that the soil is considered "dry"
+        MoistureIndicator = MoistureIndicators[1];
         
     }
     else {
         
         // return that the soil is considred "moist"
-        MoistureIndicator = MoistureIndicators[1];
+        MoistureIndicator = MoistureIndicators[2];
     }
 }
 
@@ -169,7 +188,7 @@ void PerformMoistureMeasurement(){
     unsigned long firstMeasureTime = currentMillis;
     
     // Go through a loop until the duration it takes to perform a moisture measurement is over
-    while (currentMillis - firstMeasureTime <= SoilMoistureMeasurementWaitDuration) {
+    while (currentMillis - firstMeasureTime < SoilMoistureMeasurementWaitDuration) {
         
         currentMillis = millis();
     }
@@ -210,16 +229,21 @@ void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
 
 // Decide if we need to switch the Dryness Warning LED on or off based on the interpretation of the moisture sensor analog input
 void DecisionToSwitchSoilDryWaringLED(int Indicator){
+
+    // remember the moisture indicator in this switch statement if "0" some day no longer means "urgently dry"
+    // and "1" does no longer mean "dry"
+    // MoistureIndicators[0];
     
     switch(Indicator){ // What kind of soil moisture indicator did we receive?
             
-        case 0: // the soil is dry
+        case 0: // the soil is urgently dry
+        case 1: // the soil is dry
             
             // switch on the red dryness indication LED
             digitalWrite(SoilDryWarningLED, HIGH);
             break;
             
-        case 1: // the soil is moist
+        default: // in all the cases where the soil is not "dry" or "urgently dry" no warning LED is needed
             
             // switch of the red dryness indication LED
             digitalWrite(SoilDryWarningLED, LOW);
@@ -227,8 +251,59 @@ void DecisionToSwitchSoilDryWaringLED(int Indicator){
     }
 }
 
+
+// Switch on the water pump by switching the transistor
+void StartTheWaterPump(){
+    
+    /* store when the pump action started
+     * check how long the self watering action is currently performed
+     * check if the soil is already "moist" again
+     * stop the watering immediately if the time for the watering is up or the soil is "moist" again to avoid water overflow
+     */
+    
+    unsigned long CurrentMillis = millis(); // recurring check of the current time
+    unsigned long PumpBeginningMillis = CurrentMillis; // this value serves to compare start and end time of the watering action
+    unsigned long PumpDurationMillis = 10000; // water for 10 seconds. This provides 300 ml of water
+    
+    while ((CurrentMillis - PumpBeginningMillis < PumpDurationMillis) && (MoistureIndicator != MoistureIndicators[2])) {
+        
+        // switch on the water pump
+        digitalWrite(PumpVoltagePin, HIGH);
+        
+        // check if the soil is "moist" already;
+        PerformMoistureMeasurement();
+        
+        CurrentMillis = millis();
+    }
+    
+    // stop the water pump
+    digitalWrite(PumpVoltagePin, LOW);
+}
+
+
+// Decide if we need to switch on the water pump to perform a self watering action based on the interpretation of the moisture sensor analog input
+void DecisionToSwitchWaterPump(int Indicator){
+    
+    // remember the moisture indicator in this switch statement if "0" some day no longer means "urgently dry"
+    // MoistureIndicators[0];
+    
+    switch (Indicator) {
+        case 0: // the soil is "urgently dry"
+            
+            // start the self watering action
+            StartTheWaterPump();
+            
+            break;
+            
+        default:
+            // do nothing but ensure that there is no power supply to the transistor
+            digitalWrite(PumpVoltagePin, LOW);
+            
+            break;
+    }
+}
+
 void loop() {
-    // put your main code here, to run repeatedly:
     
     /* Check if it is time to start the measurement of the soil moisture
      * The return of this check is a simple TRUE or FALSE statement
@@ -242,16 +317,17 @@ void loop() {
      * This analog input value is then converted into a percentage value in three ranges which lead to an interpretation
      * of the current moisture status of the soil - let's start with green, yellow, red
      */
-    
     MoistureMeasurement(IsTimeForMoistureMeasurement());
-    
-    /* Interprete the return percentage value into an LED light indication if the soil is dry
-     *
-     */
     
     /* Decide if the red dryness warning indication LED needs to be swiched on or off based on the moisture
      * interpretation
      */
     DecisionToSwitchSoilDryWaringLED(MoistureIndicator);
+    
+    /* Decide if the water pump to water the soil automatically should be switched on
+     * This decision will be based on the last moisture measurement of the moisture sensor
+     * If the soil is "urgently dry" the waterpump will immediately start watering the soil
+     */
+    DecisionToSwitchWaterPump(MoistureIndicator);
     
 }
