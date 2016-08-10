@@ -8,7 +8,7 @@
 // 				Stefan Willuda
 //
 // Date			01.08.16 14:31
-// Version		0.65.0
+// Version		0.66.0
 //
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
@@ -18,6 +18,10 @@
 
 
 // PIN Declaration ############################################################
+
+// Declaration of the Pins for the RedFly WiFi Shield
+
+// D0, D1, D2, D3 // https://github.com/watterott/Arduino-Libs/tree/master/RedFly
 
 
 // Declarations for status indicators LEDs
@@ -40,16 +44,23 @@
 
 // Include Libraries ###########################################################
 
+// Include Arduino library to allow autocomplete syntax in Xcode
 #include <Arduino.h>
 
+// Include libraries to allow WiFi Connection with the RedFly Wifi shield
+// https://github.com/watterott/Arduino-Libs/tree/master/RedFly
+#include <RedFly.h>
+#include <RedFlyClient.h>
+#include <RedFlyServer.h>
+
+
+// Constants and variables ######################################################
 
 // Calculate or store constants that are uses several times in the codebase
 
 // When we apply voltage to the moisture sensor it takes a short time for the sensor to adjust
 unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 milliseconds = 1 second
 
-
-// Define used variables, constants and calculations
 
 // Every how many milliseconds are we going to perform a moisture measurement?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
@@ -63,7 +74,38 @@ unsigned long MoistMeasureInterval = 1800000; // 30 * 60 * 1000; // milliseconds
 long lastMoistMeasureTime = -1 * MoistMeasureInterval;
 
 
+// define the variable that stores the data input that is sent by the soil moisture sensor for reuseage
+int MoistureMeasurementResultAnalogInput;
+
+
 // Define the thresholds of different analog input values to decide if they can be considered as dry, moist and so on...
+/* This array shall be extended later if we want a more granular distinction between dry, moist, toomoist soil
+ * How to calculate the actual voltage input is well described at https://www.arduino.cc/en/Tutorial/ReadAnalogVoltage
+ */
+/* to define the thresholds for the analogInput value of the moisture sensor
+ * I've measured the voltage input in a glass of water, which I consider to be wet and it was 0.7 volts input
+ * Considering the formular: voltage= sensorValue * (5.0 / 1023.0)
+ * I've measured different states of moisture to collect example data
+ * If the moisture sensor sticks to really dry soil = 10% wet = 1,0 V
+ *      0% moist = 1,00 V = 205 analogInput
+ * If the moisture sensor sticks in soil that is considered 40% wet = 1,66 V
+ *		40% moist = 1,66 V = 340 analogInput
+ * If the moisture sensor sticks in soil that has been watered right now = 2,16 V
+ *		80% moist = 2,16 V = 442 analogInput
+ * If the moisture sensor sticks in soil that is still water wet after a watering = 2,35 V
+ *		100% moist = 2,35 V = 481 analogInput
+ * If the moisture sensor sticks in a glass of water I can measure with a multimeter 2.6 Volts input
+ *		water moist = 2.6 V = 532 analogInput
+
+ * Used thresholds
+ * "zero water" : 0% : 205 : Indicator 0 - urgently dry
+ * "urgently dry" : 20% : 260 : Indicator 0 - urgently dry
+ * "moist" : 40% : 340 : Indicator 1 - dry
+ * "very moist" : 80% : 442 : Indicator 2 - moist
+ * "wet" : 100% : 481 : Indicator 2 - moist
+ */
+int ThresholdsForAnalogInputValues[] = {205, 260, 340, 442, 481};
+
 /* In the Array we store different tresholds
  * position 0 --> the indicator for "urgently dry" - triggers self watering event
  * position 1 --> the indicator for "dry" - triggers the red warning lamp that asks for manual watering
@@ -77,9 +119,277 @@ int MoistureIndicators[] = {0, 1, 2};
 int MoistureIndicator = MoistureIndicators[2];
 
 
-// Setup Start
+// Functions #####################################################################
+
+/* By using the RedFly WiFi Shield we have communications conflicts with 
+ * serial communication. That is why we have do shortly disable the RedFly Shield when 
+ * doing a serial print
+ */
+void debugoutln(char *s)
+{
+#if defined(__AVR_ATmega32U4__)
+    Serial.println(s);
+#else
+    RedFly.disable();
+    Serial.println(s);
+    RedFly.enable();
+#endif
+}
+
+
+// Establish a WiFi Connection using the RedFly WiFi Shield ######################
+void EstablishWifiConnectionWithRedFlyShield()
+{
+    
+    // initialize the WiFi module on the shield
+    
+    // Serial log
+    debugoutln("EstablishWiFiConnectionWithRedFlyShield()");
+    
+    uint8_t ret;
+    
+    //init the WiFi module on the shield
+    // ret = RedFly.init(br, pwr) //br=9600|19200|38400|57600|115200|200000|230400, pwr=LOW_POWER|MED_POWER|HIGH_POWER
+    // ret = RedFly.init(pwr) //9600 baud, pwr=LOW_POWER|MED_POWER|HIGH_POWER
+    // ret = RedFly.init() //9600 baud, HIGH_POWER
+    
+    ret = RedFly.init();
+    
+    /* sometimes the connection is not established on the first try, thats why I need to try more than once
+     * but not more than 20 times, because this would make the whole code in the loop stop
+     */
+    
+    int counter, maxcounter;
+    counter = 0;
+    maxcounter = 100;
+    
+    while (ret && counter < maxcounter) {
+        
+        ret = RedFly.init();
+
+        debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
+
+        counter++;
+        
+    }
+    
+    // ret = RedFly.init();
+    
+    if(ret){
+
+        // debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
+        
+    }
+    else {
+        
+        // scan for wireless networks (must be run before join command)
+        RedFly.scan();
+        
+        
+        //join network
+        // ret = join("wlan-ssid", "wlan-passw", INFRASTRUCTURE or IBSS_JOINER or IBSS_CREATOR, chn, authmode) //join infrastructure or ad-hoc network, or create ad-hoc network
+        // ret = join("wlan-ssid", "wlan-passw", IBSS_CREATOR, chn) //create ad-hoc network with password, channel 1-14
+        // ret = join("wlan-ssid", IBSS_CREATOR, chn) //create ad-hoc network, channel 1-14
+        // ret = join("wlan-ssid", "wlan-passw", INFRASTRUCTURE or IBSS_JOINER) //join infrastructure or ad-hoc network with password
+        // ret = join("wlan-ssid", INFRASTRUCTURE or IBSS_JOINER) //join infrastructure or ad-hoc network
+        // ret = join("wlan-ssid", "wlan-passw") //join infrastructure network with password
+        // ret = join("wlan-ssid") //join infrastructure network
+        
+        
+        #define Network "WLAN-Kabel"
+        #define NetworkPW "1604644462468036"
+ 
+        ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
+        
+        /* sometimes the connection is not established on the first try, thats why I need to try more than once
+         * but not more than 20 times, because this would make the whole code in the loop stop
+         */
+
+        counter = 0;
+        
+        while (ret && counter < maxcounter) {
+            
+            ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
+            
+            debugoutln("RedFly.join ERROR");
+            
+            counter++;
+            
+        }
+        
+        if(ret){
+            
+            //debugoutln("RedFly.join ERROR");
+        }
+        else {
+           
+            byte ip[]        = { 192, 168, 178, 34 }; //ip from shield (client)
+            byte netmask[]   = { 255, 255, 255,  0 }; //netmask
+            byte gateway[]   = { 192, 168, 178,  1 }; //ip from gateway/router
+            byte dnsserver[] = { 192, 168, 178,  1 }; //ip from dns server
+            byte server[]    = {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+            
+            #define HOSTNAME "192.168.178.24"  //host
+            
+            //set ip config
+            // ret = RedFly.begin(); //DHCP
+            // ret = RedFly.begin(1 or 2); //1=DHCP or 2=Auto-IP
+            // ret = RedFly.begin(ip);
+            // ret = RedFly.begin(ip, dnsserver);
+            // ret = RedFly.begin(ip, dnsserver, gateway);
+            // ret = RedFly.begin(ip, dnsserver, gateway, netmask);
+            
+            ret = RedFly.begin();
+
+            /* sometimes the connection is not established on the first try, thats why I need to try more than once
+             * but not more than 20 times, because this would make the whole code in the loop stop
+             */
+            
+            counter = 0;
+            
+            while (ret && counter < maxcounter) {
+                
+                ret = RedFly.begin();
+                
+                debugoutln("RedFly.begin ERROR");
+                
+                counter++;
+                
+            }
+            
+            if(ret){
+                
+                // The connection was not established this time, so disconnect
+                RedFly.disconnect();
+                
+            }
+            else {
+                
+                RedFly.getlocalip(ip);       // receive shield IP in case of DHCP/Auto-IP
+                
+                // server.begin();
+                debugoutln("WiFi Shield connected");
+                
+            }
+        }
+    }
+}
+
+
+// Send out the measured data to a website #######################################
+
+/* Sends different values to a http webserver on which a PHP script waits for the data
+ * to store them in a MySQL database
+
+ * Based on Watterott sample
+ * Web Client
+ * This sketch connects to a website using a RedFly-Shield.
+
+ * Inspired by
+ * http://jleopold.de/wp-content/uploads/2011/03/ArduinoDatenLogger.txt
+ */
+void HttpDataTransmition(int value){
+    
+    debugoutln("HttpDataTransmition");
+    
+    // server on which the php script runs, that interprets the moisture value
+    byte domainserver[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+    
+    RedFlyClient phpclient(domainserver, 80);
+    
+    if(phpclient.connect(domainserver, 80))
+    {
+        //make a HTTP request
+        //http://www.watterott.net/forum/topic/282
+        
+        debugoutln("Http Send");
+        
+        // we fill in different datatable values
+        
+        // one is the name of the sensor (plant)
+        const char * sensor_string;
+        sensor_string = "Banane";
+        
+        // one is the kind of value we are transmitting
+        const char * type_string;
+        type_string = "Prozentfeuchte";
+        
+        
+        //String GetRequest;
+        // http://miscsolutions.wordpress.com/2011/10/16/five-things-i-never-use-in-arduino-projects/
+        
+        char * GetRequest;
+        const char * get1;
+        
+        get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
+        
+        // Host IP der Website
+        #define HOSTNAME "192.168.178.24"
+        
+        const char * get2 = "?name=";
+        const char * get3 = "&type=";
+        const char * get4 = "&value=";
+        const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";
+        const char * get6 = " HTTP/1.1\r\nHost: ";
+        const char * get7 = "\r\n\r\n";
+        
+        char * value_char;
+        value_char = (char*) calloc(5, sizeof(char));
+        itoa(value, value_char, 10);
+        
+        // allocate memory for the message
+        GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
+                                    + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
+        
+        // assemble the GetRequest
+        strcat(GetRequest, get1);
+        strcat(GetRequest, get2);
+        strcat(GetRequest, sensor_string);
+        strcat(GetRequest, get3);
+        strcat(GetRequest, type_string);
+        strcat(GetRequest, get4);
+        strcat(GetRequest, value_char);
+        strcat(GetRequest, get5);
+        strcat(GetRequest, get6);
+        strcat(GetRequest, HOSTNAME);
+        strcat(GetRequest, get7);
+        
+        phpclient.print(GetRequest);
+    
+        // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=6&key=123
+        
+        free(GetRequest);                       // free the allocated string memory
+        free(value_char);
+
+        phpclient.flush();
+        phpclient.stop();
+        
+        // Serial Log info
+        debugoutln("Transmission success");
+        
+    }
+    else {
+        
+        // Serial Log info
+        debugoutln("PHP Server unavailable");
+        
+        // try to re-establish the wifi connection
+        EstablishWifiConnectionWithRedFlyShield();
+        
+    }
+    
+}
+
+
+// Setup Start ###################################################################
 
 void setup() {
+    
+    // Inialize the Serial Communication and set the data rate for the hardware serial port
+    Serial.begin(9600);
+    
+    // Statuslog
+    debugoutln("void setup()");
     
     // Define pins and functions of these pins
     pinMode(SoilDryWarningLED, OUTPUT);  // to switch on or off the LED for dryness indication
@@ -92,12 +402,15 @@ void setup() {
     delay(400);
     digitalWrite(SoilDryWarningLED, LOW);
     
+    // initially connect to the WiFi network using the RedFly WiFi Shield
+    EstablishWifiConnectionWithRedFlyShield();
+    
 }
 
+/* Check if it is time to perform a new moisture measurement
+ * We don't want to measure the moisture every loop of the processor
+ */
 boolean IsTimeForMoistureMeasurement() {
-    
-    // Check if it is time to perform a new moisture measurement
-    // We don't want to measure the moisture every loop of the processor
     
     // TRUE = Yes, we need to perform a moisture measurement
     // FALSE = No, currently no new moisture measurement needed, the last moisture measurement was performed not long ago
@@ -122,39 +435,16 @@ boolean IsTimeForMoistureMeasurement() {
 void InterpreteMoistureMeasurementAnalogInput(int Input) {
     
     // Define wether a analog input value is considered dry or moist
-    // This array shall be extended later if we want a more granular distinction between dry, moist, toomoist soil
-    
-    // How to calculate the actual voltage input is well described at https://www.arduino.cc/en/Tutorial/ReadAnalogVoltage
-    
-    /* to define the thresholds for the analogInput value of the moisture sensor
-     * I've measured the voltage input in a glass of water, which I consider to be wet and it was 0.7 volts input
-     * Considering the formular: voltage= sensorValue * (5.0 / 1023.0)
-     * I've measured different states of moisture to collect example data
-     * If the moisture sensor sticks in a glass of water I can measure with a multimeter 2.6 Volts input
-     *		100% moist = 2.6 V = 532 analogInput
-     * If the moisture sensor sticks to really dry soil = 10% wet = 1,0 V
-     *      10% moist = 1,00 V = 205 analogInput
-     * If the moisture sensor sticks in soil that is considered 40% wet = 1,66 V
-     *		40% moist = 1,66 V = 340 analogInput
-     * If the moisture sensor sticks in soil that has been watered right now = 2,16 V
-     *		80% moist = 2,16 V = 442 analogInput
-     * If the moisture sensor sticks in soil that is still water wet after a watering = 2,35 V
-     *		90% moist = 2,35 V = 481 analogInput
-     * I can assume that 100 analogInput indicates wet soil
-     */
-    
-    // "urgently dry", "dry"
-    int ThresholdsForAnalogInputValues[] = {260, 340};
     
     // Check if the analog input value from the moisture sensor is considered to indicate an "urgently dry" soil
-    if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[0]]){
+    if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[1]]){
         
         // retun that the soil is considered "urently dry"
         MoistureIndicator = MoistureIndicators[0];
         
     }
     // Check if the analog input value from the moisture sensor is considered to indicate a "dry" soil
-    else if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[1]]){
+    else if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[2]]){
         
         // retun that the soil is considered "dry"
         MoistureIndicator = MoistureIndicators[1];
@@ -165,6 +455,58 @@ void InterpreteMoistureMeasurementAnalogInput(int Input) {
         // return that the soil is considred "moist"
         MoistureIndicator = MoistureIndicators[2];
     }
+}
+
+/* Calculate the percentage value of current moisture based on the last measured moisture analog Input
+ * This percentage value of the current moisture will be shown to the user on a website or in an app and so on... 
+ */
+long PercentMoistureValue(int AnalogInputValue)
+{
+    
+    /*
+     * Used thresholds
+     * "zero water" : 0% : 205 : Indicator 0 - urgently dry
+     * "urgently dry" : 20% : 260 : Indicator 0 - urgently dry
+     * "moist" : 40% : 340 : Indicator 1 - dry
+     * "very moist" : 80% : 442 : Indicator 2 - moist
+     * "wet" : 90% : 481 : Indicator 2 - moist
+     */
+    // int ThresholdsForAnalogInputValues[] = {205, 260, 340, 442, 481};
+    
+    
+    int zero = ThresholdsForAnalogInputValues[0];
+    int twenty = ThresholdsForAnalogInputValues[1];
+    int fourty = ThresholdsForAnalogInputValues[2];
+    int eighty = ThresholdsForAnalogInputValues[3];
+    int hundred = ThresholdsForAnalogInputValues[4];
+    
+    long PercentageValue;
+    
+    /* If we ever receive an anlogInput value that is larger than 100% == 481 or smaller than 
+     * 0% == 205 than we limit the range of the value we calculate with with the 0% and 100% values
+     * which have been defined in the thresholds for the analog input values
+     */
+    AnalogInputValue = constrain(AnalogInputValue, zero, hundred);
+    
+    // percentage mapping between 0 and 20%
+    // https://www.arduino.cc/en/Reference/Map
+    if (AnalogInputValue <= twenty){
+        PercentageValue = map(AnalogInputValue, zero, twenty, 0, 20);
+    }
+    // percentage mapping between 20 and 40%
+    else if ((AnalogInputValue > twenty) && (AnalogInputValue <= fourty)){
+        PercentageValue = map(AnalogInputValue, twenty + 1, fourty, 21, 40);
+    }
+    // percentage mapping between 40 and 80%
+    else if ((AnalogInputValue > fourty) && (AnalogInputValue <= eighty)){
+        PercentageValue = map(AnalogInputValue, fourty + 1 , eighty, 41, 80);
+    }
+    // percentage mapping between 80 and 100%
+    else if (AnalogInputValue > eighty){
+        PercentageValue = map(AnalogInputValue, eighty + 1, hundred, 81, 100);
+    }
+    
+    return(PercentageValue);
 }
 
 
@@ -194,7 +536,7 @@ void PerformMoistureMeasurement(){
     }
     
     // collect the data input that is sent by the soil moisture sensor and store it for reuseage
-    int MoistureMeasurementResultAnalogInput = analogRead(MoistureMeasurementAnalogInputPin);
+    MoistureMeasurementResultAnalogInput = analogRead(MoistureMeasurementAnalogInputPin);
     
     // switch of the voltage of the moisture sensor
     digitalWrite(SoilMeasureVoltagePin, LOW);
@@ -204,6 +546,7 @@ void PerformMoistureMeasurement(){
     
     // Interprete the analog input value from the sensor
     InterpreteMoistureMeasurementAnalogInput(MoistureMeasurementResultAnalogInput);
+    
 }
 
 
@@ -303,6 +646,20 @@ void DecisionToSwitchWaterPump(int Indicator){
     }
 }
 
+
+void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
+    
+    if (IsTimeToSendData){
+        
+        debugoutln("SendMoisturePercentageValueToDatabase");
+        
+        // Transform the current analogInput value for the moisture of the soil into a percentage value
+        HttpDataTransmition(PercentMoistureValue(MoistAnalogValue));
+        
+    }
+}
+
+
 void loop() {
     
     /* Check if it is time to start the measurement of the soil moisture
@@ -310,6 +667,7 @@ void loop() {
      * We use this statement to pass it on to following functions to decide e.g. if a moisture
      * needs to take place
      */
+    boolean MeasureAndDataTransimitionTime = IsTimeForMoistureMeasurement();
     
     /* Start the moisture measurement
      * Cosider the TRUE or FALSE statement from the time check before
@@ -317,7 +675,7 @@ void loop() {
      * This analog input value is then converted into a percentage value in three ranges which lead to an interpretation
      * of the current moisture status of the soil - let's start with green, yellow, red
      */
-    MoistureMeasurement(IsTimeForMoistureMeasurement());
+    MoistureMeasurement(MeasureAndDataTransimitionTime);
     
     /* Decide if the red dryness warning indication LED needs to be swiched on or off based on the moisture
      * interpretation
@@ -329,5 +687,16 @@ void loop() {
      * If the soil is "urgently dry" the waterpump will immediately start watering the soil
      */
     DecisionToSwitchWaterPump(MoistureIndicator);
+    
+    /* Send the moisture data to a central database 
+     * from there the moisture value can be displayed in an app or on a website
+     * we only store the current percentage value for the moisture in that database
+     */
+    SendMoisturePercentageValueToDatabase(MeasureAndDataTransimitionTime, MoistureMeasurementResultAnalogInput);
+    
+    /* After one cycle of the loop has taken place reset the value of the MeasureAndDataTransimitionTime 
+     * to avoid unnecessary measures or data transmitions
+     */
+    MeasureAndDataTransimitionTime = false;
     
 }
