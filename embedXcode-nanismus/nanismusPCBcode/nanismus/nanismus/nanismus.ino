@@ -121,6 +121,17 @@ int MoistureIndicator = MoistureIndicators[2];
 
 // Functions #####################################################################
 
+//debug output functions (9600 Baud, 8N2)
+//Leonardo boards use USB for communication, so we dont need to disable the RedFly
+void debugout(char *s)
+{
+
+    RedFly.disable();
+    Serial.print(s);
+    RedFly.enable();
+    
+}
+
 /* By using the RedFly WiFi Shield we have communications conflicts with 
  * serial communication. That is why we have do shortly disable the RedFly Shield when 
  * doing a serial print
@@ -223,13 +234,14 @@ void EstablishWifiConnectionWithRedFlyShield()
         }
         else {
            
+            /*
             byte ip[]        = { 192, 168, 178, 34 }; //ip from shield (client)
             byte netmask[]   = { 255, 255, 255,  0 }; //netmask
             byte gateway[]   = { 192, 168, 178,  1 }; //ip from gateway/router
             byte dnsserver[] = { 192, 168, 178,  1 }; //ip from dns server
             byte server[]    = {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
             
-            #define HOSTNAME "192.168.178.24"  //host
+             */
             
             //set ip config
             // ret = RedFly.begin(); //DHCP
@@ -260,12 +272,12 @@ void EstablishWifiConnectionWithRedFlyShield()
             if(ret){
                 
                 // The connection was not established this time, so disconnect
-                RedFly.disconnect();
+                // RedFly.disconnect();
                 
             }
             else {
                 
-                RedFly.getlocalip(ip);       // receive shield IP in case of DHCP/Auto-IP
+                //RedFly.getlocalip(ip);       // receive shield IP in case of DHCP/Auto-IP
                 
                 // server.begin();
                 debugoutln("WiFi Shield connected");
@@ -293,22 +305,25 @@ void HttpDataTransmition(int value){
     debugoutln("HttpDataTransmition");
     
     // server on which the php script runs, that interprets the moisture value
-    byte domainserver[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+    byte server[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
     
-    RedFlyClient phpclient(domainserver, 80);
+    RedFlyClient client(server, 80);
     
-    if(phpclient.connect(domainserver, 80))
+    if(client.connect(server, 80))
     {
         //make a HTTP request
         //http://www.watterott.net/forum/topic/282
         
         debugoutln("Http Send");
         
+        // Host IP der Website
+        #define HOSTNAME "192.168.178.24"
+        
         // we fill in different datatable values
         
         // one is the name of the sensor (plant)
         const char * sensor_string;
-        sensor_string = "Banane";
+        sensor_string = "Test";
         
         // one is the kind of value we are transmitting
         const char * type_string;
@@ -322,9 +337,6 @@ void HttpDataTransmition(int value){
         const char * get1;
         
         get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
-        
-        // Host IP der Website
-        #define HOSTNAME "192.168.178.24"
         
         const char * get2 = "?name=";
         const char * get3 = "&type=";
@@ -354,15 +366,21 @@ void HttpDataTransmition(int value){
         strcat(GetRequest, HOSTNAME);
         strcat(GetRequest, get7);
         
-        phpclient.print(GetRequest);
+        client.print(GetRequest);
     
         // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=6&key=123
         
         free(GetRequest);                       // free the allocated string memory
         free(value_char);
-
-        phpclient.flush();
-        phpclient.stop();
+        
+        
+        /* To be sure that the data transmission was successful catch the server response and evaluate the result
+         * do it like here 
+         * /Users/stefanwilluda/github/nanismus/embedXcode-nanismus/nanismusPCBcode/nanismus/nanismus/Sketchbook/Libraries/RedFly/examples/WebClient/WebClient.ino
+         */
+        
+        client.flush();
+        client.stop();
         
         // Serial Log info
         debugoutln("Transmission success");
@@ -407,6 +425,7 @@ void setup() {
     
 }
 
+// Setup End #####################################################################
 /* Check if it is time to perform a new moisture measurement
  * We don't want to measure the moisture every loop of the processor
  */
@@ -646,7 +665,7 @@ void DecisionToSwitchWaterPump(int Indicator){
     }
 }
 
-
+// Transform the current moisture value into a percentage value and send it to a database using http://
 void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
     
     if (IsTimeToSendData){

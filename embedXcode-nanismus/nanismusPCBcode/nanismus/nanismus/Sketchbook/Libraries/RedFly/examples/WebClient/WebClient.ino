@@ -15,7 +15,7 @@ byte gateway[]   = { 192,168,  0,100 }; //ip from gateway/router
 byte dnsserver[] = { 192,168,  0,100 }; //ip from dns server
 byte server[]    = {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
 
-#define HOSTNAME "www.watterott.net"  //host
+#define HOSTNAME "nanismus.no-ip.org" //"www.watterott.net"  //host
 
 //initialize the client library with the ip and port of the server 
 //that you want to connect to (port 80 is default for HTTP)
@@ -78,7 +78,11 @@ void setup()
     // ret = join("wlan-ssid", INFRASTRUCTURE or IBSS_JOINER) //join infrastructure or ad-hoc network
     // ret = join("wlan-ssid", "wlan-passw") //join infrastructure network with password
     // ret = join("wlan-ssid") //join infrastructure network
-    ret = RedFly.join("wlan-ssid", "wlan-passw", INFRASTRUCTURE);
+        
+        #define Network "WLAN-Kabel"
+        #define NetworkPW "1604644462468036"
+ 
+        ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
     if(ret)
     {
       debugoutln("JOIN ERR");
@@ -93,7 +97,8 @@ void setup()
       // ret = RedFly.begin(ip, dnsserver);
       // ret = RedFly.begin(ip, dnsserver, gateway);
       // ret = RedFly.begin(ip, dnsserver, gateway, netmask);
-      ret = RedFly.begin(ip, dnsserver, gateway, netmask);
+      //ret = RedFly.begin(ip, dnsserver, gateway, netmask);
+      ret = RedFly.begin(); 
       if(ret)
       {
         debugoutln("BEGIN ERR");
