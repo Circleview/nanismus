@@ -13,11 +13,14 @@
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
 //
-// See         ReadMe.txt for references
-//
+// See         ReadMe.txt for
 
+/* current result of arduino IDE compiling
+ Der Sketch verwendet 13.948 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
+ Globale Variablen verwenden 673 Bytes (32%) des dynamischen Speichers, 1.375 Bytes für lokale Variablen verbleiben. Das Maximum sind 2.048 Bytes.
+ */
 
-// PIN Declaration ############################################################
+// PIN Declaration ################################################################################################################
 
 // Declaration of the Pins for the RedFly WiFi Shield
 
@@ -42,7 +45,7 @@
 #define MoistureMeasurementAnalogInputPin 4
 
 
-// Include Libraries ###########################################################
+// Include Libraries ###############################################################################################################
 
 // Include Arduino library to allow autocomplete syntax in Xcode
 #include <Arduino.h>
@@ -54,7 +57,8 @@
 #include <RedFlyServer.h>
 
 
-// Constants and variables ######################################################
+// Constants and variables ##########################################################################################################
+
 
 // Calculate or store constants that are uses several times in the codebase
 
@@ -119,7 +123,8 @@ int MoistureIndicators[] = {0, 1, 2};
 int MoistureIndicator = MoistureIndicators[2];
 
 
-// Functions #####################################################################
+// Debug Functions ####################################################################################################################
+
 
 //debug output functions (9600 Baud, 8N2)
 //Leonardo boards use USB for communication, so we dont need to disable the RedFly
@@ -148,14 +153,16 @@ void debugoutln(char *s)
 }
 
 
-// Establish a WiFi Connection using the RedFly WiFi Shield ######################
+// Establish a WiFi Connection using the RedFly WiFi Shield ##########################################################################
+
+
 void EstablishWifiConnectionWithRedFlyShield()
 {
     
     // initialize the WiFi module on the shield
     
     // Serial log
-    debugoutln("EstablishWiFiConnectionWithRedFlyShield()");
+    // debugoutln("EstablishWiFiConnectionWithRedFlyShield()");
     
     uint8_t ret;
     
@@ -167,12 +174,12 @@ void EstablishWifiConnectionWithRedFlyShield()
     ret = RedFly.init();
     
     /* sometimes the connection is not established on the first try, thats why I need to try more than once
-     * but not more than 20 times, because this would make the whole code in the loop stop
+     * but not more than maxcounter times, because this would make the whole code in the loop stop
      */
     
     int counter, maxcounter;
     counter = 0;
-    maxcounter = 100;
+    maxcounter = 50;
     
     while (ret && counter < maxcounter) {
         
@@ -183,8 +190,6 @@ void EstablishWifiConnectionWithRedFlyShield()
         counter++;
         
     }
-    
-    // ret = RedFly.init();
     
     if(ret){
 
@@ -213,9 +218,10 @@ void EstablishWifiConnectionWithRedFlyShield()
         ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
         
         /* sometimes the connection is not established on the first try, thats why I need to try more than once
-         * but not more than 20 times, because this would make the whole code in the loop stop
+         * but not more than maxcounter times, because this would make the whole code in the loop stop
          */
-
+        
+        // reset the counter
         counter = 0;
         
         while (ret && counter < maxcounter) {
@@ -231,6 +237,7 @@ void EstablishWifiConnectionWithRedFlyShield()
         if(ret){
             
             //debugoutln("RedFly.join ERROR");
+            
         }
         else {
            
@@ -288,244 +295,344 @@ void EstablishWifiConnectionWithRedFlyShield()
 }
 
 
-// Send out the measured data to a website #######################################
+// Send out the measured data to a website ###########################################################################################
+
 
 /* Sends different values to a http webserver on which a PHP script waits for the data
  * to store them in a MySQL database
-
+ 
  * Based on Watterott sample
  * Web Client
  * This sketch connects to a website using a RedFly-Shield.
-
+ 
  * Inspired by
  * http://jleopold.de/wp-content/uploads/2011/03/ArduinoDatenLogger.txt
  */
-void HttpDataTransmition(int value){
+
+
+// Check if we receive a HTTP response for our POST request and interprete this response
+// return true if the data transmission was successful, else return false
+boolean SuccessOfHttpPostRequest(RedFlyClient client){
     
-    debugoutln("HttpDataTransmition");
+    // interprete the result of the http response to store the return value of this function
+    boolean tempReturnValue;
     
-    byte server[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
     
-    RedFlyClient client(server, 80);
+    /* To be sure that the data transmission was successful catch the server response and evaluate the result
+     * oriented on the RedFly Example WebClient.ino
+     * I did not want to use the loop() to evaluate the server response
+     * That is why I chose to use a while() with a timeout
+     * If there is no response within the timeout, I have to asume that the server is not available
+     */
     
+    // Timekeeper to check if the Timeout is reached
+    unsigned long currentMillis = millis();
+    unsigned long startTime = currentMillis;
+    
+    // give it a TimeoutTime milliseconds to receive an answer from the webserver
+    unsigned long TimeoutTime = 120000; // milliseconds
+    
+    /* The Webserver is going to answer with a simple HTTP response
+     * We are going to fetch the answer in a buffer
+     * and then we are going to check the server HTTP response if we get a "success" response or something else
+     */
+    
+    // declarations to process the answer of the webserver
+    char data[300];  //receive buffer, usually the answer is not larger than 250 chars
+    unsigned int len=0; //receive buffer length
+    
+    /* We are going to seach in the HTTP response for a phase that indicates transmission success
+     * Therefore we are looking for a pointer, which indicates the position in the array that holds
+     * the match
+     */
+    // Size of the Pointer, is greater that 0 in every case we receive data from the webserver
+    int PointerSize = 0;
+    
+    // indicator that the webserver is transmitting a response
+    int c;
+    
+    // Serial log info
+    debugoutln("start waiting");
+    
+    
+    /* Start the while()
+     * As long as we don't get an response or the TimeoutTime is not exeeded, we keep waiting for a response
+     * PointerSize is larger than 0 whenever we receive a HTTP response
+     * Even if we receive a HTTP response that does not indicate transmission success, we stop the while()
+     * because we only want to interprete the answer. It is not necessary to waste time
+     */
+    while ((currentMillis - startTime <= TimeoutTime) && (PointerSize == 0)) {
+        
+        
+        /*if there are incoming bytes available
+         * from the server then read them
+         */
+        if(client.available()) {
+            do
+            {
+                c = client.read();
+                if((c != -1) && (len < (sizeof(data)-1)))
+                {
+                    // collect the whole HTTP response in the data array
+                    data[len++] = c;
+                }
+            }while(c != -1);
+        }
+        
+        //if the server's disconnected, stop the client and evaluate the received data
+        if(len && !client.connected()) {
+            
+            client.stop();
+            RedFly.disconnect();
+            
+            data[len] = 0;
+            // Serial log info
+            // debugout(data);
+            
+            
+            /* Now that we received the HTTP response it is time to interprete the received data
+             * The webserver we address is responding wether a "success", a "failure" or something else
+             * We need to search in the HTTP response for that "success" or "failure" statement
+             * It is not enough to receive a "200 OK" response, because this does only indicate, if we
+             * have been able to connect to the webserver. Even if we receive a "failure" response
+             * this will come with a "200 OK" response. That's why we have to dive a little bit deeper
+             * and analyse the resonse message
+             *
+             * The idea is to find a specific substrting in a string with char datatype
+             * this is described here http://forum.arduino.cc/index.php?topic=394718.0
+             *
+             * With that in mind we can search for any sub char array within the HTTP response array.
+             */
+            
+            /* Answer, we need to receive in order to know that the submission was successful
+             * This string is determinded in the "valueget.php" file on the webserver.
+             */
+            char successStringWebserver[] = "transmission success";
+            
+            // Pointer that locates the position of the searched substring (char array) within a larger char array
+            char * Pointer;
+            
+            // function to find the pointer - is empty if there is no match
+            Pointer = strstr(data, successStringWebserver);
+            
+            // To get out of the while() I have to check if we received a valid response from the webserver
+            PointerSize = sizeof(Pointer);
+            
+            // We locate the position of the substring within the larger
+            int PointerPosition;
+            // subtract the starting pointer of Haystack from the pointer returned by strstr()
+            PointerPosition = (&Pointer[0] - &data[0]);
+            
+            // The PointerPosition in the array is always positive if we find the substring in the larger dara array
+            if (PointerPosition >= 0) {
+                
+                // transmission success
+                // Serial Log info
+                // debugoutln(successStringWebserver);
+                
+                // store the result to use it when the function is done
+                tempReturnValue = true;
+                
+            }
+            else if (PointerPosition < 0) {
+                
+                // Serial Log info
+                // debugoutln("transmission failed");
+                
+                /* This means that we have been able to connect to the web server and POST our request
+                 * but the response was not a success message.
+                 * The reason for that might be, that the key to perform the database insert was wrong
+                 * or that the script in valueget.php does not support the request URL
+                 */
+                
+                // store the result to use it when the function is done
+                tempReturnValue = false;
+                
+            }
+            else {
+                
+                // Serial log info
+                // debugoutln("something is wrong here");
+                
+                /* Actually this else event should not occur, because we only get here if we receive a
+                 * response. But I don't want to let special events to be unhandled.
+                 */
+                
+                // store the result to use it when the function is done
+                tempReturnValue = false;
+                
+            }
+            
+            len = 0;
+        }
+        
+        currentMillis = millis();
+    }
+    
+    // serial log info
+    debugoutln("stopped waiting");
+    
+    // flush the client connection
+    // https://www.arduino.cc/en/Reference/WiFiClientFlush
+    client.flush();
+    
+    return (tempReturnValue);
+}
+
+
+/* This function puts together all the different parts of the POST request
+ * that is sent to the webserver
+ */
+char * assembleThePostRequest(int value) {
+    
+    
+    // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
+#define HOSTNAME "192.168.178.24"
+    
+    // we fill in different datatable values
+    
+    // one is the name of the sensor (plant)
+    const char * sensor_string;
+    sensor_string = "Test";
+    
+    // one is the kind of value we are transmitting
+    const char * type_string;
+    type_string = "Prozentfeuchte";
+    
+    
+    //String GetRequest;
+    // http://miscsolutions.wordpress.com/2011/10/16/five-things-i-never-use-in-arduino-projects/
+    
+    char * GetRequest;
+    const char * get1;
+    
+    // Define the different values of the POST request
+    
+    //get1 = "GET /valueget.php";
+    // Change from GET to POST, I've read something about security issues with GET
+    get1 = "POST /valueget.php";
+    
+    const char * get2 = "?name=";
+    const char * get3 = "&type=";
+    const char * get4 = "&value=";
+    const char * get5 = "&key=c3781633f1fb1ddca77c9038d499434";//c3781633f1fb1ddca77c9038d4994345
+    const char * get6 = " HTTP/1.1\r\nHost: ";
+    const char * get7 = "\r\n\r\n";
+    
+    // transform the sensor value into a char to fit it in the POST request
+    char * value_char;
+    value_char = (char*) calloc(5, sizeof(char));
+    itoa(value, value_char, 10);
+    
+    // allocate memory for the POST request
+    GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
+                                + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
+    
+    // assemble the POST Request
+    strcat(GetRequest, get1);
+    strcat(GetRequest, get2);
+    strcat(GetRequest, sensor_string);
+    strcat(GetRequest, get3);
+    strcat(GetRequest, type_string);
+    strcat(GetRequest, get4);
+    strcat(GetRequest, value_char);
+    strcat(GetRequest, get5);
+    strcat(GetRequest, get6);
+    strcat(GetRequest, HOSTNAME);
+    strcat(GetRequest, get7);
+    
+    return (GetRequest);
+    
+    // free the allocated string memory
+    // free(GetRequest);
+    // free(value_char);
+    
+}
+
+// Here we do the  Http POST request and check if the transmission was successful
+boolean HttpPostRequest(int value, RedFlyClient client, byte server[]){
+    
+    // debugoutln("HttpPostRequest");
+    
+    char * PostRequest = assembleThePostRequest(value);
+    
+    // we want to know if the transmission was successful
+    boolean tempReturnValue;
+    
+    // connect the client to the web server and transmit the post request
     if(client.connect(server, 80))
     {
         //make a HTTP request
         //http://www.watterott.net/forum/topic/282
         
-        debugoutln("Http Send");
-        
-        // Host IP der Website
-        #define HOSTNAME "192.168.178.24"
-        
-        // we fill in different datatable values
-        
-        // one is the name of the sensor (plant)
-        const char * sensor_string;
-        sensor_string = "Test";
-        
-        // one is the kind of value we are transmitting
-        const char * type_string;
-        type_string = "Prozentfeuchte";
-        
-        
-        //String GetRequest;
-        // http://miscsolutions.wordpress.com/2011/10/16/five-things-i-never-use-in-arduino-projects/
-        
-        char * GetRequest;
-        const char * get1;
-        
-        //get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
-        get1 = "POST /valueget.php"; // Zugang zur Live-Datenbank
-        
-        const char * get2 = "?name=";
-        const char * get3 = "&type=";
-        const char * get4 = "&value=";
-        const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
-        const char * get6 = " HTTP/1.1\r\nHost: ";
-        const char * get7 = "\r\n\r\n";
-        
-        char * value_char;
-        value_char = (char*) calloc(5, sizeof(char));
-        itoa(value, value_char, 10);
-        
-        // allocate memory for the message
-        GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
-                                    + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
-        
-        // assemble the GetRequest
-        strcat(GetRequest, get1);
-        strcat(GetRequest, get2);
-        strcat(GetRequest, sensor_string);
-        strcat(GetRequest, get3);
-        strcat(GetRequest, type_string);
-        strcat(GetRequest, get4);
-        strcat(GetRequest, value_char);
-        strcat(GetRequest, get5);
-        strcat(GetRequest, get6);
-        strcat(GetRequest, HOSTNAME);
-        strcat(GetRequest, get7);
-        
-        client.print(GetRequest);
-    
-        // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=6&key=123
-        
-        // free the allocated string memory
-        free(GetRequest);
-        free(value_char);
-        
-        
-        
-        /* To be sure that the data transmission was successful catch the server response and evaluate the result
-         * oriented on the RedFly Example WebClient.ino
-         * I did not want to use the loop() to evaluate the server response 
-         * That is why I chose to use a while() with a timeout
-         * If there is no response within the timeout, I have to asume that the server is not available
-         */
-        
-        // Timekeeper to check if the Timeout is reached
-        unsigned long currentMillis = millis();
-        unsigned long startTime = currentMillis;
-        
-        // give it a TimeoutTime milliseconds to receive an answer from the webserver
-        unsigned long TimeoutTime = 120000; // milliseconds
-        
-        /* The Webserver is going to answer with a simple HTTP response 
-         * We are going to fetch the answer in a buffer 
-         * and then we are going to check the server HTTP response if we get a "success" response or something else
-         */
-        
-        // declarations to process the answer of the webserver
-        char data[300];  //receive buffer, usually the answer is not larger than 250 chars
-        unsigned int len=0; //receive buffer length
-        
-        /* We are going to seach in the HTTP response for a phase that indicates transmission success
-         * Therefore we are looking for a pointer, which indicates the position in the array that holds
-         * the match
-         */
-        // Size of the Pointer, is greater that 0 in every case we receive data from the webserver
-        int PointerSize = 0;
-        
-        // indicator that the webserver is transmitting a response
-        int c;
-        
         // Serial log info
-        debugoutln("start waiting");
+        // debugoutln("Http Send");
         
+        // call the web server
+        // Example request http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=6&key=123
+        client.print(PostRequest);
         
-        /* Start the while() 
-         * As long as we don't get an response or the TimeoutTime is not exeeded, we keep waiting for a response
-         * PointerSize is larger than 0 whenever we receive a HTTP response
-         * Even if we receive a HTTP response that does not indicate transmission success, we stop the while() 
-         * because we only want to interprete the answer. It is not necessary to waste time
-         */
-        while ((currentMillis - startTime <= TimeoutTime) && (PointerSize == 0)) {
-            
-
-            /*if there are incoming bytes available
-             * from the server then read them
-             */
-            if(client.available()) {
-                do
-                {
-                    c = client.read();
-                    if((c != -1) && (len < (sizeof(data)-1)))
-                    {
-                        // collect the whole HTTP response in the data array
-                        data[len++] = c;
-                    }
-                }while(c != -1);
-            }
-            
-            //if the server's disconnected, stop the client and evaluate the received data
-            if(len && !client.connected()) {
-                
-                client.stop();
-                RedFly.disconnect();
-                
-                data[len] = 0;
-                // Serial log info
-                //debugout(data);
-                
-                
-                /* Now that we received the HTTP response it is time to interprete the received data
-                 * The webserver we address is responding wether a "success", a "failure" or something else
-                 * We need to search in the HTTP response for that "success" or "failure" statement
-                 * It is not enough to receive a "200 OK" response, because this does only indicate, if we 
-                 * have been able to connect to the webserver. Even if we receive a "failure" response
-                 * this will come with a "200 OK" response. That's why we have to dive a little bit deeper
-                 * and analyse the resonse message
-                 *
-                 * The idea is to find a specific substrting in a string with char datatype
-                 * this is described here http://forum.arduino.cc/index.php?topic=394718.0
-                 * 
-                 * With that in mind we can search for any sub char array within the HTTP response array. 
-                 */
-                
-                /* Answer, we need to receive in order to know that the submission was successful
-                 * This string is determinded in the "valueget.php" file on the webserver. 
-                 */
-                char successStringWebserver[] = "transmission success";
-                
-                // Pointer that locates the position of the searched substring (char array) within a larger char array
-                char * Pointer;
-                
-                // function to find the pointer - is empty if there is no match
-                Pointer = strstr(data, successStringWebserver);
-                
-                // To get out of the while() I have to check if we received a valid response from the webserver
-                PointerSize = sizeof(Pointer);
-                
-                // We locate the position of the substring within the larger
-                int PointerPosition;
-                // subtract the starting pointer of Haystack from the pointer returned by strstr()
-                PointerPosition = (&Pointer[0] - &data[0]);
-                
-                
-                // The PointerPosition in the array is always positive if we find the substring in the larger dara array
-                if (PointerPosition >= 0) {
-                    
-                    // Serial Log info
-                    debugoutln(successStringWebserver);
-                    
-                }
-                else if (PointerPosition < 0) {
-                    
-                    // Serial Log info
-                    debugoutln("transmission failed");
-                    
-                }
-                else {
-                    
-                    debugoutln("something is wrong here");
-                }
-                
-                len = 0;
-            }
-
-            currentMillis = millis();
-        }
-        
-        debugoutln("stopped waiting");
-        
-        // flush the client connection
-        client.flush();
+        tempReturnValue = SuccessOfHttpPostRequest(client);
         
     }
     else {
         
         // Serial Log info
-        debugoutln("PHP Server unavailable");
+        debugoutln("server unavailable");
         
         // try to re-establish the wifi connection
-        // EstablishWifiConnectionWithRedFlyShield();
+        EstablishWifiConnectionWithRedFlyShield();
+        
+        tempReturnValue = false;
         
     }
+    
+    // free allocated memory
+    free(PostRequest);
+    
+    return (tempReturnValue);
+    
+}
+
+// define the address of the server and trigger a POST request to a webserver
+/* we try to send the value to the webserver
+ * if this does not work out on the first try we try it again with the same value
+ * if this again does not work out, we try to re-establish the whole Wifi connection
+ * unfortunately we currently cannot do more than that because we don't have access to
+ * the server */
+void FullHttpPostTransmission(int value){
+    
+    /* Server IP adress - we remain with a local IP because currently the web server is
+     * in the same network as the RedFly WiFi shield
+     */
+    byte server[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+    
+    // initialize the client
+    RedFlyClient client(server, 80);
+    
+    int maxAttempts = 4; // how often do we try to send out the data at max?
+    int numberAttempts = 1; // starting point to count
+    
+    // if we could not transmit successfully try it again
+    do {
+        
+        // Serial log info
+        // debugoutln("new attempt to do a POST");
+        
+        // The Post request is done in the while statement below
+        
+        // count the number of attempts up
+        numberAttempts++;
+        
+    }
+    // Check if we receive a HTTP response for our POST request and interprete this response
+    while (!HttpPostRequest(value, client, server) && (numberAttempts <= maxAttempts));
     
 }
 
 
-// Setup Start ###################################################################
+// Setup Start #######################################################################################################################
+
 
 void setup() {
     
@@ -533,7 +640,7 @@ void setup() {
     Serial.begin(9600);
     
     // Statuslog
-    debugoutln("void setup()");
+    // debugoutln("void setup()");
     
     // Define pins and functions of these pins
     pinMode(SoilDryWarningLED, OUTPUT);  // to switch on or off the LED for dryness indication
@@ -551,7 +658,10 @@ void setup() {
     
 }
 
-// Setup End #####################################################################
+
+// Setup End #########################################################################################################################
+
+
 /* Check if it is time to perform a new moisture measurement
  * We don't want to measure the moisture every loop of the processor
  */
@@ -796,13 +906,17 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
     
     if (IsTimeToSendData){
         
-        debugoutln("SendMoisturePercentageValueToDatabase");
+        // Serial log info
+        // debugoutln("SendMoisturePercentageValueToDatabase");
         
         // Transform the current analogInput value for the moisture of the soil into a percentage value
-        HttpDataTransmition(PercentMoistureValue(MoistAnalogValue));
+        FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue));
         
     }
 }
+
+
+// Loop Start #######################################################################################################################
 
 
 void loop() {

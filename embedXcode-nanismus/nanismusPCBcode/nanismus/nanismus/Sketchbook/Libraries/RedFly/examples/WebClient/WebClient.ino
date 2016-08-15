@@ -167,46 +167,20 @@ void loop()
     data[len] = 0;
     debugout(data);
 
-        char * value_char;
-        value_char = (char*) calloc(5, sizeof(char));
-        itoa(len, value_char, 10);
-
-    debugout("length of data: ");     
-    debugout(value_char); 
-    
+   
     // interprete the received data
-    String stringOne = String(data);
 
-        // char * value_char;
-        value_char = (char*) calloc(5, sizeof(char));
-        itoa(stringOne.length(), value_char, 10);
-
-    debugoutln(""); 
-    debugout("length of string: ");     
-    debugoutln(value_char); 
-
-    // Answer we need to receive in order to know that the submission was successful
-    //String successStringWebserver = "Dateneingabe erfolgreich";
-    char successStringWebserver[] = "Dateneingabe fehlgeschlagen" ;
-    unsigned int successLen = sizeof(successStringWebserver); 
-    // How long is the message we would like to receive? 
-    //int receiveStringLength = successStringWebserver.length(); 
+    // find a substrting in a string with char datatype
+    // http://forum.arduino.cc/index.php?topic=394718.0
     
-    // https://www.arduino.cc/en/Tutorial/StringStartsWithEndsWith
-    /*if (stringOne.endsWith(successStringWebserver)){
-    // substring(index) looks for the substring from the index position to the end:
-    // https://www.arduino.cc/en/Tutorial/StringSubstring
-    // if (stringOne.substring(9) == "200 OK") {
-    */
+    // Answer, we need to receive in order to know that the submission was successful
+    char successStringWebserver[] = "transmission success";
 
-    //char Haystack[len] = { data };
-    //char Needle[successLen] = { successStringWebserver };
-    debugoutln(data);
-    debugoutln(successStringWebserver);
+    // Pointer that locates the position of the searched substring (char array) within a larger char array 
     char * Pointer;
-    Pointer = strstr(data, successStringWebserver);
-    debugoutln(&Pointer[0] - &data[0]); // subtract the starting pointer of Haystack from the pointer returned by strstr()
-    // debugoutln(find_text(Needle, Haystack));    
+    
+    // function to find the pointer - returns -1 if there is no match
+    Pointer = strstr(data, successStringWebserver);  
 
     if (Pointer > 0) {
       
