@@ -108,14 +108,17 @@ int MoistureMeasurementResultAnalogInput;
  * If the moisture sensor sticks in a glass of water I can measure with a multimeter 2.6 Volts input
  *		water moist = 2.6 V = 532 analogInput
 
+ * This definition was adjusted on the 15th August to
+ 
  * Used thresholds
+ 
  * "zero water" : 0% : 205 : Indicator 0 - urgently dry
- * "urgently dry" : 20% : 260 : Indicator 0 - urgently dry
- * "moist" : 40% : 340 : Indicator 1 - dry
+ * "urgently dry" : 20% : 280 : Indicator 0 - urgently dry
+ * "moist" : 40% : 360 : Indicator 1 - dry
  * "very moist" : 80% : 442 : Indicator 2 - moist
  * "wet" : 100% : 481 : Indicator 2 - moist
  */
-int ThresholdsForAnalogInputValues[] = {205, 260, 340, 442, 481};
+int ThresholdsForAnalogInputValues[] = {205, 280, 360, 442, 481};
 
 /* In the Array we store different tresholds
  * position 0 --> the indicator for "urgently dry" - triggers self watering event
@@ -730,17 +733,7 @@ void InterpreteMoistureMeasurementAnalogInput(int Input) {
 long PercentMoistureValue(int AnalogInputValue)
 {
     
-    /*
-     * Used thresholds
-     * "zero water" : 0% : 205 : Indicator 0 - urgently dry
-     * "urgently dry" : 20% : 260 : Indicator 0 - urgently dry
-     * "moist" : 40% : 340 : Indicator 1 - dry
-     * "very moist" : 80% : 442 : Indicator 2 - moist
-     * "wet" : 90% : 481 : Indicator 2 - moist
-     */
-    // int ThresholdsForAnalogInputValues[] = {205, 260, 340, 442, 481};
-    
-    
+    // see the threshold definition above
     int zero = ThresholdsForAnalogInputValues[0];
     int twenty = ThresholdsForAnalogInputValues[1];
     int fourty = ThresholdsForAnalogInputValues[2];
