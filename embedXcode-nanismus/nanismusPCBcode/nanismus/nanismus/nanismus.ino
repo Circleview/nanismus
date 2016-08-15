@@ -13,7 +13,7 @@
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
 //
-// See          ReadMe.txt
+// See          ReadMe.txt for references
 
 /* current result of arduino IDE compiling
  Der Sketch verwendet 13.948 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
