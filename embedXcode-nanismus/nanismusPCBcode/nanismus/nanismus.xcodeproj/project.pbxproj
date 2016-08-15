@@ -539,7 +539,7 @@
 		86F0C5831D5A3C9000DF21F9 /* Libraries */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Libraries; path = Sketchbook/Libraries; sourceTree = "<group>"; };
 		86F0C5861D5A502000DF21F9 /* valueget.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; name = valueget.php; path = ../../../../website/valueget.php; sourceTree = "<group>"; };
 		86F0C5871D5A567E00DF21F9 /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; name = src; path = ../../../../website/src; sourceTree = "<group>"; };
-		86F0C5881D5A5D2400DF21F9 /* index.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; name = index.php; path = ../../../../website/index.php; sourceTree = "<group>"; };
+		86F0C5881D5A5D2400DF21F9 /* index.php */ = {isa = PBXFileReference; explicitFileType = text.html; fileEncoding = 4; name = index.php; path = ../../../../website/index.php; sourceTree = "<group>"; };
 		86F5FAB81D621771002E1616 /* fritzing */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fritzing; path = ../../../../fritzing; sourceTree = "<group>"; };
 		86F5FAB91D623599002E1616 /* css */ = {isa = PBXFileReference; lastKnownFileType = folder; name = css; path = ../../../../website/css; sourceTree = "<group>"; };
 		86F5FABA1D623599002E1616 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = ../../../../website/images; sourceTree = "<group>"; };

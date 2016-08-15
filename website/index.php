@@ -20,6 +20,10 @@
 <!-- Favicon -->
 <link href="images/favicon" type="image/x-icon" rel="shortcut icon" />
 
+<!-- Stylesheets -->
+
+<link rel="stylesheet" href="css/style.css" />
+
 
 <!-- PHP load data from mySQL database to show on this page -->
 <?php
@@ -32,7 +36,13 @@
 
 <body>
 
-    <h1>Feuchtigkeit: <?php echo "$Feuchte %"; ?></h1>
+    <table>
+        <tr>
+            <td>
+                Feuchtigkeit: <?php echo "$Feuchte %"; ?>
+            </td>
+        </tr>
+    </table>
 
 </body>
 
