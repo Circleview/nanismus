@@ -112,13 +112,13 @@ int MoistureMeasurementResultAnalogInput;
  
  * Used thresholds
  
- * "zero water" : 0% : 205 : Indicator 0 - urgently dry
- * "urgently dry" : 20% : 280 : Indicator 0 - urgently dry
- * "moist" : 40% : 360 : Indicator 1 - dry
+ * "zero water" : 0% : 240 : Indicator 0 - urgently dry
+ * "urgently dry" : 20% : 300 : Indicator 0 - urgently dry
+ * "moist" : 40% : 380 : Indicator 1 - dry
  * "very moist" : 80% : 442 : Indicator 2 - moist
  * "wet" : 100% : 481 : Indicator 2 - moist
  */
-int ThresholdsForAnalogInputValues[] = {205, 280, 360, 442, 481};
+int ThresholdsForAnalogInputValues[] = {240, 300, 380, 442, 481};
 
 /* In the Array we store different tresholds
  * position 0 --> the indicator for "urgently dry" - triggers self watering event
@@ -530,7 +530,7 @@ char * assembleThePostRequest(int value) {
     const char * get2 = "?name=";
     const char * get3 = "&type=";
     const char * get4 = "&value=";
-    const char * get5 = "&key=c3781633f1fb1ddca77c9038d499434";//c3781633f1fb1ddca77c9038d4994345
+    const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
     const char * get6 = " HTTP/1.1\r\nHost: ";
     const char * get7 = "\r\n\r\n";
     
