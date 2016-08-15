@@ -13,7 +13,7 @@
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
 //
-// See         ReadMe.txt for
+// See          ReadMe.txt
 
 /* current result of arduino IDE compiling
  Der Sketch verwendet 13.948 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
@@ -47,6 +47,7 @@
 
 // Include Libraries ###############################################################################################################
 
+
 // Include Arduino library to allow autocomplete syntax in Xcode
 #include <Arduino.h>
 
@@ -59,6 +60,12 @@
 
 // Constants and variables ##########################################################################################################
 
+
+// define if this is a test build or a production build
+#define test 0 // 0 == production ; 1 == test
+/* the interpretation of this value will currently lead to a different http POST statement
+ * which writes differently attributed data to the database
+ */
 
 // Calculate or store constants that are uses several times in the codebase
 
@@ -488,12 +495,17 @@ char * assembleThePostRequest(int value) {
     
     // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
 #define HOSTNAME "192.168.178.24"
-    
-    // we fill in different datatable values
-    
+ 
     // one is the name of the sensor (plant)
     const char * sensor_string;
-    sensor_string = "Test";
+    
+    // we fill in different datatable values based on wether we have a test build or a production build
+    if (test == 1){
+        sensor_string = "Test";
+    }
+    else if (test == 0){
+        sensor_string = "Banane";
+    }
     
     // one is the kind of value we are transmitting
     const char * type_string;
