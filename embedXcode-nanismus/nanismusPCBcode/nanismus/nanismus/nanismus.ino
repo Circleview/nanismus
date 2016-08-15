@@ -304,7 +304,6 @@ void HttpDataTransmition(int value){
     
     debugoutln("HttpDataTransmition");
     
-    // server on which the php script runs, that interprets the moisture value
     byte server[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
     
     RedFlyClient client(server, 80);
@@ -336,12 +335,13 @@ void HttpDataTransmition(int value){
         char * GetRequest;
         const char * get1;
         
-        get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
+        //get1 = "GET /valueget.php"; // Zugang zur Live-Datenbank
+        get1 = "POST /valueget.php"; // Zugang zur Live-Datenbank
         
         const char * get2 = "?name=";
         const char * get3 = "&type=";
         const char * get4 = "&value=";
-        const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";
+        const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
         const char * get6 = " HTTP/1.1\r\nHost: ";
         const char * get7 = "\r\n\r\n";
         
@@ -370,20 +370,146 @@ void HttpDataTransmition(int value){
     
         // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=6&key=123
         
-        free(GetRequest);                       // free the allocated string memory
+        // free the allocated string memory
+        free(GetRequest);
         free(value_char);
         
         
+        
         /* To be sure that the data transmission was successful catch the server response and evaluate the result
-         * do it like here 
-         * /Users/stefanwilluda/github/nanismus/embedXcode-nanismus/nanismusPCBcode/nanismus/nanismus/Sketchbook/Libraries/RedFly/examples/WebClient/WebClient.ino
+         * oriented on the RedFly Example WebClient.ino
+         * I did not want to use the loop() to evaluate the server response 
+         * That is why I chose to use a while() with a timeout
+         * If there is no response within the timeout, I have to asume that the server is not available
          */
         
-        client.flush();
-        client.stop();
+        // Timekeeper to check if the Timeout is reached
+        unsigned long currentMillis = millis();
+        unsigned long startTime = currentMillis;
         
-        // Serial Log info
-        debugoutln("Transmission success");
+        // give it a TimeoutTime milliseconds to receive an answer from the webserver
+        unsigned long TimeoutTime = 120000; // milliseconds
+        
+        /* The Webserver is going to answer with a simple HTTP response 
+         * We are going to fetch the answer in a buffer 
+         * and then we are going to check the server HTTP response if we get a "success" response or something else
+         */
+        
+        // declarations to process the answer of the webserver
+        char data[300];  //receive buffer, usually the answer is not larger than 250 chars
+        unsigned int len=0; //receive buffer length
+        
+        /* We are going to seach in the HTTP response for a phase that indicates transmission success
+         * Therefore we are looking for a pointer, which indicates the position in the array that holds
+         * the match
+         */
+        // Size of the Pointer, is greater that 0 in every case we receive data from the webserver
+        int PointerSize = 0;
+        
+        // indicator that the webserver is transmitting a response
+        int c;
+        
+        // Serial log info
+        debugoutln("start waiting");
+        
+        
+        /* Start the while() 
+         * As long as we don't get an response or the TimeoutTime is not exeeded, we keep waiting for a response
+         * PointerSize is larger than 0 whenever we receive a HTTP response
+         * Even if we receive a HTTP response that does not indicate transmission success, we stop the while() 
+         * because we only want to interprete the answer. It is not necessary to waste time
+         */
+        while ((currentMillis - startTime <= TimeoutTime) && (PointerSize == 0)) {
+            
+
+            /*if there are incoming bytes available
+             * from the server then read them
+             */
+            if(client.available()) {
+                do
+                {
+                    c = client.read();
+                    if((c != -1) && (len < (sizeof(data)-1)))
+                    {
+                        // collect the whole HTTP response in the data array
+                        data[len++] = c;
+                    }
+                }while(c != -1);
+            }
+            
+            //if the server's disconnected, stop the client and evaluate the received data
+            if(len && !client.connected()) {
+                
+                client.stop();
+                RedFly.disconnect();
+                
+                data[len] = 0;
+                // Serial log info
+                //debugout(data);
+                
+                
+                /* Now that we received the HTTP response it is time to interprete the received data
+                 * The webserver we address is responding wether a "success", a "failure" or something else
+                 * We need to search in the HTTP response for that "success" or "failure" statement
+                 * It is not enough to receive a "200 OK" response, because this does only indicate, if we 
+                 * have been able to connect to the webserver. Even if we receive a "failure" response
+                 * this will come with a "200 OK" response. That's why we have to dive a little bit deeper
+                 * and analyse the resonse message
+                 *
+                 * The idea is to find a specific substrting in a string with char datatype
+                 * this is described here http://forum.arduino.cc/index.php?topic=394718.0
+                 * 
+                 * With that in mind we can search for any sub char array within the HTTP response array. 
+                 */
+                
+                /* Answer, we need to receive in order to know that the submission was successful
+                 * This string is determinded in the "valueget.php" file on the webserver. 
+                 */
+                char successStringWebserver[] = "transmission success";
+                
+                // Pointer that locates the position of the searched substring (char array) within a larger char array
+                char * Pointer;
+                
+                // function to find the pointer - is empty if there is no match
+                Pointer = strstr(data, successStringWebserver);
+                
+                // To get out of the while() I have to check if we received a valid response from the webserver
+                PointerSize = sizeof(Pointer);
+                
+                // We locate the position of the substring within the larger
+                int PointerPosition;
+                // subtract the starting pointer of Haystack from the pointer returned by strstr()
+                PointerPosition = (&Pointer[0] - &data[0]);
+                
+                
+                // The PointerPosition in the array is always positive if we find the substring in the larger dara array
+                if (PointerPosition >= 0) {
+                    
+                    // Serial Log info
+                    debugoutln(successStringWebserver);
+                    
+                }
+                else if (PointerPosition < 0) {
+                    
+                    // Serial Log info
+                    debugoutln("transmission failed");
+                    
+                }
+                else {
+                    
+                    debugoutln("something is wrong here");
+                }
+                
+                len = 0;
+            }
+
+            currentMillis = millis();
+        }
+        
+        debugoutln("stopped waiting");
+        
+        // flush the client connection
+        client.flush();
         
     }
     else {
@@ -392,7 +518,7 @@ void HttpDataTransmition(int value){
         debugoutln("PHP Server unavailable");
         
         // try to re-establish the wifi connection
-        EstablishWifiConnectionWithRedFlyShield();
+        // EstablishWifiConnectionWithRedFlyShield();
         
     }
     

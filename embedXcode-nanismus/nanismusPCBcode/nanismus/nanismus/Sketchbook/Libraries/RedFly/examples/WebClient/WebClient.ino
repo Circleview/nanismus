@@ -13,9 +13,10 @@ byte ip[]        = { 192,168,  0, 30 }; //ip from shield (client)
 byte netmask[]   = { 255,255,255,  0 }; //netmask
 byte gateway[]   = { 192,168,  0,100 }; //ip from gateway/router
 byte dnsserver[] = { 192,168,  0,100 }; //ip from dns server
-byte server[]    = {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+byte server[]    = {192, 168, 178, 24};// {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
 
-#define HOSTNAME "nanismus.no-ip.org" //"www.watterott.net"  //host
+#define HOSTNAME "192.168.178.24"// "nanismus.no-ip.org" //"www.watterott.net"  //host
+// #define HOSTNAME "192.168.178.24"// "nanismus.no-ip.org" //"www.watterott.net"  //host
 
 //initialize the client library with the ip and port of the server 
 //that you want to connect to (port 80 is default for HTTP)
@@ -45,7 +46,6 @@ void debugoutln(char *s)
   RedFly.enable();
 #endif
 }
-
 
 void setup()
 {
@@ -79,10 +79,10 @@ void setup()
     // ret = join("wlan-ssid", "wlan-passw") //join infrastructure network with password
     // ret = join("wlan-ssid") //join infrastructure network
         
-        #define Network "WLAN-Kabel"
-        #define NetworkPW "1604644462468036"
- 
-        ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
+    #define Network "WLAN-Kabel"
+    #define NetworkPW "1604644462468036"
+
+    ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
     if(ret)
     {
       debugoutln("JOIN ERR");
@@ -107,12 +107,13 @@ void setup()
       }
       else
       {
-        if(RedFly.getip(HOSTNAME, server) == 0) //get ip
-        {
+        // if(RedFly.getip(HOSTNAME, server) == 0) //get ip
+        //{
           if(client.connect(server, 80))
           {
+            
             //make a HTTP request
-            client.print_P(PSTR("GET / HTTP/1.1\r\nHost: "HOSTNAME"\r\n\r\n"));
+            client.print_P(PSTR("POST /valueget.php?name=Test&type=Prozentfeuchte&value=75&key=c3781633f1fb1ddca77c9038d4994345 HTTP/1.1\r\nHost: "HOSTNAME"\r\n\r\n")); 
           }
           else
           {
@@ -120,20 +121,21 @@ void setup()
             RedFly.disconnect();
             for(;;); //do nothing forevermore
           }
-        }
-        else
+        //}
+        /*else
         {
           debugoutln("DNS ERR");
           RedFly.disconnect();
           for(;;); //do nothing forevermore
-        }
+        }*/
       }
     }
   }
 }
 
 
-char data[1024];  //receive buffer
+char data[300];  //receive buffer
+// 16 to receive the HTTP header
 unsigned int len=0; //receive buffer length
 
 void loop()
@@ -143,7 +145,8 @@ void loop()
   //if there are incoming bytes available 
   //from the server then read them 
   if(client.available())
-  {
+  { 
+    
     do
     {
       c = client.read();
@@ -157,12 +160,63 @@ void loop()
   //if the server's disconnected, stop the client and print the received data
   if(len && !client.connected())
   {
+    
     client.stop();
     RedFly.disconnect();
 
     data[len] = 0;
     debugout(data);
+
+        char * value_char;
+        value_char = (char*) calloc(5, sizeof(char));
+        itoa(len, value_char, 10);
+
+    debugout("length of data: ");     
+    debugout(value_char); 
     
+    // interprete the received data
+    String stringOne = String(data);
+
+        // char * value_char;
+        value_char = (char*) calloc(5, sizeof(char));
+        itoa(stringOne.length(), value_char, 10);
+
+    debugoutln(""); 
+    debugout("length of string: ");     
+    debugoutln(value_char); 
+
+    // Answer we need to receive in order to know that the submission was successful
+    //String successStringWebserver = "Dateneingabe erfolgreich";
+    char successStringWebserver[] = "Dateneingabe fehlgeschlagen" ;
+    unsigned int successLen = sizeof(successStringWebserver); 
+    // How long is the message we would like to receive? 
+    //int receiveStringLength = successStringWebserver.length(); 
+    
+    // https://www.arduino.cc/en/Tutorial/StringStartsWithEndsWith
+    /*if (stringOne.endsWith(successStringWebserver)){
+    // substring(index) looks for the substring from the index position to the end:
+    // https://www.arduino.cc/en/Tutorial/StringSubstring
+    // if (stringOne.substring(9) == "200 OK") {
+    */
+
+    //char Haystack[len] = { data };
+    //char Needle[successLen] = { successStringWebserver };
+    debugoutln(data);
+    debugoutln(successStringWebserver);
+    char * Pointer;
+    Pointer = strstr(data, successStringWebserver);
+    debugoutln(&Pointer[0] - &data[0]); // subtract the starting pointer of Haystack from the pointer returned by strstr()
+    // debugoutln(find_text(Needle, Haystack));    
+
+    if (Pointer > 0) {
+      
+      debugoutln("OK");
+     
+    }
+    else {
+      debugoutln("no match");
+    }   
+
     len = 0;
   }
 }

@@ -12,9 +12,10 @@ byte ip[]        = { 192,168,  0, 30 }; //ip from shield (client)
 byte netmask[]   = { 255,255,255,  0 }; //netmask
 byte gateway[]   = { 192,168,  0,100 }; //ip from gateway/router
 byte dnsserver[] = { 192,168,  0,100 }; //ip from dns server
-byte server[]    = {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+byte server[]    = {192, 168, 178, 24};// {   0,  0,  0,  0 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
 
-#define HOSTNAME "www.watterott.net"  //host
+// #define HOSTNAME "www.watterott.net"  //host
+#define HOSTNAME "192.168.178.24"  //host
 
 uint8_t http=INVALID_SOCKET; //socket handle
 uint16_t http_len=0; //receive len
@@ -77,7 +78,12 @@ void setup()
     // ret = join("wlan-ssid", INFRASTRUCTURE or IBSS_JOINER) //join infrastructure or ad-hoc network
     // ret = join("wlan-ssid", "wlan-passw") //join infrastructure network with password
     // ret = join("wlan-ssid") //join infrastructure network
-    ret = RedFly.join("wlan-ssid", "wlan-passw", INFRASTRUCTURE);
+        
+    #define Network "WLAN-Kabel"
+    #define NetworkPW "1604644462468036"
+
+    ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
+    
     if(ret)
     {
       debugoutln("JOIN ERR");
@@ -92,7 +98,8 @@ void setup()
       // ret = RedFly.begin(ip, dnsserver);
       // ret = RedFly.begin(ip, dnsserver, gateway);
       // ret = RedFly.begin(ip, dnsserver, gateway, netmask);
-      ret = RedFly.begin(ip, dnsserver, gateway, netmask);
+      ret = RedFly.begin(); 
+      //ret = RedFly.begin(ip, dnsserver, gateway, netmask);
       if(ret)
       {
         debugoutln("BEGIN ERR");
@@ -101,8 +108,8 @@ void setup()
       }
       else
       {
-        if(RedFly.getip(HOSTNAME, server) == 0) //get ip
-        {
+        //if(RedFly.getip(HOSTNAME, server) == 0) //get ip
+        //{
           http = RedFly.socketConnect(PROTO_TCP, server, 80); //start connection to server on port 80
           if(http == 0xFF)
           {
@@ -113,15 +120,16 @@ void setup()
           else
           {
             //send HTTP request
-            RedFly.socketSendPGM(http, PSTR("GET / HTTP/1.1\r\nHost: "HOSTNAME"\r\n\r\n"));
+            // RedFly.socketSendPGM(http, PSTR("GET / HTTP/1.1\r\nHost: "HOSTNAME"\r\n\r\n"));
+            RedFly.socketSendPGM(http, PSTR("POST /valueget.php?name=Test&type=Prozentfeuchte&value=75&key=c3781633f1fb1ddca77c9038d4994345 HTTP/1.1\r\nHost: "HOSTNAME"\r\n\r\n"));
           }
-        }
-        else
+        //}
+        /*else
         {
           debugoutln("DNS ERR");
           RedFly.disconnect();
           for(;;); //do nothing forevermore
-        }
+        }*/
       }
     }
   }
