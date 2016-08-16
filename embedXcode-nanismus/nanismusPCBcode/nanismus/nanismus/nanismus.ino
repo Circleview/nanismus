@@ -8,7 +8,7 @@
 // 				Stefan Willuda
 //
 // Date			01.08.16 14:31
-// Version		0.66.0
+// Version		0.67.0
 //
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0

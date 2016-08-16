@@ -1,7 +1,4 @@
 
-body {
-    background: #82c837; /* http://www.w3schools.com/colors/colors_picker.asp */ 
-}
 table {
     width: 100%;
     height: 100%;
@@ -15,5 +12,4 @@ td {
     font-size: 30px;
     font-style: bold;
     font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
-    color: #ffffff;
 }

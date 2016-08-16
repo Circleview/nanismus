@@ -25,12 +25,66 @@
 <link rel="stylesheet" href="css/style.css" />
 
 
+
 <!-- PHP load data from mySQL database to show on this page -->
 <?php
-    
+
     include ("src/dbabfrage.php");
-    
+
 ?>
+
+<!-- dynamic styles based on database value -->
+<style>
+    
+    /* http://www.w3schools.com/colors/colors_picker.asp */
+    
+    body {
+        
+        background:
+
+        <?php
+
+            /* for tests
+            $Feuchte = 18;
+             */
+
+            if ($Feuchte >=40){
+                echo "#82c837;"; /* green */
+            }
+            else if ($Feuchte >=20){
+                echo "#FFFF33;"; /* "#F2EC38;"; /* yellow */
+            }
+            else {
+                echo "#C8373A;"; /* red */
+            }
+    
+        ?>
+    }
+
+    td {
+        color:
+
+        <?php
+
+        /* for tests
+         $Feuchte = 18;
+         */
+
+        if ($Feuchte >=40){
+            echo "#ffffff;"; /* green */
+        }
+        else if ($Feuchte >=20){
+            echo "#000000;"; /* "#F2EC38;"; /* yellow */
+        }
+        else {
+            echo "#ffffff;"; /* red */
+    
+        }
+
+        ?>
+    }
+
+</style>
 
 </head>
 
