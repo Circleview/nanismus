@@ -40,6 +40,8 @@
     
     body {
         
+        /* change the background color based on the current moisture of the plant. 
+         * use green, yellow and red */
         background:
 
         <?php
@@ -48,10 +50,10 @@
             $Feuchte = 18;
              */
 
-            if ($Feuchte >=40){
+            if ($Feuchte >=41){
                 echo "#82c837;"; /* green */
             }
-            else if ($Feuchte >=20){
+            else if ($Feuchte >=21){
                 echo "#FFFF33;"; /* "#F2EC38;"; /* yellow */
             }
             else {
@@ -62,6 +64,9 @@
     }
 
     td {
+        
+        /* change the td font color based on the current moisture of the plant.
+         * use green, yellow and red */
         color:
 
         <?php
@@ -70,10 +75,10 @@
          $Feuchte = 18;
          */
 
-        if ($Feuchte >=40){
+        if ($Feuchte >=41){
             echo "#ffffff;"; /* green */
         }
-        else if ($Feuchte >=20){
+        else if ($Feuchte >=21){
             echo "#000000;"; /* "#F2EC38;"; /* yellow */
         }
         else {
