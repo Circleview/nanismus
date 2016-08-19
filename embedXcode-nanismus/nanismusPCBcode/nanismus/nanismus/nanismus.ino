@@ -118,7 +118,7 @@ int MoistureMeasurementResultAnalogInput;
  * "very moist" : 80% : 442 : Indicator 2 - moist
  * "wet" : 100% : 481 : Indicator 2 - moist
  */
-int ThresholdsForAnalogInputValues[] = {240, 300, 380, 442, 481};
+int ThresholdsForAnalogInputValues[] = {310, 360, 400, 442, 481};
 
 /* In the Array we store different tresholds
  * position 0 --> the indicator for "urgently dry" - triggers self watering event
