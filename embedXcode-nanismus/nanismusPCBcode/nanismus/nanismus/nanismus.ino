@@ -690,11 +690,11 @@ boolean IsTimeForMoistureMeasurement() {
      */
     
     unsigned long currentMillis = millis();
-    if(currentMillis - lastMoistMeasureTime >= MoistMeasureInterval) {
-        return(true);
+    if(currentMillis - lastMoistMeasureTime < MoistMeasureInterval) {
+        return(false);
     }
     else {
-        return(false);
+        return(true);
     }
 }
 
