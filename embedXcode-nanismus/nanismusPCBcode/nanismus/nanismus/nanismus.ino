@@ -493,7 +493,7 @@ boolean SuccessOfHttpPostRequest(RedFlyClient client){
 /* This function puts together all the different parts of the POST request
  * that is sent to the webserver
  */
-char * assembleThePostRequest(int value) {
+char * assembleThePostRequest(long value) {
     
     
     // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
@@ -565,7 +565,7 @@ char * assembleThePostRequest(int value) {
 }
 
 // Here we do the  Http POST request and check if the transmission was successful
-boolean HttpPostRequest(int value, RedFlyClient client, byte server[]){
+boolean HttpPostRequest(long value, RedFlyClient client, byte server[]){
     
     // debugoutln("HttpPostRequest");
     
@@ -615,7 +615,7 @@ boolean HttpPostRequest(int value, RedFlyClient client, byte server[]){
  * if this again does not work out, we try to re-establish the whole Wifi connection
  * unfortunately we currently cannot do more than that because we don't have access to
  * the server */
-void FullHttpPostTransmission(int value){
+void FullHttpPostTransmission(long value){
     
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
