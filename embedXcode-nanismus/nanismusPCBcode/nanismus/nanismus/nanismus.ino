@@ -774,7 +774,8 @@ long PercentMoistureValue(int AnalogInputValue)
 void PerformMoistureMeasurement(){
     
     // idicate with an LED that a measurement is currently performed
-    digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
+    // currently swiched off because I fear it consumes too much voltage
+    // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
     
     // apply voltage to soil moisture sensor
     digitalWrite(SoilMeasureVoltagePin, HIGH);
@@ -802,7 +803,7 @@ void PerformMoistureMeasurement(){
     digitalWrite(SoilMeasureVoltagePin, LOW);
     
     // switch off the indication LED
-    digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
+    // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
     
     // Interprete the analog input value from the sensor
     InterpreteMoistureMeasurementAnalogInput(MoistureMeasurementResultAnalogInput);
@@ -843,7 +844,8 @@ void DecisionToSwitchSoilDryWaringLED(int Indicator){
         case 1: // the soil is dry
             
             // switch on the red dryness indication LED
-            digitalWrite(SoilDryWarningLED, HIGH);
+            // currently switched off, because it seems to consume too much current
+            // digitalWrite(SoilDryWarningLED, HIGH);
             break;
             
         default: // in all the cases where the soil is not "dry" or "urgently dry" no warning LED is needed
