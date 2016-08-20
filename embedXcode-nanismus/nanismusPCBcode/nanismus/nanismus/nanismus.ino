@@ -62,7 +62,7 @@
 
 
 // define if this is a test build or a production build
-#define test 0 // 0 == production ; 1 == test
+#define test 1 // 0 == production ; 1 == test
 /* the interpretation of this value will currently lead to a different http POST statement
  * which writes differently attributed data to the database
  */
@@ -162,6 +162,35 @@ void debugoutln(char *s)
 #endif
 }
 
+// debug output function for unsigned long values
+void debugoutlnUnsignedLong(char *s, unsigned long value){
+#if defined(__AVR_ATmega32U4__)
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+#else
+    RedFly.disable();
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+    RedFly.enable();
+#endif
+}
+
+// debug output function for int values
+void debugoutlnInt(char *s, int value){
+#if defined(__AVR_ATmega32U4__)
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+#else
+    RedFly.disable();
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+    RedFly.enable();
+#endif
+}
 
 // Establish a WiFi Connection using the RedFly WiFi Shield ##########################################################################
 
@@ -181,7 +210,7 @@ void EstablishWifiConnectionWithRedFlyShield()
     // ret = RedFly.init(pwr) //9600 baud, pwr=LOW_POWER|MED_POWER|HIGH_POWER
     // ret = RedFly.init() //9600 baud, HIGH_POWER
     
-    ret = RedFly.init();
+    // ret = RedFly.init();
     
     /* sometimes the connection is not established on the first try, thats why I need to try more than once
      * but not more than maxcounter times, because this would make the whole code in the loop stop
@@ -193,7 +222,10 @@ void EstablishWifiConnectionWithRedFlyShield()
     
     while (ret && counter < maxcounter) {
         
-        ret = RedFly.init();
+        /* In high power transmit mode an external power supply is recommended, because in some cases the USB port has not enough power
+         * https://github.com/watterott/Arduino-Libs/tree/master/RedFly
+         */
+        ret = RedFly.init(9600, LOW_POWER);
 
         debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
 
@@ -688,12 +720,18 @@ boolean IsTimeForMoistureMeasurement() {
     /* If the time that has passed between the last moisture measurement and now is larger than
      * the defined moisture intervall than a new moisture measurement is needed
      */
-    
     unsigned long currentMillis = millis();
+    
     if(currentMillis - lastMoistMeasureTime < MoistMeasureInterval) {
+        
+        debugoutln("IsTimeForMoistureMeasurement = false");
         return(false);
     }
     else {
+        
+        // Serial debug info
+        debugoutln("IsTimeForMoistureMeasurement = true");
+        
         return(true);
     }
 }
@@ -705,6 +743,9 @@ boolean IsTimeForMoistureMeasurement() {
 void InterpreteMoistureMeasurementAnalogInput(int Input) {
     
     // Define wether a analog input value is considered dry or moist
+    
+    // Serial debug info
+    debugoutln("InterpreteMoistureMeasurementAnalogInput()");
     
     // Check if the analog input value from the moisture sensor is considered to indicate an "urgently dry" soil
     if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[1]]){
@@ -777,6 +818,9 @@ void PerformMoistureMeasurement(){
     // currently swiched off because I fear it consumes too much voltage
     // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
     
+    // Serial debug info
+    debugoutln("PerformMoistureMeasurement()");
+    
     // apply voltage to soil moisture sensor
     digitalWrite(SoilMeasureVoltagePin, HIGH);
     
@@ -816,8 +860,14 @@ void PerformMoistureMeasurement(){
  */
 void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
     
+    // Serial debug info
+    debugoutln("MoistureMeasurement()");
+    
     // is it already time to perform a new moisture check?
     if(IsTimeForMoistureMeasurement) {
+        
+        // Serial debug info
+        debugoutln("IsTimeForMoistureMeasurement == true");
         
         /* Store the current time to "remember" when the last moisture measurement took place
          * This information will be needed to decide in later loops of the code if it is time
@@ -828,12 +878,20 @@ void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
         // Start the measurement of the current soil moisture
         PerformMoistureMeasurement();
     }
+    else{
+        
+        // Serial debug info
+        debugoutln("IsTimeForMoistureMeasurement == false");
+    }
 }
 
 
 // Decide if we need to switch the Dryness Warning LED on or off based on the interpretation of the moisture sensor analog input
 void DecisionToSwitchSoilDryWaringLED(int Indicator){
 
+    // Serial debug info
+    debugoutln("DecisionToSwitchSoilDryWaringLED()");
+    
     // remember the moisture indicator in this switch statement if "0" some day no longer means "urgently dry"
     // and "1" does no longer mean "dry"
     // MoistureIndicators[0];
@@ -860,6 +918,9 @@ void DecisionToSwitchSoilDryWaringLED(int Indicator){
 // Switch on the water pump by switching the transistor
 void StartTheWaterPump(){
     
+    // Serial debug info
+    debugoutln("StartTheWaterPump()");
+    
     /* store when the pump action started
      * check how long the self watering action is currently performed
      * check if the soil is already "moist" again
@@ -870,24 +931,42 @@ void StartTheWaterPump(){
     unsigned long PumpBeginningMillis = CurrentMillis; // this value serves to compare start and end time of the watering action
     unsigned long PumpDurationMillis = 10000; // water for 10 seconds. This provides 300 ml of water
     
+    // Serial debug info
+    debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
+    
     while ((CurrentMillis - PumpBeginningMillis < PumpDurationMillis) && (MoistureIndicator != MoistureIndicators[2])) {
+        
+        // Serial debug info
+        debugoutlnUnsignedLong("CurrentMillis", CurrentMillis);
+        debugoutlnInt("MoistureIndicator", MoistureIndicator);
         
         // switch on the water pump
         digitalWrite(PumpVoltagePin, HIGH);
         
         // check if the soil is "moist" already;
-        PerformMoistureMeasurement();
+        // currently disabled because it seems to consume too much current while the pump needs already a lot
+        // PerformMoistureMeasurement();
         
         CurrentMillis = millis();
     }
     
+    // Serial debug info
+    debugoutln("stop the water pump");
+    
     // stop the water pump
     digitalWrite(PumpVoltagePin, LOW);
+    
+    // reset the moisture indicator to avoid that the pump starts again immediately after it pumped to let the water spread in the plant pot
+    MoistureIndicator = MoistureIndicators[2]; // Indicator 2 == moist
+    
 }
 
 
 // Decide if we need to switch on the water pump to perform a self watering action based on the interpretation of the moisture sensor analog input
 void DecisionToSwitchWaterPump(int Indicator){
+    
+    // Serial debug info
+    debugoutln("DecisionToSwitchWaterPump()");
     
     // remember the moisture indicator in this switch statement if "0" some day no longer means "urgently dry"
     // MoistureIndicators[0];
