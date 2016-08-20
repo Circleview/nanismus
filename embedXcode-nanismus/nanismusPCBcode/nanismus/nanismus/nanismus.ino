@@ -76,7 +76,7 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
 // Every how many milliseconds are we going to perform a moisture measurement?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
 // 30 minutes * 60 seconds * 1000 milliseconds
-unsigned long MoistMeasureInterval = 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+unsigned long MoistMeasureInterval = 60000; // 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
 
 // store the most recent time when the moisture measurement took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
@@ -200,7 +200,7 @@ void EstablishWifiConnectionWithRedFlyShield()
     
     // initialize the WiFi module on the shield
     
-    // Serial log
+    // Serial debug info
     // debugoutln("EstablishWiFiConnectionWithRedFlyShield()");
     
     uint8_t ret;
@@ -234,7 +234,8 @@ void EstablishWifiConnectionWithRedFlyShield()
     }
     
     if(ret){
-
+        
+        // Serial debug info
         // debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
         
     }
@@ -599,6 +600,7 @@ char * assembleThePostRequest(long value) {
 // Here we do the  Http POST request and check if the transmission was successful
 boolean HttpPostRequest(long value, RedFlyClient client, byte server[]){
     
+    // Serial debug info
     // debugoutln("HttpPostRequest");
     
     char * PostRequest = assembleThePostRequest(value);
@@ -648,6 +650,9 @@ boolean HttpPostRequest(long value, RedFlyClient client, byte server[]){
  * unfortunately we currently cannot do more than that because we don't have access to
  * the server */
 void FullHttpPostTransmission(long value){
+    
+    // Serial debug info
+    debugoutln("FullHttpPostTransmission");
     
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
@@ -766,6 +771,10 @@ void InterpreteMoistureMeasurementAnalogInput(int Input) {
         // return that the soil is considred "moist"
         MoistureIndicator = MoistureIndicators[2];
     }
+    
+    // Serial debug info
+    debugoutlnInt("MoistureIndicator", MoistureIndicator);
+    
 }
 
 /* Calculate the percentage value of current moisture based on the last measured moisture analog Input
@@ -845,6 +854,9 @@ void PerformMoistureMeasurement(){
     
     // switch of the voltage of the moisture sensor
     digitalWrite(SoilMeasureVoltagePin, LOW);
+    
+    // Serial debug info
+    debugoutlnInt("MoistureMeasurementResultAnalogInput", MoistureMeasurementResultAnalogInput);
     
     // switch off the indication LED
     // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
@@ -945,7 +957,7 @@ void StartTheWaterPump(){
         
         // check if the soil is "moist" already;
         // currently disabled because it seems to consume too much current while the pump needs already a lot
-        // PerformMoistureMeasurement();
+        PerformMoistureMeasurement();
         
         CurrentMillis = millis();
     }
@@ -990,10 +1002,13 @@ void DecisionToSwitchWaterPump(int Indicator){
 // Transform the current moisture value into a percentage value and send it to a database using http://
 void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
     
+    // Serial log info
+    // debugoutln("SendMoisturePercentageValueToDatabase");
+    
     if (IsTimeToSendData){
         
-        // Serial log info
-        // debugoutln("SendMoisturePercentageValueToDatabase");
+        // Serial debug info
+        debugoutln("IsTimeToSendData");
         
         // Transform the current analogInput value for the moisture of the soil into a percentage value
         FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue));
