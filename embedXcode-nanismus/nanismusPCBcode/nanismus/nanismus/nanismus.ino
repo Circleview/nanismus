@@ -62,7 +62,7 @@
 
 
 // define if this is a test build or a production build
-#define test 1 // 0 == production ; 1 == test
+#define test 0 // 0 == production ; 1 == test
 /* the interpretation of this value will currently lead to a different http POST statement
  * which writes differently attributed data to the database
  */
@@ -76,7 +76,7 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
 // Every how many milliseconds are we going to perform a moisture measurement?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
 // 30 minutes * 60 seconds * 1000 milliseconds
-unsigned long MoistMeasureInterval = 60000; // 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+unsigned long MoistMeasureInterval = 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
 
 // store the most recent time when the moisture measurement took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
@@ -941,7 +941,7 @@ void StartTheWaterPump(){
     
     unsigned long CurrentMillis = millis(); // recurring check of the current time
     unsigned long PumpBeginningMillis = CurrentMillis; // this value serves to compare start and end time of the watering action
-    unsigned long PumpDurationMillis = 10000; // water for 10 seconds. This provides 300 ml of water
+    unsigned long PumpDurationMillis = 20000; // water for 20 seconds. This provides 300 ml of water
     
     // Serial debug info
     debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
