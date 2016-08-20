@@ -16,8 +16,8 @@
 // See          ReadMe.txt for references
 
 /* current result of arduino IDE compiling
- Der Sketch verwendet 13.948 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
- Globale Variablen verwenden 673 Bytes (32%) des dynamischen Speichers, 1.375 Bytes für lokale Variablen verbleiben. Das Maximum sind 2.048 Bytes.
+Der Sketch verwendet 15.258 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
+Globale Variablen verwenden 1.245 Bytes (60%) des dynamischen Speichers, 803 Bytes für lokale Variablen verbleiben. Das Maximum sind 2.048 Bytes.
  */
 
 // PIN Declaration ################################################################################################################
@@ -112,25 +112,21 @@ int MoistureMeasurementResultAnalogInput;
  
  * Used thresholds
  
- * "zero water" : 0% : 240 : Indicator 0 - urgently dry
- * "urgently dry" : 20% : 300 : Indicator 0 - urgently dry
- * "moist" : 40% : 380 : Indicator 1 - dry
- * "very moist" : 80% : 442 : Indicator 2 - moist
- * "wet" : 100% : 481 : Indicator 2 - moist
+ * "zero" : 0% : 310
+ * "urgently dry" : 20% : 360
+ * "moist" : 40% : 400
+ * "very moist" : 80% : 442
+ * "hundred" : 100% : 481
  */
-int ThresholdsForAnalogInputValues[] = {310, 360, 400, 442, 481};
+/* line 121
+ *     ThresholdsForAnalogInputValues[] = {zero, urgently dry, moist, very moist, hundred};
+ *     ThresholdsForAnalogInputValues[] = {0%  , 20%         , 40%  , 80%       , 100%   };
+ *     ThresholdsForAnalogInputValues[] = {0   , 1           , 2    , 3         , 4      };
+ */
+   int ThresholdsForAnalogInputValues[] = {310 , 360         , 400  , 442       , 481    };
 
-/* In the Array we store different tresholds
- * position 0 --> the indicator for "urgently dry" - triggers self watering event
- * position 1 --> the indicator for "dry" - triggers the red warning lamp that asks for manual watering
- * position 2 --> the indicator for "moist" - everything is ok
- */
-int MoistureIndicators[] = {0, 1, 2};
-
-/* Store the indicator of the soil moisture
- * When we run the loop for the first time we consider the soil to be "moist";
- */
-int MoistureIndicator = MoistureIndicators[2];
+// Store the indicator of the soil moisture
+char * MoistureIndicator;
 
 
 // Debug Functions ####################################################################################################################
@@ -179,6 +175,21 @@ void debugoutlnUnsignedLong(char *s, unsigned long value){
 
 // debug output function for int values
 void debugoutlnInt(char *s, int value){
+#if defined(__AVR_ATmega32U4__)
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+#else
+    RedFly.disable();
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+    RedFly.enable();
+#endif
+}
+
+// debug output function for char * values
+void debugoutlnChar(char *s, char * value){
 #if defined(__AVR_ATmega32U4__)
     Serial.print(s);
     Serial.print(": ");
@@ -741,41 +752,6 @@ boolean IsTimeForMoistureMeasurement() {
     }
 }
 
-/* Interprete the return percentage value into an LED light indication if the soil is dry
- *
- */
-// Interprete the analog input from the moisture sensor
-void InterpreteMoistureMeasurementAnalogInput(int Input) {
-    
-    // Define wether a analog input value is considered dry or moist
-    
-    // Serial debug info
-    debugoutln("InterpreteMoistureMeasurementAnalogInput()");
-    
-    // Check if the analog input value from the moisture sensor is considered to indicate an "urgently dry" soil
-    if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[1]]){
-        
-        // retun that the soil is considered "urently dry"
-        MoistureIndicator = MoistureIndicators[0];
-        
-    }
-    // Check if the analog input value from the moisture sensor is considered to indicate a "dry" soil
-    else if(Input <= ThresholdsForAnalogInputValues[MoistureIndicators[2]]){
-        
-        // retun that the soil is considered "dry"
-        MoistureIndicator = MoistureIndicators[1];
-        
-    }
-    else {
-        
-        // return that the soil is considred "moist"
-        MoistureIndicator = MoistureIndicators[2];
-    }
-    
-    // Serial debug info
-    debugoutlnInt("MoistureIndicator", MoistureIndicator);
-    
-}
 
 /* Calculate the percentage value of current moisture based on the last measured moisture analog Input
  * This percentage value of the current moisture will be shown to the user on a website or in an app and so on... 
@@ -821,14 +797,14 @@ long PercentMoistureValue(int AnalogInputValue)
 
 
 // Start the actual moisture measurement by calling data from the moisture sensor
-void PerformMoistureMeasurement(){
+int CurrentMoistureAnalogInputValue(){
     
     // idicate with an LED that a measurement is currently performed
     // currently swiched off because I fear it consumes too much voltage
     // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
     
     // Serial debug info
-    debugoutln("PerformMoistureMeasurement()");
+    debugoutln("CurrentMoistureAnalogInputValue()");
     
     // apply voltage to soil moisture sensor
     digitalWrite(SoilMeasureVoltagePin, HIGH);
@@ -861,8 +837,67 @@ void PerformMoistureMeasurement(){
     // switch off the indication LED
     // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
     
-    // Interprete the analog input value from the sensor
-    InterpreteMoistureMeasurementAnalogInput(MoistureMeasurementResultAnalogInput);
+    return (MoistureMeasurementResultAnalogInput);
+    
+}
+
+
+// Read the Analog Input Value from the moisture sensor and interprete this value to moisture categories
+char * currentMoistureInterpretation() {
+    
+    /* returns the interpretation of the current soil moistue as a char
+     * I do this because I got confused with the different numbers of moisture indication
+     */
+    
+    // Serial debug info
+    debugoutln("currentMoistureInterpretation()");
+    
+    // Measure the current moisture, that returns an anlog Input Int value
+    // Interprete the analog input from the moisture sensor
+    int Input = CurrentMoistureAnalogInputValue();
+    
+    // Define a temporary moisture indicator to return to the function
+    char * TempMoistureIndicator;
+    
+    // Define wether a analog input value is considered dry or moist
+    
+    /* look line 121
+     *     ThresholdsForAnalogInputValues[] = {zero, urgently dry, moist, very moist, hundred};
+     *     ThresholdsForAnalogInputValues[] = {0%  , 20%         , 40%  , 80%       , 100%   };
+     *     ThresholdsForAnalogInputValues[] = {0   , 1           , 2    , 3         , 4      };
+     */
+    // int ThresholdsForAnalogInputValues[] = {310 , 360         , 400  , 442       , 481    };
+    
+    // Check if the analog input value from the moisture sensor is considered to indicate an "urgently dry" soil
+    if(Input <= ThresholdsForAnalogInputValues[1]){
+        
+        // retun that the soil is considered "urgently dry"
+        TempMoistureIndicator = "urgently dry";
+        
+    }
+    // Check if the analog input value from the moisture sensor is considered to indicate a "dry" soil
+    else if(Input <= ThresholdsForAnalogInputValues[2]){
+        
+        // retun that the soil is considered "dry"
+        TempMoistureIndicator = "dry";
+        
+    }
+    else if (Input <= ThresholdsForAnalogInputValues[3]){
+        
+        // return that the soil is considered "moist"
+        TempMoistureIndicator = "moist";
+    }
+    else {
+        
+        // return that the soil is considred "very moist"
+        TempMoistureIndicator = "very moist";
+    }
+    
+    // Serial debug info
+    debugoutlnChar("TempMoistureIndicator", TempMoistureIndicator);
+    
+    // return the value to the function
+    return (TempMoistureIndicator);
     
 }
 
@@ -870,7 +905,7 @@ void PerformMoistureMeasurement(){
 /* Measure the moisture of the soil
  * but only if it is already time to do the measurement
  */
-void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
+void DefineTheCurrentMoistureIndicator(boolean IsTimeForMoistureMeasurement) {
     
     // Serial debug info
     debugoutln("MoistureMeasurement()");
@@ -887,8 +922,11 @@ void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
          */
         lastMoistMeasureTime = millis();
         
-        // Start the measurement of the current soil moisture
-        PerformMoistureMeasurement();
+        /* Start the measurement of the current soil moisture
+         * and interprete this value into an Moisture indicator
+         */
+        MoistureIndicator = currentMoistureInterpretation();
+
     }
     else{
         
@@ -899,31 +937,46 @@ void MoistureMeasurement(boolean IsTimeForMoistureMeasurement) {
 
 
 // Decide if we need to switch the Dryness Warning LED on or off based on the interpretation of the moisture sensor analog input
-void DecisionToSwitchSoilDryWaringLED(int Indicator){
+void DecisionToSwitchSoilDryWaringLED(char * Indicator){
 
     // Serial debug info
     debugoutln("DecisionToSwitchSoilDryWaringLED()");
     
-    // remember the moisture indicator in this switch statement if "0" some day no longer means "urgently dry"
-    // and "1" does no longer mean "dry"
-    // MoistureIndicators[0];
+    // What kind of soil moisture indicator did we receive?
+    // Serial debug info
+    debugoutlnChar("Received Indicator", Indicator);
     
-    switch(Indicator){ // What kind of soil moisture indicator did we receive?
-            
-        case 0: // the soil is urgently dry
-        case 1: // the soil is dry
-            
-            // switch on the red dryness indication LED
-            // currently switched off, because it seems to consume too much current
-            // digitalWrite(SoilDryWarningLED, HIGH);
-            break;
-            
-        default: // in all the cases where the soil is not "dry" or "urgently dry" no warning LED is needed
-            
-            // switch of the red dryness indication LED
-            digitalWrite(SoilDryWarningLED, LOW);
-            break;
+    // Based on the received indicator you may decide if you need to switch on the LED
+    if (Indicator == "urgently dry") {
+        
+        // Serial debug info
+        debugoutln("Switch ON LED");
+        
+        // switch on the red dryness indication LED
+        // currently switched off, because it seems to consume too much current
+        // digitalWrite(SoilDryWarningLED, HIGH);
+        
     }
+    else if (Indicator == "dry"){
+        
+        // Serial debug info
+        debugoutln("Switch ON LED");
+        
+        // switch on the red dryness indication LED
+        // currently switched off, because it seems to consume too much current
+        // digitalWrite(SoilDryWarningLED, HIGH);
+        
+    }else {
+        
+        // in all the cases where the soil is not "dry" or "urgently dry" no warning LED is needed
+        
+        // Serial debug info
+        debugoutln("Switch OFF LED");
+        
+        // switch off the red dryness indication LED
+        digitalWrite(SoilDryWarningLED, LOW);
+    }
+            
 }
 
 
@@ -946,18 +999,14 @@ void StartTheWaterPump(){
     // Serial debug info
     debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
     
-    while ((CurrentMillis - PumpBeginningMillis < PumpDurationMillis) && (MoistureIndicator != MoistureIndicators[2])) {
+    while ((CurrentMillis - PumpBeginningMillis < PumpDurationMillis) && (currentMoistureInterpretation() != "very moist")) {
         
         // Serial debug info
         debugoutlnUnsignedLong("CurrentMillis", CurrentMillis);
-        debugoutlnInt("MoistureIndicator", MoistureIndicator);
+        debugoutlnChar("MoistureIndicator", MoistureIndicator);
         
         // switch on the water pump
         digitalWrite(PumpVoltagePin, HIGH);
-        
-        // check if the soil is "moist" already;
-        // currently disabled because it seems to consume too much current while the pump needs already a lot
-        PerformMoistureMeasurement();
         
         CurrentMillis = millis();
     }
@@ -969,33 +1018,38 @@ void StartTheWaterPump(){
     digitalWrite(PumpVoltagePin, LOW);
     
     // reset the moisture indicator to avoid that the pump starts again immediately after it pumped to let the water spread in the plant pot
-    MoistureIndicator = MoistureIndicators[2]; // Indicator 2 == moist
+    MoistureIndicator = "moist"; // Indicator 2 == moist
     
 }
 
 
 // Decide if we need to switch on the water pump to perform a self watering action based on the interpretation of the moisture sensor analog input
-void DecisionToSwitchWaterPump(int Indicator){
+void DecisionToSwitchWaterPump(char * Indicator){
     
     // Serial debug info
     debugoutln("DecisionToSwitchWaterPump()");
     
-    // remember the moisture indicator in this switch statement if "0" some day no longer means "urgently dry"
-    // MoistureIndicators[0];
+    // Which Indicator did we receive?
+    // Serial debug info
+    debugoutlnChar("Received Indicator", Indicator);
     
-    switch (Indicator) {
-        case 0: // the soil is "urgently dry"
-            
-            // start the self watering action
-            StartTheWaterPump();
-            
-            break;
-            
-        default:
-            // do nothing but ensure that there is no power supply to the transistor
-            digitalWrite(PumpVoltagePin, LOW);
-            
-            break;
+    // decide based on the indicator if we need to start the water pump
+    if (Indicator == "urgently dry") {
+        
+        // Serial debug info
+        debugoutln("Switch ON pump");
+        
+        // start the self watering action
+        StartTheWaterPump();
+        
+    } else {
+        
+        // Serial debug info
+        debugoutln("Switch OFF pump");
+        
+        // do nothing but ensure that there is no power supply to the transistor
+        digitalWrite(PumpVoltagePin, LOW);
+        
     }
 }
 
@@ -1032,10 +1086,10 @@ void loop() {
     /* Start the moisture measurement
      * Cosider the TRUE or FALSE statement from the time check before
      * The return of this moisture measurement is an analog input value
-     * This analog input value is then converted into a percentage value in three ranges which lead to an interpretation
-     * of the current moisture status of the soil - let's start with green, yellow, red
+     * This analog input value is then interpreted into an moisture indicator 
+     * of the current moisture status of the soil
      */
-    MoistureMeasurement(MeasureAndDataTransimitionTime);
+    DefineTheCurrentMoistureIndicator(MeasureAndDataTransimitionTime);
     
     /* Decide if the red dryness warning indication LED needs to be swiched on or off based on the moisture
      * interpretation
