@@ -8,7 +8,7 @@
 // 				Stefan Willuda
 //
 // Date			01.08.16 14:31
-// Version		0.67.0
+// Version		0.68.0
 //
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
@@ -57,12 +57,16 @@ Globale Variablen verwenden 1.245 Bytes (60%) des dynamischen Speichers, 803 Byt
 #include <RedFlyClient.h>
 #include <RedFlyServer.h>
 
+// library to check the Currently free Memory from http://www.arduino.cc/playground/Code/AvailableMemory
+// Download the Library from https://github.com/maniacbug/MemoryFree
+#include <MemoryFree.h>
+
 
 // Constants and variables ##########################################################################################################
 
 
 // define if this is a test build or a production build
-#define test 0 // 0 == production ; 1 == test
+#define test 1 // 0 == production ; 1 == test
 /* the interpretation of this value will currently lead to a different http POST statement
  * which writes differently attributed data to the database
  */
@@ -76,13 +80,24 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
 // Every how many milliseconds are we going to perform a moisture measurement?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
 // 30 minutes * 60 seconds * 1000 milliseconds
-unsigned long MoistMeasureInterval = 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+unsigned long MoistMeasureInterval = 120000;// 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+
+// Every how many milliseconds are we going to perform a call to the web server to check the watering initiation status?
+// currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
+unsigned long WateringInitiationCallInterval = 120000; // 900000; // 15 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+
 
 // store the most recent time when the moisture measurement took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
  * which leads to an immediate measurement of the soil when the board is connected to the power supply
  */
 long lastMoistMeasureTime = -1 * MoistMeasureInterval;
+
+// store the most recent time when call of the watering initiation status took place
+/* When we start the first iteration of the code loop than we use the current time minus one interval
+ * which leads to an immediate call when the board is connected to the power supply
+ */
+long lastWateringInitiationCallTime = -1 * WateringInitiationCallInterval;
 
 
 // define the variable that stores the data input that is sent by the soil moisture sensor for reuseage
@@ -173,8 +188,23 @@ void debugoutlnUnsignedLong(char *s, unsigned long value){
 #endif
 }
 
-// debug output function for int values
+// debug output function for char * values
 void debugoutlnInt(char *s, int value){
+#if defined(__AVR_ATmega32U4__)
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+#else
+    RedFly.disable();
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+    RedFly.enable();
+#endif
+}
+
+// debug output function for const char * values
+void debugoutlnConstChar(char *s, const char * value){
 #if defined(__AVR_ATmega32U4__)
     Serial.print(s);
     Serial.print(": ");
@@ -202,6 +232,34 @@ void debugoutlnChar(char *s, char * value){
     RedFly.enable();
 #endif
 }
+
+
+int currentMemoryFree()
+{
+    int mem = freeMemory();
+    return (mem);
+
+}
+
+void debugoutlnMemory(){
+    
+    char *s = "Current Memory";
+    int value = currentMemoryFree();
+    
+#if defined(__AVR_ATmega32U4__)
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+#else
+    RedFly.disable();
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+    RedFly.enable();
+#endif
+    
+}
+
 
 // Establish a WiFi Connection using the RedFly WiFi Shield ##########################################################################
 
@@ -236,7 +294,8 @@ void EstablishWifiConnectionWithRedFlyShield()
         /* In high power transmit mode an external power supply is recommended, because in some cases the USB port has not enough power
          * https://github.com/watterott/Arduino-Libs/tree/master/RedFly
          */
-        ret = RedFly.init(9600, LOW_POWER);
+        // ret = RedFly.init(9600, LOW_POWER);
+        ret = RedFly.init();
 
         debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
 
@@ -366,11 +425,13 @@ void EstablishWifiConnectionWithRedFlyShield()
 
 // Check if we receive a HTTP response for our POST request and interprete this response
 // return true if the data transmission was successful, else return false
-boolean SuccessOfHttpPostRequest(RedFlyClient client){
+boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClient client){
+    
+    // Serial debug info
+    // debugoutln("SuccessOfHttpPostRequest");
     
     // interprete the result of the http response to store the return value of this function
     boolean tempReturnValue;
-    
     
     /* To be sure that the data transmission was successful catch the server response and evaluate the result
      * oriented on the RedFly Example WebClient.ino
@@ -441,7 +502,7 @@ boolean SuccessOfHttpPostRequest(RedFlyClient client){
             
             data[len] = 0;
             // Serial log info
-            // debugout(data);
+            debugout(data);
             
             
             /* Now that we received the HTTP response it is time to interprete the received data
@@ -461,7 +522,7 @@ boolean SuccessOfHttpPostRequest(RedFlyClient client){
             /* Answer, we need to receive in order to know that the submission was successful
              * This string is determinded in the "valueget.php" file on the webserver.
              */
-            char successStringWebserver[] = "transmission success";
+            //char successStringWebserver[] = "transmission success";
             
             // Pointer that locates the position of the searched substring (char array) within a larger char array
             char * Pointer;
@@ -482,7 +543,7 @@ boolean SuccessOfHttpPostRequest(RedFlyClient client){
                 
                 // transmission success
                 // Serial Log info
-                // debugoutln(successStringWebserver);
+                debugoutlnConstChar("successStringWebserver", successStringWebserver);
                 
                 // store the result to use it when the function is done
                 tempReturnValue = true;
@@ -491,7 +552,7 @@ boolean SuccessOfHttpPostRequest(RedFlyClient client){
             else if (PointerPosition < 0) {
                 
                 // Serial Log info
-                // debugoutln("transmission failed");
+                debugoutln("failure");
                 
                 /* This means that we have been able to connect to the web server and POST our request
                  * but the response was not a success message.
@@ -531,14 +592,52 @@ boolean SuccessOfHttpPostRequest(RedFlyClient client){
     client.flush();
     
     return (tempReturnValue);
+
+}
+
+
+/* currently I am calling different URLs via http POST request
+ * here I decide which website to call, based on an "websiteSelector" indicator
+ */
+const char * switchBetweenDifferentWebsiteURLs(int websiteSelector) {
+    
+    // Serial debug info
+    // debugoutln("switchBetweenDifferentWebsiteURLs");
+    
+    const char * url; // what URL is related to which websiteSelector?
+    
+    switch (websiteSelector) {
+        case 1:
+            
+            // This is the web server script that logs the percentage value of the current moisture to display it on the index page
+            // Change from GET to POST, I've read something about security issues with GET
+            url = "POST /valueget.php";
+            break;
+            
+        case 2:
+            
+            // This is the web server script that calls for the current watering initiation status (initate, reset)
+            url = "POST /call_watering_initiation.php";
+            break;
+            
+        default:
+            break;
+    }
+    
+    // Serial debug info
+    // debugoutlnChar("url", url);
+    return (url);
 }
 
 
 /* This function puts together all the different parts of the POST request
  * that is sent to the webserver
  */
-char * assembleThePostRequest(long value) {
+char * assembleThePostRequest(long value, int websiteSelector) {
     
+    
+    // Serial debug info
+    // debugoutln("assembleThePostRequest()");
     
     // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
 #define HOSTNAME "192.168.178.24"
@@ -562,14 +661,14 @@ char * assembleThePostRequest(long value) {
     //String GetRequest;
     // http://miscsolutions.wordpress.com/2011/10/16/five-things-i-never-use-in-arduino-projects/
     
+    // Define the different values of the POST request
+    
     char * GetRequest;
     const char * get1;
     
-    // Define the different values of the POST request
+    // Decide which website / php script you want to call
+    get1 = switchBetweenDifferentWebsiteURLs(websiteSelector);
     
-    //get1 = "GET /valueget.php";
-    // Change from GET to POST, I've read something about security issues with GET
-    get1 = "POST /valueget.php";
     
     const char * get2 = "?name=";
     const char * get3 = "&type=";
@@ -608,31 +707,68 @@ char * assembleThePostRequest(long value) {
     
 }
 
-// Here we do the  Http POST request and check if the transmission was successful
-boolean HttpPostRequest(long value, RedFlyClient client, byte server[]){
+const char * successStringForAWebsiteSelector(int websiteSelector){
     
     // Serial debug info
-    // debugoutln("HttpPostRequest");
+    // debugoutln("successStringForAWebsiteSelector");
     
-    char * PostRequest = assembleThePostRequest(value);
+    const char * successString; // what URL is related to which websiteSelector?
+    
+    switch (websiteSelector) {
+        case 1:
+            
+            // This is the web server script that logs the percentage value of the current moisture to display it on the index page
+            // /valueget.php
+            successString = "transmission success";
+            break;
+            
+        case 2:
+            
+            // This is the web server script that calls for the current watering initiation status (initate, reset)
+            // /call_watering_initiation.php
+            successString = "initate";
+            break;
+            
+        default:
+            break;
+    }
+    
+    // Serial debug info
+    // debugoutlnChar("successString", successString);
+    return (successString);
+    
+}
+
+// Here we do the  Http POST request and check if the transmission was successful
+boolean SuccessResultOfHttpPostRequest(long value, int websiteSelector, RedFlyClient client, byte server[]){
+    
+    // Serial debug info
+    debugoutln("ResultOfHttpPostRequest");
+    
+    char * PostRequest = assembleThePostRequest(value, websiteSelector);
+    
+    // Serial debug info
+    // debugoutlnChar("PostRequest", PostRequest);
     
     // we want to know if the transmission was successful
     boolean tempReturnValue;
     
+    const char * successString = successStringForAWebsiteSelector(websiteSelector);
+    
     // connect the client to the web server and transmit the post request
     if(client.connect(server, 80))
     {
+        // Serial debug info
+        // debugoutln("client.connect(server, 80) == true");
+        
         //make a HTTP request
         //http://www.watterott.net/forum/topic/282
-        
-        // Serial log info
-        // debugoutln("Http Send");
         
         // call the web server
         // Example request http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=6&key=123
         client.print(PostRequest);
-        
-        tempReturnValue = SuccessOfHttpPostRequest(client);
+
+        tempReturnValue = SuccessOfHttpPostRequest(successString, client);
         
     }
     else {
@@ -660,10 +796,13 @@ boolean HttpPostRequest(long value, RedFlyClient client, byte server[]){
  * if this again does not work out, we try to re-establish the whole Wifi connection
  * unfortunately we currently cannot do more than that because we don't have access to
  * the server */
-void FullHttpPostTransmission(long value){
+void FullHttpPostTransmission(long value, int websiteSelector){
     
     // Serial debug info
     debugoutln("FullHttpPostTransmission");
+    
+    // Serial debug info
+    debugoutlnMemory();
     
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
@@ -680,7 +819,7 @@ void FullHttpPostTransmission(long value){
     do {
         
         // Serial log info
-        // debugoutln("new attempt to do a POST");
+        // debugoutlnInt("new attempt", numberAttempts);
         
         // The Post request is done in the while statement below
         
@@ -689,7 +828,7 @@ void FullHttpPostTransmission(long value){
         
     }
     // Check if we receive a HTTP response for our POST request and interprete this response
-    while (!HttpPostRequest(value, client, server) && (numberAttempts <= maxAttempts));
+    while ((!SuccessResultOfHttpPostRequest(value, websiteSelector, client, server)) && (numberAttempts <= maxAttempts));
     
 }
 
@@ -728,7 +867,7 @@ void setup() {
 /* Check if it is time to perform a new moisture measurement
  * We don't want to measure the moisture every loop of the processor
  */
-boolean IsTimeForMoistureMeasurement() {
+boolean IsTimeForSomething(long starttime, unsigned long interval) {
     
     // TRUE = Yes, we need to perform a moisture measurement
     // FALSE = No, currently no new moisture measurement needed, the last moisture measurement was performed not long ago
@@ -738,15 +877,15 @@ boolean IsTimeForMoistureMeasurement() {
      */
     unsigned long currentMillis = millis();
     
-    if(currentMillis - lastMoistMeasureTime < MoistMeasureInterval) {
+    if(currentMillis - starttime < interval) {
         
-        debugoutln("IsTimeForMoistureMeasurement = false");
+        // debugoutln("IsTimeForSomething = false");
         return(false);
     }
     else {
         
         // Serial debug info
-        debugoutln("IsTimeForMoistureMeasurement = true");
+        // debugoutln("IsTimeForSomething = true");
         
         return(true);
     }
@@ -804,7 +943,7 @@ int CurrentMoistureAnalogInputValue(){
     // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
     
     // Serial debug info
-    debugoutln("CurrentMoistureAnalogInputValue()");
+    // debugoutln("CurrentMoistureAnalogInputValue()");
     
     // apply voltage to soil moisture sensor
     digitalWrite(SoilMeasureVoltagePin, HIGH);
@@ -832,7 +971,7 @@ int CurrentMoistureAnalogInputValue(){
     digitalWrite(SoilMeasureVoltagePin, LOW);
     
     // Serial debug info
-    debugoutlnInt("MoistureMeasurementResultAnalogInput", MoistureMeasurementResultAnalogInput);
+    // debugoutlnInt("MoistureMeasurementResultAnalogInput", MoistureMeasurementResultAnalogInput);
     
     // switch off the indication LED
     // digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
@@ -850,7 +989,7 @@ char * currentMoistureInterpretation() {
      */
     
     // Serial debug info
-    debugoutln("currentMoistureInterpretation()");
+    // debugoutln("currentMoistureInterpretation()");
     
     // Measure the current moisture, that returns an anlog Input Int value
     // Interprete the analog input from the moisture sensor
@@ -894,7 +1033,7 @@ char * currentMoistureInterpretation() {
     }
     
     // Serial debug info
-    debugoutlnChar("TempMoistureIndicator", TempMoistureIndicator);
+    // debugoutlnChar("TempMoistureIndicator", TempMoistureIndicator);
     
     // return the value to the function
     return (TempMoistureIndicator);
@@ -908,13 +1047,13 @@ char * currentMoistureInterpretation() {
 void DefineTheCurrentMoistureIndicator(boolean IsTimeForMoistureMeasurement) {
     
     // Serial debug info
-    debugoutln("MoistureMeasurement()");
+    // debugoutln("MoistureMeasurement()");
     
     // is it already time to perform a new moisture check?
     if(IsTimeForMoistureMeasurement) {
         
         // Serial debug info
-        debugoutln("IsTimeForMoistureMeasurement == true");
+        // debugoutln("IsTimeForMoistureMeasurement == true");
         
         /* Store the current time to "remember" when the last moisture measurement took place
          * This information will be needed to decide in later loops of the code if it is time
@@ -931,7 +1070,7 @@ void DefineTheCurrentMoistureIndicator(boolean IsTimeForMoistureMeasurement) {
     else{
         
         // Serial debug info
-        debugoutln("IsTimeForMoistureMeasurement == false");
+        // debugoutln("IsTimeForMoistureMeasurement == false");
     }
 }
 
@@ -940,17 +1079,17 @@ void DefineTheCurrentMoistureIndicator(boolean IsTimeForMoistureMeasurement) {
 void DecisionToSwitchSoilDryWaringLED(char * Indicator){
 
     // Serial debug info
-    debugoutln("DecisionToSwitchSoilDryWaringLED()");
+    // debugoutln("DecisionToSwitchSoilDryWaringLED()");
     
     // What kind of soil moisture indicator did we receive?
     // Serial debug info
-    debugoutlnChar("Received Indicator", Indicator);
+    // debugoutlnChar("Received Indicator", Indicator);
     
     // Based on the received indicator you may decide if you need to switch on the LED
     if (Indicator == "urgently dry") {
         
         // Serial debug info
-        debugoutln("Switch ON LED");
+        // debugoutln("Switch ON LED");
         
         // switch on the red dryness indication LED
         // currently switched off, because it seems to consume too much current
@@ -960,7 +1099,7 @@ void DecisionToSwitchSoilDryWaringLED(char * Indicator){
     else if (Indicator == "dry"){
         
         // Serial debug info
-        debugoutln("Switch ON LED");
+        // debugoutln("Switch ON LED");
         
         // switch on the red dryness indication LED
         // currently switched off, because it seems to consume too much current
@@ -971,7 +1110,7 @@ void DecisionToSwitchSoilDryWaringLED(char * Indicator){
         // in all the cases where the soil is not "dry" or "urgently dry" no warning LED is needed
         
         // Serial debug info
-        debugoutln("Switch OFF LED");
+        // debugoutln("Switch OFF LED");
         
         // switch off the red dryness indication LED
         digitalWrite(SoilDryWarningLED, LOW);
@@ -984,7 +1123,7 @@ void DecisionToSwitchSoilDryWaringLED(char * Indicator){
 void StartTheWaterPump(){
     
     // Serial debug info
-    debugoutln("StartTheWaterPump()");
+    // debugoutln("StartTheWaterPump()");
     
     /* store when the pump action started
      * check how long the self watering action is currently performed
@@ -997,13 +1136,13 @@ void StartTheWaterPump(){
     unsigned long PumpDurationMillis = 20000; // water for 20 seconds. This provides 300 ml of water
     
     // Serial debug info
-    debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
+    // debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
     
     while ((CurrentMillis - PumpBeginningMillis < PumpDurationMillis) && (currentMoistureInterpretation() != "very moist")) {
         
         // Serial debug info
-        debugoutlnUnsignedLong("CurrentMillis", CurrentMillis);
-        debugoutlnChar("MoistureIndicator", MoistureIndicator);
+        // debugoutlnUnsignedLong("CurrentMillis", CurrentMillis);
+        // debugoutlnChar("MoistureIndicator", MoistureIndicator);
         
         // switch on the water pump
         digitalWrite(PumpVoltagePin, HIGH);
@@ -1012,7 +1151,7 @@ void StartTheWaterPump(){
     }
     
     // Serial debug info
-    debugoutln("stop the water pump");
+    // debugoutln("stop the water pump");
     
     // stop the water pump
     digitalWrite(PumpVoltagePin, LOW);
@@ -1027,17 +1166,17 @@ void StartTheWaterPump(){
 void DecisionToSwitchWaterPump(char * Indicator){
     
     // Serial debug info
-    debugoutln("DecisionToSwitchWaterPump()");
+    // debugoutln("DecisionToSwitchWaterPump()");
     
     // Which Indicator did we receive?
     // Serial debug info
-    debugoutlnChar("Received Indicator", Indicator);
+    // debugoutlnChar("Received Indicator", Indicator);
     
     // decide based on the indicator if we need to start the water pump
     if (Indicator == "urgently dry") {
         
         // Serial debug info
-        debugoutln("Switch ON pump");
+        // debugoutln("Switch ON pump");
         
         // start the self watering action
         StartTheWaterPump();
@@ -1045,13 +1184,14 @@ void DecisionToSwitchWaterPump(char * Indicator){
     } else {
         
         // Serial debug info
-        debugoutln("Switch OFF pump");
+        // debugoutln("Switch OFF pump");
         
         // do nothing but ensure that there is no power supply to the transistor
         digitalWrite(PumpVoltagePin, LOW);
         
     }
 }
+
 
 // Transform the current moisture value into a percentage value and send it to a database using http://
 void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
@@ -1062,10 +1202,27 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
     if (IsTimeToSendData){
         
         // Serial debug info
-        debugoutln("IsTimeToSendData");
+        // debugoutln("IsTimeToSendData");
         
         // Transform the current analogInput value for the moisture of the soil into a percentage value
-        FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue));
+        FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
+        
+    }
+}
+
+// Call a web server to see if there is a manual initiation for watering the plant
+void CheckWateringInitiationStatus(boolean IsTimeToCallInitiationStatus){
+   
+    // Serial log info
+    // debugoutln("CheckWateringInitiationStatus");
+    
+    if (IsTimeToCallInitiationStatus){
+        
+        // Serial debug info
+        debugoutln("IsTimeToCallData");
+        
+        // Call the web server to receive the current initiation status (initiate or reset)
+        FullHttpPostTransmission(1, 2); // The int value is random, because we currently don't need it to just call the URL // The 2 is the value for the webSiteselector watering.php
         
     }
 }
@@ -1081,7 +1238,11 @@ void loop() {
      * We use this statement to pass it on to following functions to decide e.g. if a moisture
      * needs to take place
      */
-    boolean MeasureAndDataTransimitionTime = IsTimeForMoistureMeasurement();
+    boolean MeasureAndDataTransimitionTime = IsTimeForSomething(lastMoistMeasureTime, MoistMeasureInterval);
+    
+    /* Check if it is time to start calling the web server for a watering initiation status 
+     */
+    boolean WateringInitiationStatusTime = IsTimeForSomething(lastWateringInitiationCallTime, WateringInitiationCallInterval);
     
     /* Start the moisture measurement
      * Cosider the TRUE or FALSE statement from the time check before
@@ -1101,6 +1262,14 @@ void loop() {
      * If the soil is "urgently dry" the waterpump will immediately start watering the soil
      */
     DecisionToSwitchWaterPump(MoistureIndicator);
+    
+    /* Check from time to time if a watering event was initiated manually over the website
+     * Therefore we make a http:// request to our webserver and call the current status
+     * of the watering initiation
+     * If we receive that a manual watering event was initiated, then we start the waterpump
+     * After that we reset the watering initiation status with a web server call
+     */
+    CheckWateringInitiationStatus(WateringInitiationStatusTime);
     
     /* Send the moisture data to a central database 
      * from there the moisture value can be displayed in an app or on a website

@@ -17,7 +17,7 @@
     // Festlegen welche Datenbank verwendet werden soll
     $test = false;  // bei true werden die Daten in die Testdatenbank geschrieben
     
-    $tabelle = "plant_log";
+    $tabelle = "initiate_watering_events";
     
     
     //Datenbank-Verbindung herstellen
@@ -30,23 +30,43 @@
     
     // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=99&key=c3781633f1fb1ddca77c9038d4994345
     
-    if ((isset($_GET['name'])) and (isset($_GET['type'])) and (isset($_GET['value'])) and (($_GET['key']) == $key))
-    {	// Wenn 'TEMP' Ÿbergeben wurde und key stimmt...
+    if ((isset($_GET['name'])) and (isset($_GET['value'])) and (($_GET['key']) == $key))
+    {	// If values have been transmitted and the key is correct ...
         
         $name = ($_GET['name']);
-        $type = ($_GET['type']);
-        $value = ($_GET['value']);
+        $valueInt = ($_GET['value']);
+        $valueString;
         
-        // http://stackoverflow.com/questions/1995562/now-function-in-php
-        $timestamp = date("Y-m-d H:i:s");
+        // the http:// call from the arduino webclient only sends int values, those have to be interpreted
+        
+        switch ($valueInt){
+            case 1 :
+                
+                // Reset by Arduino web client
+                $valueString = "reset";
+                break;
+                
+            case 2 :
+                
+                // pump initiation by use
+                $valueString = "initate";
+                break;
+                
+            default :
+                
+                // e.g. for unintended calls
+                $valueString = "none";
+                break;
+        }
+        
         $sql = "
         INSERT INTO $tabelle
         (
-         sensorname , logtype , value , timestamp
+         name , watering_initiated
          )
         VALUES
         (
-         '$name', '$type', $value, '$timestamp'
+         '$name', '$valueString'
          )
         ";
         
