@@ -29,6 +29,9 @@
     // Erhaltene Daten des Arduino Http Get in die MySQL Datenbank speichern
     
     // http://nanismus.no-ip.org/nanismus_test/valueget.php?name=Banane&type=status&value=99&key=c3781633f1fb1ddca77c9038d4994345
+    /*     if ((isset($_GET['name'])) and (isset($_GET['type'])) and (isset($_GET['value'])) and (($_GET['key']) == $key))
+     {
+     */
     
     if ((isset($_GET['name'])) and (isset($_GET['type'])) and (isset($_GET['value'])) and (($_GET['key']) == $key))
     {	// Wenn 'TEMP' Ÿbergeben wurde und key stimmt...

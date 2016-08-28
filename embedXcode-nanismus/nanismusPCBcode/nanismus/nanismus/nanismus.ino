@@ -446,7 +446,7 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
     unsigned long startTime = currentMillis;
     
     // give it a TimeoutTime milliseconds to receive an answer from the webserver
-    unsigned long TimeoutTime = 120000; // milliseconds
+    unsigned long TimeoutTime = 60000; // milliseconds
     
     /* The Webserver is going to answer with a simple HTTP response
      * We are going to fetch the answer in a buffer
@@ -468,8 +468,10 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
     int c;
     
     // Serial log info
-    debugoutln("start waiting");
+    // debugoutln("start waiting");
+
     
+    client.print("Connection: close\r\n\r\n");
     
     /* Start the while()
      * As long as we don't get an response or the TimeoutTime is not exeeded, we keep waiting for a response
@@ -553,6 +555,7 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
             else if (PointerPosition < 0) {
                 
                 // Serial Log info
+                debugoutln("");
                 debugoutln("failure");
                 
                 /* This means that we have been able to connect to the web server and POST our request
@@ -607,18 +610,20 @@ const char * switchBetweenDifferentWebsiteURLs(int websiteSelector) {
     
     const char * url; // what URL is related to which websiteSelector?
     
+    // HTTP Methods: GET vs. POST http://www.w3schools.com/tags/ref_httpmethods.asp
+    
     switch (websiteSelector) {
         case 1:
             
             // This is the web server script that logs the percentage value of the current moisture to display it on the index page
             // Change from GET to POST, I've read something about security issues with GET
-            url = "POST /valueget.php";
+            url = "GET /valueget.php";
             break;
             
         case 2:
             
             // This is the web server script that calls for the current watering initiation status (initate, reset)
-            url = "POST /call_watering_initiation.php";
+            url = "GET /call_initiation.php";
             break;
             
         default:
@@ -641,7 +646,7 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     // debugoutln("assembleThePostRequest()");
     
     // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
-#define HOSTNAME "192.168.178.24"
+#define HOSTNAME "192.168.178.23" // "173.194.219.94" // google.de
  
     // one is the name of the sensor (plant)
     const char * sensor_string;
@@ -670,35 +675,59 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     // Decide which website / php script you want to call
     get1 = switchBetweenDifferentWebsiteURLs(websiteSelector);
     
-    
-    const char * get2 = "?name=";
-    const char * get3 = "&type=";
-    const char * get4 = "&value=";
-    const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
-    const char * get6 = " HTTP/1.1\r\nHost: ";
-    const char * get7 = "\r\n\r\n";
-    
-    // transform the sensor value into a char to fit it in the POST request
-    char * value_char;
-    value_char = (char*) calloc(5, sizeof(char));
-    itoa(value, value_char, 10);
-    
-    // allocate memory for the POST request
-    GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
-                                + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
-    
-    // assemble the POST Request
-    strcat(GetRequest, get1);
-    strcat(GetRequest, get2);
-    strcat(GetRequest, sensor_string);
-    strcat(GetRequest, get3);
-    strcat(GetRequest, type_string);
-    strcat(GetRequest, get4);
-    strcat(GetRequest, value_char);
-    strcat(GetRequest, get5);
-    strcat(GetRequest, get6);
-    strcat(GetRequest, HOSTNAME);
-    strcat(GetRequest, get7);
+    if (websiteSelector == 1){
+
+        const char * get2 = "?name=";
+        const char * get3 = "&type=";
+        const char * get4 = "&value=";
+        const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
+        const char * get6 = " HTTP/1.1\r\nHost: ";
+        const char * get7 = "\r\n";
+        
+        // transform the sensor value into a char to fit it in the POST request
+        char * value_char;
+        value_char = (char*) calloc(5, sizeof(char));
+        itoa(value, value_char, 10);
+        
+        // allocate memory for the POST request
+        GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
+                                    + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
+       
+         // assemble the GET Request
+         strcat(GetRequest, get1);
+         strcat(GetRequest, get2);
+         strcat(GetRequest, sensor_string);
+         strcat(GetRequest, get3);
+         strcat(GetRequest, type_string);
+         strcat(GetRequest, get4);
+         strcat(GetRequest, value_char);
+         strcat(GetRequest, get5);
+         strcat(GetRequest, get6);
+         strcat(GetRequest, HOSTNAME);
+         strcat(GetRequest, get7);
+        
+    }
+    else if (websiteSelector == 2){
+        
+        const char * get6 = " HTTP/1.1\r\nHost: ";
+        const char * get7 = "\r\n";
+        
+        // transform the sensor value into a char to fit it in the POST request
+        char * value_char;
+        value_char = (char*) calloc(5, sizeof(char));
+        itoa(value, value_char, 10);
+        
+        // allocate memory for the POST request
+        GetRequest = (char*) calloc(strlen(get1) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
+        
+        // assemble the GET Request
+        strcat(GetRequest, get1);
+        strcat(GetRequest, get6);
+        strcat(GetRequest, HOSTNAME);
+        strcat(GetRequest, get7);
+        
+    }
+
     
     return (GetRequest);
     
@@ -808,7 +837,7 @@ void FullHttpPostTransmission(long value, int websiteSelector){
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
      */
-    byte server[] = { 192, 168, 178, 24 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+    byte server[] = { 192, 168, 178, 23 }; // {173, 194, 219 ,94}; google.de //  //{  85, 13,145,242 }; //ip from www.watterott.net (server)
     
     // initialize the client
     RedFlyClient client(server, 80);
