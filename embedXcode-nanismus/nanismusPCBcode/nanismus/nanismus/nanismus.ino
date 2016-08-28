@@ -66,7 +66,7 @@ Globale Variablen verwenden 1.245 Bytes (60%) des dynamischen Speichers, 803 Byt
 
 
 // define if this is a test build or a production build
-#define test 1 // 0 == production ; 1 == test
+#define istest 1 // 0 == production ; 1 == test
 /* the interpretation of this value will currently lead to a different http POST statement
  * which writes differently attributed data to the database
  */
@@ -80,24 +80,25 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
 // Every how many milliseconds are we going to perform a moisture measurement?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
 // 30 minutes * 60 seconds * 1000 milliseconds
-unsigned long MoistMeasureInterval = 120000;// 1800000; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+// ; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+unsigned long MoistMeasureInterval[2] = {1800000, 120000};
 
 // Every how many milliseconds are we going to perform a call to the web server to check the watering initiation status?
 // currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
-unsigned long WateringInitiationCallInterval = 120000; // 900000; // 15 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
-
+// 15 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+unsigned long WateringInitiationCallInterval[2] = {900000, 120000}; // 0 == production 1 == test
 
 // store the most recent time when the moisture measurement took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
  * which leads to an immediate measurement of the soil when the board is connected to the power supply
  */
-long lastMoistMeasureTime = -1 * MoistMeasureInterval;
+long lastMoistMeasureTime = -1 * MoistMeasureInterval[istest];
 
 // store the most recent time when call of the watering initiation status took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
  * which leads to an immediate call when the board is connected to the power supply
  */
-long lastWateringInitiationCallTime = -1 * WateringInitiationCallInterval;
+long lastWateringInitiationCallTime = -1 * WateringInitiationCallInterval[istest];
 
 
 // define the variable that stores the data input that is sent by the soil moisture sensor for reuseage
@@ -646,10 +647,10 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     const char * sensor_string;
     
     // we fill in different datatable values based on wether we have a test build or a production build
-    if (test == 1){
+    if (istest == 1){
         sensor_string = "Test";
     }
-    else if (test == 0){
+    else if (istest == 0){
         sensor_string = "Banane";
     }
     
@@ -1238,11 +1239,11 @@ void loop() {
      * We use this statement to pass it on to following functions to decide e.g. if a moisture
      * needs to take place
      */
-    boolean MeasureAndDataTransimitionTime = IsTimeForSomething(lastMoistMeasureTime, MoistMeasureInterval);
+    boolean MeasureAndDataTransimitionTime = IsTimeForSomething(lastMoistMeasureTime, MoistMeasureInterval[istest]);
     
     /* Check if it is time to start calling the web server for a watering initiation status 
      */
-    boolean WateringInitiationStatusTime = IsTimeForSomething(lastWateringInitiationCallTime, WateringInitiationCallInterval);
+    boolean WateringInitiationStatusTime = IsTimeForSomething(lastWateringInitiationCallTime, WateringInitiationCallInterval[istest]);
     
     /* Start the moisture measurement
      * Cosider the TRUE or FALSE statement from the time check before
