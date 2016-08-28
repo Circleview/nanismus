@@ -298,7 +298,7 @@ void EstablishWifiConnectionWithRedFlyShield()
         // ret = RedFly.init(9600, LOW_POWER);
         ret = RedFly.init();
 
-        debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
+        // debugoutln("RedFly.init ERROR"); //there are problems with the communication between the Arduino and the RedFly
 
         counter++;
         
@@ -342,7 +342,7 @@ void EstablishWifiConnectionWithRedFlyShield()
             
             ret = RedFly.join(Network, NetworkPW, INFRASTRUCTURE);
             
-            debugoutln("RedFly.join ERROR");
+            // debugoutln("RedFly.join ERROR");
             
             counter++;
             
@@ -384,7 +384,7 @@ void EstablishWifiConnectionWithRedFlyShield()
                 
                 ret = RedFly.begin();
                 
-                debugoutln("RedFly.begin ERROR");
+                // debugoutln("RedFly.begin ERROR");
                 
                 counter++;
                 
@@ -401,7 +401,7 @@ void EstablishWifiConnectionWithRedFlyShield()
                 //RedFly.getlocalip(ip);       // receive shield IP in case of DHCP/Auto-IP
                 
                 // server.begin();
-                debugoutln("WiFi Shield connected");
+                // debugoutln("WiFi Shield connected");
                 
             }
         }
@@ -429,7 +429,10 @@ void EstablishWifiConnectionWithRedFlyShield()
 boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClient client){
     
     // Serial debug info
-    // debugoutln("SuccessOfHttpPostRequest");
+    debugoutln("SuccessOfHttpPostRequest - Start");
+    
+    // Serial debug info
+    debugoutlnMemory();
     
     // interprete the result of the http response to store the return value of this function
     boolean tempReturnValue;
@@ -455,7 +458,7 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
     
     // declarations to process the answer of the webserver
     char data[300];  //receive buffer, usually the answer is not larger than 250 chars
-    unsigned int len=0; //receive buffer length
+    unsigned int len=0; // receive buffer length
     
     /* We are going to seach in the HTTP response for a phase that indicates transmission success
      * Therefore we are looking for a pointer, which indicates the position in the array that holds
@@ -507,7 +510,6 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
             // Serial log info
             debugout(data);
             
-            
             /* Now that we received the HTTP response it is time to interprete the received data
              * The webserver we address is responding wether a "success", a "failure" or something else
              * We need to search in the HTTP response for that "success" or "failure" statement
@@ -533,20 +535,35 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
             // function to find the pointer - is empty if there is no match
             Pointer = strstr(data, successStringWebserver);
             
+            // Serial debug info
+            // debugoutlnChar("Pointer", Pointer);
+            
+            // Serial debug info
+            // debugoutlnMemory();
+            
             // To get out of the while() I have to check if we received a valid response from the webserver
             PointerSize = sizeof(Pointer);
+            
+            // Serial debug info
+            // debugoutlnInt("PointerSize", PointerSize);
             
             // We locate the position of the substring within the larger
             int PointerPosition;
             // subtract the starting pointer of Haystack from the pointer returned by strstr()
             PointerPosition = (&Pointer[0] - &data[0]);
             
+            // Serial debug info
+            // debugoutlnInt("Pointer Position", PointerPosition);
+            
+            // try to free the memory
+            // Pointer = "";
+            
             // The PointerPosition in the array is always positive if we find the substring in the larger dara array
             if (PointerPosition >= 0) {
                 
                 // transmission success
                 // Serial Log info
-                debugoutlnConstChar("successStringWebserver", successStringWebserver);
+                // debugoutlnConstChar("successStringWebserver", successStringWebserver);
                 
                 // store the result to use it when the function is done
                 tempReturnValue = true;
@@ -573,7 +590,7 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
                 // Serial log info
                 // debugoutln("something is wrong here");
                 
-                /* Actually this else event should not occur, because we only get here if we receive a
+                /* Actually this else event should not occur, because we only get here if we don't receive a
                  * response. But I don't want to let special events to be unhandled.
                  */
                 
@@ -582,6 +599,8 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
                 
             }
             
+            // Serial debug info
+            // debugoutlnMemory();
             len = 0;
         }
         
@@ -589,11 +608,17 @@ boolean SuccessOfHttpPostRequest(const char * successStringWebserver, RedFlyClie
     }
     
     // serial log info
-    debugoutln("stopped waiting");
+    // debugoutln("stopped waiting");
     
     // flush the client connection
     // https://www.arduino.cc/en/Reference/WiFiClientFlush
     client.flush();
+    
+    // Serial debug info
+    debugoutln("SuccessOfHttpPostRequest - End");
+    
+    // Serial debug info
+    debugoutlnMemory();
     
     return (tempReturnValue);
 
@@ -661,7 +686,7 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     
     // one is the kind of value we are transmitting
     const char * type_string;
-    type_string = "Prozentfeuchte";
+    type_string = "Prozentfreuchte";
     
     
     //String GetRequest;
@@ -705,19 +730,21 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     strcat(GetRequest, HOSTNAME);
     strcat(GetRequest, get7);
     
+    // free the allocated string memory
+    free(value_char);
+    // free(GetRequest);
     
     return (GetRequest);
-    
-    // free the allocated string memory
-    // free(GetRequest);
-    // free(value_char);
     
 }
 
 const char * successStringForAWebsiteSelector(int websiteSelector){
     
     // Serial debug info
-    // debugoutln("successStringForAWebsiteSelector");
+    // debugoutln("successStringForAWebsiteSelector - Start");
+    
+    // Serial debug info
+    // debugoutlnMemory();
     
     const char * successString; // what URL is related to which websiteSelector?
     
@@ -742,6 +769,16 @@ const char * successStringForAWebsiteSelector(int websiteSelector){
     
     // Serial debug info
     // debugoutlnChar("successString", successString);
+    
+    // Serial debug info
+    // debugoutlnInt("Size of successString", sizeof(successString));
+    
+    // Serial debug info
+    // debugoutln("successStringForAWebsiteSelector - End");
+    
+    // Serial debug info
+    // debugoutlnMemory();
+    
     return (successString);
     
 }
@@ -750,7 +787,10 @@ const char * successStringForAWebsiteSelector(int websiteSelector){
 boolean SuccessResultOfHttpPostRequest(long value, int websiteSelector, RedFlyClient client, byte server[]){
     
     // Serial debug info
-    debugoutln("ResultOfHttpPostRequest");
+    debugoutln("SuccessResultOfHttpPostRequest - Start");
+    
+    // Serial debug info
+    debugoutlnMemory();
     
     char * PostRequest = assembleThePostRequest(value, websiteSelector);
     
@@ -781,7 +821,7 @@ boolean SuccessResultOfHttpPostRequest(long value, int websiteSelector, RedFlyCl
     else {
         
         // Serial Log info
-        debugoutln("server unavailable");
+        // debugoutln("server unavailable");
         
         // try to re-establish the wifi connection
         EstablishWifiConnectionWithRedFlyShield();
@@ -792,6 +832,12 @@ boolean SuccessResultOfHttpPostRequest(long value, int websiteSelector, RedFlyCl
     
     // free allocated memory
     free(PostRequest);
+    
+    // Serial debug info
+    debugoutln("SuccessResultOfHttpPostRequest - End");
+    
+    // Serial debug info
+    debugoutlnMemory();
     
     return (tempReturnValue);
     
@@ -806,10 +852,10 @@ boolean SuccessResultOfHttpPostRequest(long value, int websiteSelector, RedFlyCl
 void FullHttpPostTransmission(long value, int websiteSelector){
     
     // Serial debug info
-    debugoutln("FullHttpPostTransmission");
+    // debugoutln("FullHttpPostTransmission - Start");
     
     // Serial debug info
-    debugoutlnMemory();
+    // debugoutlnMemory();
     
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
@@ -837,6 +883,11 @@ void FullHttpPostTransmission(long value, int websiteSelector){
     // Check if we receive a HTTP response for our POST request and interprete this response
     while ((!SuccessResultOfHttpPostRequest(value, websiteSelector, client, server)) && (numberAttempts <= maxAttempts));
     
+    // Serial debug info
+    // debugoutln("FullHttpPostTransmission - End");
+    
+    // Serial debug info
+    // debugoutlnMemory();
 }
 
 
@@ -904,6 +955,12 @@ boolean IsTimeForSomething(long starttime, unsigned long interval) {
  */
 long PercentMoistureValue(int AnalogInputValue)
 {
+    
+    // Serial debug info
+    // debugoutln("PercentMoistureValue - Start");
+    
+    // Serial debug info
+    // debugoutlnMemory();
     
     // see the threshold definition above
     int zero = ThresholdsForAnalogInputValues[0];
@@ -1204,7 +1261,10 @@ void DecisionToSwitchWaterPump(char * Indicator){
 void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
     
     // Serial log info
-    // debugoutln("SendMoisturePercentageValueToDatabase");
+    // debugoutln("SendMoisturePercentageValueToDatabase - Start");
+    
+    // Serial debug info
+    // debugoutlnMemory();
     
     if (IsTimeToSendData){
         
@@ -1215,6 +1275,12 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
         FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
         
     }
+
+    // Serial log info
+    // debugoutln("SendMoisturePercentageValueToDatabase - End");
+    
+    // Serial debug info
+    // debugoutlnMemory();
 }
 
 // Call a web server to see if there is a manual initiation for watering the plant
@@ -1226,7 +1292,7 @@ void CheckWateringInitiationStatus(boolean IsTimeToCallInitiationStatus){
     if (IsTimeToCallInitiationStatus){
         
         // Serial debug info
-        debugoutln("IsTimeToCallData");
+        // debugoutln("IsTimeToCallData");
         
         // Call the web server to receive the current initiation status (initiate or reset)
         FullHttpPostTransmission(1, 2); // The int value is random, because we currently don't need it to just call the URL // The 2 is the value for the webSiteselector watering.php
