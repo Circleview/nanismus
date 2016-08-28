@@ -675,59 +675,36 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     // Decide which website / php script you want to call
     get1 = switchBetweenDifferentWebsiteURLs(websiteSelector);
     
-    if (websiteSelector == 1){
-
-        const char * get2 = "?name=";
-        const char * get3 = "&type=";
-        const char * get4 = "&value=";
-        const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
-        const char * get6 = " HTTP/1.1\r\nHost: ";
-        const char * get7 = "\r\n";
-        
-        // transform the sensor value into a char to fit it in the POST request
-        char * value_char;
-        value_char = (char*) calloc(5, sizeof(char));
-        itoa(value, value_char, 10);
-        
-        // allocate memory for the POST request
-        GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
-                                    + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
-       
-         // assemble the GET Request
-         strcat(GetRequest, get1);
-         strcat(GetRequest, get2);
-         strcat(GetRequest, sensor_string);
-         strcat(GetRequest, get3);
-         strcat(GetRequest, type_string);
-         strcat(GetRequest, get4);
-         strcat(GetRequest, value_char);
-         strcat(GetRequest, get5);
-         strcat(GetRequest, get6);
-         strcat(GetRequest, HOSTNAME);
-         strcat(GetRequest, get7);
-        
-    }
-    else if (websiteSelector == 2){
-        
-        const char * get6 = " HTTP/1.1\r\nHost: ";
-        const char * get7 = "\r\n";
-        
-        // transform the sensor value into a char to fit it in the POST request
-        char * value_char;
-        value_char = (char*) calloc(5, sizeof(char));
-        itoa(value, value_char, 10);
-        
-        // allocate memory for the POST request
-        GetRequest = (char*) calloc(strlen(get1) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
-        
-        // assemble the GET Request
-        strcat(GetRequest, get1);
-        strcat(GetRequest, get6);
-        strcat(GetRequest, HOSTNAME);
-        strcat(GetRequest, get7);
-        
-    }
-
+    
+    const char * get2 = "?name=";
+    const char * get3 = "&type=";
+    const char * get4 = "&value=";
+    const char * get5 = "&key=c3781633f1fb1ddca77c9038d4994345";//c3781633f1fb1ddca77c9038d4994345
+    const char * get6 = " HTTP/1.1\r\nHost: ";
+    const char * get7 = "\r\n";
+    
+    // transform the sensor value into a char to fit it in the POST request
+    char * value_char;
+    value_char = (char*) calloc(5, sizeof(char));
+    itoa(value, value_char, 10);
+    
+    // allocate memory for the POST request
+    GetRequest = (char*) calloc(strlen(get1) + strlen(get2) + strlen(sensor_string)  + strlen(get3) + strlen(type_string) + strlen(get4)
+                                + strlen(value_char) + strlen(get5) + strlen(get6) + strlen(HOSTNAME) + strlen(get7) + 1, sizeof(char));
+    
+    // assemble the GET Request
+    strcat(GetRequest, get1);
+    strcat(GetRequest, get2);
+    strcat(GetRequest, sensor_string);
+    strcat(GetRequest, get3);
+    strcat(GetRequest, type_string);
+    strcat(GetRequest, get4);
+    strcat(GetRequest, value_char);
+    strcat(GetRequest, get5);
+    strcat(GetRequest, get6);
+    strcat(GetRequest, HOSTNAME);
+    strcat(GetRequest, get7);
+    
     
     return (GetRequest);
     
