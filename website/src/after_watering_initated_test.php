@@ -6,8 +6,8 @@
             //some kind of header information will re-occur on may pages
             include ("page_metadata.php");
             
-            // receive and post production data
-            $name = "Banane";
+            // receive and post test data
+            $name = "Test";
             
             // Send to the database that the watering event was initiated manually
             include ("initiate_watering_manually.php");

@@ -12,7 +12,8 @@
 <?php
     
     // on production we don't want to see the test data
-    $name = "Banane";
+    $name = "Test";
+    
     include ("src/dbabfrage.php");
     
     /* for tests */

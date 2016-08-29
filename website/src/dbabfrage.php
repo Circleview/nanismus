@@ -10,7 +10,7 @@
     $sql = "
     SELECT $tabelle.value
     FROM $tabelle
-    WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Prozentfeuchte'))
+    WHERE ((($tabelle.sensorname)='$name') AND (($tabelle.logtype)='Prozentfeuchte'))
     ORDER BY $tabelle.ID DESC LIMIT 1
     ";
     
@@ -24,4 +24,6 @@
     {
         $Feuchte = $row['value'];
      }
+    
+    // echo "Feuchte: $Feuchte";
 ?>

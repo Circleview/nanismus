@@ -7,10 +7,11 @@
     
     
     // Get the last status of the watering initiation table
+    // the $name is received from the call_initiation.php
     $sql = "
     SELECT $tabelle.watering_initiated
     FROM $tabelle
-    WHERE ($tabelle.name ='Banane')
+    WHERE ($tabelle.name = '$name')
     ORDER BY $tabelle.ID DESC LIMIT 1
     ";
     

@@ -13,7 +13,18 @@
         
         // yes, show the button
     
-        echo "<form action='src/after_watering_initated.php' method='post'>";
+        if ($name == "Test"){
+            
+            // the test pages need to receive and post test data
+            echo "<form action='src/after_watering_initated_test.php' method='post'>";
+            
+        }
+        else {
+            
+            // this is the production data from the real plant
+            echo "<form action='src/after_watering_initated.php' method='post'>";
+        
+        }
         echo "<input type='submit' value='Jetzt gie&szlig;en' id='watering_button'/></p>";
         echo "</form>"; 
         
