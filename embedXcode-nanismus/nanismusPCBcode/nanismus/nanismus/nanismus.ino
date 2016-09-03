@@ -68,7 +68,7 @@ int PumpVoltagePin[2] = {11, 13}; // in production we switch 11 with the pump, i
 
 
 // define if this is a test build or a production build
-#define istest 1 // 0 == production ; 1 == test
+#define istest 0 // 0 == production ; 1 == test
 /* the interpretation of this value will currently lead to a different http POST statement
  * which writes differently attributed data to the database
  */
@@ -524,7 +524,6 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
         if(len && !client.connected()) {
             
             client.stop();
-            // RedFly.disconnect();
             
             data[len] = 0;
             // Serial log info
@@ -944,8 +943,6 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector){
     
     // initialize the client
     RedFlyClient client(server, 80);
-    
-    
     
     char * PostRequest = assembleThePostRequest(value, websiteSelector);
     

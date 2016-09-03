@@ -11,7 +11,7 @@
             
             // Send to the database that the watering event was initiated manually
             include ("initiate_watering_manually.php");
-            $Feuchte = 100;
+            // $Feuchte = 100;
             
             ?>
         

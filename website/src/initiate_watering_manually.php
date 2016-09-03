@@ -44,7 +44,23 @@
     ";
     
     //http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
-    $db_erg = mysqli_query($db_link, $sql)
-    or die("transmission failure" . mysqli_error($db_link));
+    // $db_erg = mysqli_query($db_link, $sql)
+    // or die("transmission failure" . mysqli_error($db_link));
+    
+    $db_erg = mysqli_query( $db_link, $sql );
+    if ( ! $db_erg )
+    {
+        die('invalid request: ' . mysqli_error($db_link));
+        
+    }
+    else {
+        
+        // If we performed a successful data transmission that will initiate a watering event, we want to display a nice green background. To do so we simply manipulate the moisture value to 100%
+        $Feuchte = 100;
+    }
+
+    
+    
+
     
     ?>
