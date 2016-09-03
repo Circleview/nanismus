@@ -11,7 +11,7 @@
             
             // Send to the database that the watering event was initiated manually
             include ("initiate_watering_manually.php");
-            // $Feuchte = 100;
+            $Feuchte = 100;
             
             ?>
         
@@ -72,7 +72,7 @@
         <table>
             <tr>
                 <td>
-                    Die Pflanze wurde gegossen.
+                     Die Nani wird gleich gegossen.
                 </td>
             </tr>
             <tr>

@@ -43,13 +43,13 @@
             case 1 :
                 
                 // Reset by Arduino web client
-                $valueString = "reset";
+                $valueString = "reseted";
                 break;
                 
             case 2 :
                 
                 // pump initiation by use
-                $valueString = "initate";
+                $valueString = "initiat";
                 break;
                 
             default :

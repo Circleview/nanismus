@@ -9,7 +9,7 @@
     // for test we can manipulate the database result
     // $watering_initiated = reset;
     
-    if ($Feuchte <= 40 && $watering_initiated == "reset"){
+    if ($Feuchte <= 40 && $watering_initiated == "reseted"){
         
         // yes, show the button
     

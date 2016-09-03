@@ -26,7 +26,7 @@
     
     
     // pump initiation by use
-    $valueString = "initate";
+    $valueString = "initiat";
     
     // we receive the name from the calling page
     // $name = "Banane";

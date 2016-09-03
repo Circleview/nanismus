@@ -36,7 +36,9 @@ Globale Variablen verwenden 1.245 Bytes (60%) des dynamischen Speichers, 803 Byt
 #define SoilDryWarningLED 7 // LED that indicated dryness in the soil
 
 // D11
-#define PumpVoltagePin 11 // Pin to start the waterpump to water the soil
+// Pin to start the waterpump to water the soil
+int PumpVoltagePin[2] = {11, 13}; // in production we switch 11 with the pump, in test we only switch 13, which is a LED
+// #define PumpVoltagePin 11
 
 // D13
 #define CurrentlyMoistureMeasurementIndicatorLED 13 // LED that indicates that right now a moisture measurement is performed
@@ -82,7 +84,7 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
  30 minutes * 60 seconds * 1000 milliseconds
  ; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
  */
-unsigned long MoistMeasureInterval[2] = {1800000, 120000};
+unsigned long MoistMeasureInterval[2] = {1800000, 120000}; // 0 == production 1 == test
 
 /* Every how many milliseconds are we going to perform a call to the web server to check the watering initiation status?
  currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
@@ -306,7 +308,7 @@ void EstablishWifiConnectionWithRedFlyShield()
     
     int counter, maxcounter;
     counter = 0;
-    maxcounter = 50;
+    maxcounter = 100;
     
     while (ret && counter < maxcounter) {
         
@@ -419,7 +421,7 @@ void EstablishWifiConnectionWithRedFlyShield()
                 //RedFly.getlocalip(ip);       // receive shield IP in case of DHCP/Auto-IP
                 
                 // server.begin();
-                // debugoutln("WiFi Shield connected");
+                debugoutln("WiFi Shield connected");
                 
             }
         }
@@ -522,7 +524,7 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
         if(len && !client.connected()) {
             
             client.stop();
-            RedFly.disconnect();
+            // RedFly.disconnect();
             
             data[len] = 0;
             // Serial log info
@@ -579,7 +581,7 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
                 PointerPosition = (&Pointer[0] - &data[0]);
                 
                 // Serial debug info
-                // debugoutlnInt("Pointer Position", PointerPosition);
+                debugoutlnInt("Pointer Position", PointerPosition);
                 
                 // The PointerPosition in the array is always positive if we find the substring in the larger dara array
                 if (PointerPosition >= 0) {
@@ -627,9 +629,6 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
                 currentCounter++;
 
             } while (tempReturnValue == "failure" && currentCounter < maxCounter);
-            
-            // const char * successString = successStringForAWebsiteSelector(websiteSelector);
-            
             
             // Serial debug info
             // debugoutlnMemory();
@@ -710,7 +709,7 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     // debugoutln("assembleThePostRequest()");
     
     // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
-#define HOSTNAME "192.168.178.23" // "173.194.219.94" // google.de
+#define HOSTNAME "192.168.178.24" // "173.194.219.94" // google.de
  
     // one is the name of the sensor (plant)
     const char * sensor_string;
@@ -774,52 +773,6 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     // free(GetRequest);
     
     return (GetRequest);
-    
-}
-
-const char * successStringForAWebsiteSelector(int websiteSelector){
-    
-    // Serial debug info
-    // debugoutln("successStringForAWebsiteSelector - Start");
-    
-    // Serial debug info
-    // debugoutlnMemory();
-    
-    const char * successString; // what URL is related to which websiteSelector?
-    
-    switch (websiteSelector) {
-        case 1:
-        case 3:
-            
-            // This is the web server script that logs the percentage value of the current moisture to display it on the index page
-            // /valueget.php
-            successString = "transmission success";
-            break;
-            
-        case 2:
-            
-            // This is the web server script that calls for the current watering initiation status (initate, reset)
-            // /call_watering_initiation.php
-            successString = "initate";
-            break;
-            
-        default:
-            break;
-    }
-    
-    // Serial debug info
-    // debugoutlnChar("successString", successString);
-    
-    // Serial debug info
-    // debugoutlnInt("Size of successString", sizeof(successString));
-    
-    // Serial debug info
-    // debugoutln("successStringForAWebsiteSelector - End");
-    
-    // Serial debug info
-    // debugoutlnMemory();
-    
-    return (successString);
     
 }
 
@@ -934,7 +887,7 @@ char * currentMoistureInterpretation() {
 void StartTheWaterPump(){
     
     // Serial debug info
-    // debugoutln("StartTheWaterPump()");
+    debugoutln("StartTheWaterPump()");
     
     /* store when the pump action started
      * check how long the self watering action is currently performed
@@ -944,7 +897,7 @@ void StartTheWaterPump(){
     
     unsigned long CurrentMillis = millis(); // recurring check of the current time
     unsigned long PumpBeginningMillis = CurrentMillis; // this value serves to compare start and end time of the watering action
-    unsigned long PumpDurationMillis = 20000; // water for 20 seconds. This provides 300 ml of water
+    unsigned long PumpDurationMillis = 30000; // water for 30 seconds.
     
     // Serial debug info
     // debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
@@ -956,7 +909,7 @@ void StartTheWaterPump(){
         // debugoutlnChar("MoistureIndicator", MoistureIndicator);
         
         // switch on the water pump
-        digitalWrite(PumpVoltagePin, HIGH);
+        digitalWrite(PumpVoltagePin[istest], HIGH);
         
         CurrentMillis = millis();
     }
@@ -965,7 +918,7 @@ void StartTheWaterPump(){
     // debugoutln("stop the water pump");
     
     // stop the water pump
-    digitalWrite(PumpVoltagePin, LOW);
+    digitalWrite(PumpVoltagePin[istest], LOW);
     
     // reset the moisture indicator to avoid that the pump starts again immediately after it pumped to let the water spread in the plant pot
     MoistureIndicator = "moist"; // Indicator 2 == moist
@@ -974,13 +927,25 @@ void StartTheWaterPump(){
 
 
 // Here we do the  Http POST request and check if the transmission was successful
-const char * ResultOfHttpPostRequest(long value, int websiteSelector, RedFlyClient client, byte server[]){
+const char * ResultOfHttpPostRequest(long value, int websiteSelector){
     
     // Serial debug info
     // debugoutln("SuccessResultOfHttpPostRequest - Start");
     
     // Serial debug info
     // debugoutlnMemory();
+    
+    
+    
+    /* Server IP adress - we remain with a local IP because currently the web server is
+     * in the same network as the RedFly WiFi shield
+     */
+    byte server[] = { 192, 168, 178, 24 }; // {173, 194, 219 ,94}; google.de //  //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+    
+    // initialize the client
+    RedFlyClient client(server, 80);
+    
+    
     
     char * PostRequest = assembleThePostRequest(value, websiteSelector);
     
@@ -989,8 +954,6 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector, RedFlyClie
     
     // we want to know if the transmission was successful
     const  char * tempReturnValue;
-    
-    // const char * successString = successStringForAWebsiteSelector(websiteSelector);
     
     // connect the client to the web server and transmit the post request
     if(client.connect(server, 80))
@@ -1012,12 +975,12 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector, RedFlyClie
     else {
         
         // Serial Log info
-        // debugoutln("server unavailable");
+        debugoutln("server unavailable");
         
         // try to re-establish the wifi connection
         EstablishWifiConnectionWithRedFlyShield();
         
-        tempReturnValue = false;
+        tempReturnValue = "failure";
         
     }
     
@@ -1028,7 +991,7 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector, RedFlyClie
     // debugoutln("SuccessResultOfHttpPostRequest - End");
     
     // Serial debug info
-    // debugoutlnMemory();
+    debugoutlnMemory();
     
     return (tempReturnValue);
     
@@ -1075,14 +1038,6 @@ void FullHttpPostTransmission(long value, int websiteSelector){
     // Serial debug info
     // debugoutlnMemory();
     
-    /* Server IP adress - we remain with a local IP because currently the web server is
-     * in the same network as the RedFly WiFi shield
-     */
-    byte server[] = { 192, 168, 178, 23 }; // {173, 194, 219 ,94}; google.de //  //{  85, 13,145,242 }; //ip from www.watterott.net (server)
-    
-    // initialize the client
-    RedFlyClient client(server, 80);
-    
     int maxAttempts = 6; // how often do we try to send out the data at max?
     int numberAttempts = 1; // starting point to count
     
@@ -1093,25 +1048,37 @@ void FullHttpPostTransmission(long value, int websiteSelector){
     do {
         
         // Serial log info
-        // debugoutlnInt("new attempt", numberAttempts);
+        debugoutlnInt("new attempt", numberAttempts);
         
         // count the number of attempts up
         numberAttempts++;
         
         // The Post request is done in the statement below
-        tempRequestSuccessTrue = ResultOfHttpPostRequest(value, websiteSelector, client, server);
- 
+        tempRequestSuccessTrue = ResultOfHttpPostRequest(value, websiteSelector);
+        
+        // Serial debug info
+        debugoutlnConstChar("tempRequestSuccessTrue", tempRequestSuccessTrue);
         
         // figure out if a manual watering initiation happend on the website
         if (tempRequestSuccessTrue == "initiat"){
             
+            // Serial debug info
+            debugoutln("tempRequestSuccessTrue == 'initiat'");
+            
             // store the current manual watering initiation status
-            manualWateringInitiationStatus = "initiate"; // webServerInitiationStatus(tempRequestSuccessTrue, websiteSelector);
+            manualWateringInitiationStatus = "initiate";
 
+            // Serial debug info
+            debugoutlnConstChar("manualWateringInitiationStatus", manualWateringInitiationStatus);
+            
         }
         else {
             
             manualWateringInitiationStatus = "reset"; // the default is to reset and that is ok, because nothing will happen then
+            
+            // Serial debug info
+            debugoutlnConstChar("manualWateringInitiationStatus", manualWateringInitiationStatus);
+            
         }
         
     }
@@ -1125,12 +1092,17 @@ void FullHttpPostTransmission(long value, int websiteSelector){
     // debugoutlnMemory();
 }
 
+
 void resetTheWateringInitiationStatusOnWebserver(){
     
     /* Call the web server to receive the current initiation status (initiate or reset)
      * the php script that interpretes the incomming GET request is defined here
      * home/watering.php
      */
+    
+    // Serial debug info
+    debugoutln("resetTheWateringInitiationStatusOnWebserver()");
+    
     FullHttpPostTransmission(1, 3); // The int value 1 == reset // The 3 is the value for the webSiteselector watering.php
 
 }
@@ -1174,6 +1146,9 @@ void checkForManualWateringInitiation(const char * startWatering){
     
     if ((startWatering == "initiate") && (IsTimeForSomething(lastManualWateringActionTime, manualWateringInitiationInterval[istest]))){
         
+        // Serial debug info
+        debugoutln("startWatering == 'initiate'");
+        
         // reset the timer for the manual watering action
         lastManualWateringActionTime = millis();
         
@@ -1209,7 +1184,7 @@ void setup() {
     pinMode(SoilDryWarningLED, OUTPUT);  // to switch on or off the LED for dryness indication
     pinMode(SoilMeasureVoltagePin, OUTPUT); // to apply voltage to the moisture sensor
     pinMode(CurrentlyMoistureMeasurementIndicatorLED, OUTPUT); // to switch on or off the LED for measurement indication
-    pinMode(PumpVoltagePin, OUTPUT);
+    pinMode(PumpVoltagePin[istest], OUTPUT);
     
     // Blink once to show that we have the new version of the code
     digitalWrite(SoilDryWarningLED, HIGH);
@@ -1366,8 +1341,12 @@ void DecisionToSwitchWaterPump(char * Indicator){
     // decide based on the indicator if we need to start the water pump
     if (Indicator == "urgently dry") {
         
+        
         // Serial debug info
-        // debugoutln("Switch ON pump");
+        debugoutlnChar("Received Indicator", Indicator);
+        
+        // Serial debug info
+        debugoutln("Switch ON pump");
         
         // start the self watering action
         StartTheWaterPump();
@@ -1378,7 +1357,7 @@ void DecisionToSwitchWaterPump(char * Indicator){
         // debugoutln("Switch OFF pump");
         
         // do nothing but ensure that there is no power supply to the transistor
-        digitalWrite(PumpVoltagePin, LOW);
+        digitalWrite(PumpVoltagePin[istest], LOW);
         
     }
 }
@@ -1396,7 +1375,7 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
     if (IsTimeToSendData){
         
         // Serial debug info
-        // debugoutln("IsTimeToSendData");
+        debugoutln("IsTimeToSendData");
         
         // Transform the current analogInput value for the moisture of the soil into a percentage value
         FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
@@ -1419,7 +1398,7 @@ void CheckWateringInitiationStatus(boolean IsTimeToCallInitiationStatus){
     if (IsTimeToCallInitiationStatus){
         
         // Serial debug info
-        // debugoutln("IsTimeToCallData");
+        debugoutln("IsTimeToCallData");
         
         // reset the timer to wait for the next Inition Call
         lastWateringInitiationCallTime = millis();
