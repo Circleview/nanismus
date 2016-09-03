@@ -16,8 +16,8 @@
 // See          ReadMe.txt for references
 
 /* current result of arduino IDE compiling
-Der Sketch verwendet 15.258 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
-Globale Variablen verwenden 1.245 Bytes (60%) des dynamischen Speichers, 803 Bytes für lokale Variablen verbleiben. Das Maximum sind 2.048 Bytes.
+ Der Sketch verwendet 14.676 Bytes (45%) des Programmspeicherplatzes. Das Maximum sind 32.256 Bytes.
+ Globale Variablen verwenden 739 Bytes (36%) des dynamischen Speichers, 1.309 Bytes für lokale Variablen verbleiben. Das Maximum sind 2.048 Bytes.
  */
 
 // PIN Declaration ################################################################################################################
@@ -580,7 +580,7 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
                 PointerPosition = (&Pointer[0] - &data[0]);
                 
                 // Serial debug info
-                debugoutlnInt("Pointer Position", PointerPosition);
+                // debugoutlnInt("Pointer Position", PointerPosition);
                 
                 // The PointerPosition in the array is always positive if we find the substring in the larger dara array
                 if (PointerPosition >= 0) {
@@ -591,7 +591,7 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
                     tempReturnValue = expectedReturnStrings[currentCounter][0];
                     
                     // Serial debug info
-                    debugoutlnConstChar("tempReturnValue", tempReturnValue);
+                    // debugoutlnConstChar("tempReturnValue", tempReturnValue);
                     
                 }
                 else if (PointerPosition < 0) {
@@ -886,7 +886,7 @@ char * currentMoistureInterpretation() {
 void StartTheWaterPump(){
     
     // Serial debug info
-    debugoutln("StartTheWaterPump()");
+    // debugoutln("StartTheWaterPump()");
     
     /* store when the pump action started
      * check how long the self watering action is currently performed
@@ -1045,7 +1045,7 @@ void FullHttpPostTransmission(long value, int websiteSelector){
     do {
         
         // Serial log info
-        debugoutlnInt("new attempt", numberAttempts);
+        // debugoutlnInt("new attempt", numberAttempts);
         
         // count the number of attempts up
         numberAttempts++;
@@ -1054,19 +1054,19 @@ void FullHttpPostTransmission(long value, int websiteSelector){
         tempRequestSuccessTrue = ResultOfHttpPostRequest(value, websiteSelector);
         
         // Serial debug info
-        debugoutlnConstChar("tempRequestSuccessTrue", tempRequestSuccessTrue);
+        // debugoutlnConstChar("tempRequestSuccessTrue", tempRequestSuccessTrue);
         
         // figure out if a manual watering initiation happend on the website
         if (tempRequestSuccessTrue == "initiat"){
             
             // Serial debug info
-            debugoutln("tempRequestSuccessTrue == 'initiat'");
+            // debugoutln("tempRequestSuccessTrue == 'initiat'");
             
             // store the current manual watering initiation status
             manualWateringInitiationStatus = "initiate";
 
             // Serial debug info
-            debugoutlnConstChar("manualWateringInitiationStatus", manualWateringInitiationStatus);
+            // debugoutlnConstChar("manualWateringInitiationStatus", manualWateringInitiationStatus);
             
         }
         else {
@@ -1074,7 +1074,7 @@ void FullHttpPostTransmission(long value, int websiteSelector){
             manualWateringInitiationStatus = "reset"; // the default is to reset and that is ok, because nothing will happen then
             
             // Serial debug info
-            debugoutlnConstChar("manualWateringInitiationStatus", manualWateringInitiationStatus);
+            // debugoutlnConstChar("manualWateringInitiationStatus", manualWateringInitiationStatus);
             
         }
         
@@ -1098,7 +1098,7 @@ void resetTheWateringInitiationStatusOnWebserver(){
      */
     
     // Serial debug info
-    debugoutln("resetTheWateringInitiationStatusOnWebserver()");
+    // debugoutln("resetTheWateringInitiationStatusOnWebserver()");
     
     FullHttpPostTransmission(1, 3); // The int value 1 == reset // The 3 is the value for the webSiteselector watering.php
 
@@ -1144,7 +1144,7 @@ void checkForManualWateringInitiation(const char * startWatering){
     if ((startWatering == "initiate") && (IsTimeForSomething(lastManualWateringActionTime, manualWateringInitiationInterval[istest]))){
         
         // Serial debug info
-        debugoutln("startWatering == 'initiate'");
+        // debugoutln("startWatering == 'initiate'");
         
         // reset the timer for the manual watering action
         lastManualWateringActionTime = millis();
@@ -1340,10 +1340,10 @@ void DecisionToSwitchWaterPump(char * Indicator){
         
         
         // Serial debug info
-        debugoutlnChar("Received Indicator", Indicator);
+        // debugoutlnChar("Received Indicator", Indicator);
         
         // Serial debug info
-        debugoutln("Switch ON pump");
+        // debugoutln("Switch ON pump");
         
         // start the self watering action
         StartTheWaterPump();
@@ -1372,7 +1372,7 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
     if (IsTimeToSendData){
         
         // Serial debug info
-        debugoutln("IsTimeToSendData");
+        // debugoutln("IsTimeToSendData");
         
         // Transform the current analogInput value for the moisture of the soil into a percentage value
         FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
@@ -1395,7 +1395,7 @@ void CheckWateringInitiationStatus(boolean IsTimeToCallInitiationStatus){
     if (IsTimeToCallInitiationStatus){
         
         // Serial debug info
-        debugoutln("IsTimeToCallData");
+        // debugoutln("IsTimeToCallData");
         
         // reset the timer to wait for the next Inition Call
         lastWateringInitiationCallTime = millis();
