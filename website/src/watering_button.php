@@ -25,7 +25,7 @@
             echo "<form action='src/after_watering_initated.php' method='post'>";
         
         }
-        echo "<input type='submit' value='Jetzt gie&szlig;en' id='watering_button'/></p>";
+        echo "<input type='submit' value='Gie&szlig;en' id='watering_button'/></p>";
         echo "</form>"; 
         
     }

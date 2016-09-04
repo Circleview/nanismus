@@ -8,7 +8,7 @@
 // 				Stefan Willuda
 //
 // Date			01.08.16 14:31
-// Version		0.68.0
+// Version		0.69.0
 //
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
@@ -591,7 +591,7 @@ const char * resultOfHttpPostRequest(int websiteSelector, RedFlyClient client){
                     tempReturnValue = expectedReturnStrings[currentCounter][0];
                     
                     // Serial debug info
-                    // debugoutlnConstChar("tempReturnValue", tempReturnValue);
+                    debugoutlnConstChar("tempReturnValue", tempReturnValue);
                     
                 }
                 else if (PointerPosition < 0) {
@@ -934,8 +934,6 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector){
     // Serial debug info
     // debugoutlnMemory();
     
-    
-    
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
      */
@@ -1133,6 +1131,55 @@ boolean IsTimeForSomething(long starttime, unsigned long interval) {
 }
 
 
+/* Calculate the percentage value of current moisture based on the last measured moisture analog Input
+ * This percentage value of the current moisture will be shown to the user on a website or in an app and so on...
+ */
+long PercentMoistureValue(int AnalogInputValue)
+{
+    
+    // Serial debug info
+    // debugoutln("PercentMoistureValue - Start");
+    
+    // Serial debug info
+    // debugoutlnMemory();
+    
+    // see the threshold definition above
+    int zero = ThresholdsForAnalogInputValues[0];
+    int twenty = ThresholdsForAnalogInputValues[1];
+    int fourty = ThresholdsForAnalogInputValues[2];
+    int eighty = ThresholdsForAnalogInputValues[3];
+    int hundred = ThresholdsForAnalogInputValues[4];
+    
+    long PercentageValue;
+    
+    /* If we ever receive an anlogInput value that is larger than 100% == 481 or smaller than
+     * 0% == 205 than we limit the range of the value we calculate with with the 0% and 100% values
+     * which have been defined in the thresholds for the analog input values
+     */
+    AnalogInputValue = constrain(AnalogInputValue, zero, hundred);
+    
+    // percentage mapping between 0 and 20%
+    // https://www.arduino.cc/en/Reference/Map
+    if (AnalogInputValue <= twenty){
+        PercentageValue = map(AnalogInputValue, zero, twenty, 0, 20);
+    }
+    // percentage mapping between 20 and 40%
+    else if ((AnalogInputValue > twenty) && (AnalogInputValue <= fourty)){
+        PercentageValue = map(AnalogInputValue, twenty + 1, fourty, 21, 40);
+    }
+    // percentage mapping between 40 and 80%
+    else if ((AnalogInputValue > fourty) && (AnalogInputValue <= eighty)){
+        PercentageValue = map(AnalogInputValue, fourty + 1 , eighty, 41, 80);
+    }
+    // percentage mapping between 80 and 100%
+    else if (AnalogInputValue > eighty){
+        PercentageValue = map(AnalogInputValue, eighty + 1, hundred, 81, 100);
+    }
+    
+    return(PercentageValue);
+}
+
+
 // If we received an watering initiation state over the website we need to perform some actions accordingly
 void checkForManualWateringInitiation(const char * startWatering){
     
@@ -1160,6 +1207,10 @@ void checkForManualWateringInitiation(const char * startWatering){
          * 192.168.178.24/watering/?name=Banane&value=0&key=c3781633f1fb1ddca77c9038d4994345
          */
         resetTheWateringInitiationStatusOnWebserver();
+        
+        /* and send the current moisture value to the database to make clear that the watering event took place and 
+         * made a difference */
+        FullHttpPostTransmission(PercentMoistureValue(MoistureMeasurementResultAnalogInput), 1); // 1 is the websiteSelector for valueget.php
 
     }
     
@@ -1195,56 +1246,6 @@ void setup() {
 
 
 // Setup End #########################################################################################################################
-
-
-/* Calculate the percentage value of current moisture based on the last measured moisture analog Input
- * This percentage value of the current moisture will be shown to the user on a website or in an app and so on... 
- */
-long PercentMoistureValue(int AnalogInputValue)
-{
-    
-    // Serial debug info
-    // debugoutln("PercentMoistureValue - Start");
-    
-    // Serial debug info
-    // debugoutlnMemory();
-    
-    // see the threshold definition above
-    int zero = ThresholdsForAnalogInputValues[0];
-    int twenty = ThresholdsForAnalogInputValues[1];
-    int fourty = ThresholdsForAnalogInputValues[2];
-    int eighty = ThresholdsForAnalogInputValues[3];
-    int hundred = ThresholdsForAnalogInputValues[4];
-    
-    long PercentageValue;
-    
-    /* If we ever receive an anlogInput value that is larger than 100% == 481 or smaller than 
-     * 0% == 205 than we limit the range of the value we calculate with with the 0% and 100% values
-     * which have been defined in the thresholds for the analog input values
-     */
-    AnalogInputValue = constrain(AnalogInputValue, zero, hundred);
-    
-    // percentage mapping between 0 and 20%
-    // https://www.arduino.cc/en/Reference/Map
-    if (AnalogInputValue <= twenty){
-        PercentageValue = map(AnalogInputValue, zero, twenty, 0, 20);
-    }
-    // percentage mapping between 20 and 40%
-    else if ((AnalogInputValue > twenty) && (AnalogInputValue <= fourty)){
-        PercentageValue = map(AnalogInputValue, twenty + 1, fourty, 21, 40);
-    }
-    // percentage mapping between 40 and 80%
-    else if ((AnalogInputValue > fourty) && (AnalogInputValue <= eighty)){
-        PercentageValue = map(AnalogInputValue, fourty + 1 , eighty, 41, 80);
-    }
-    // percentage mapping between 80 and 100%
-    else if (AnalogInputValue > eighty){
-        PercentageValue = map(AnalogInputValue, eighty + 1, hundred, 81, 100);
-    }
-    
-    return(PercentageValue);
-}
-
 
 
 /* Measure the moisture of the soil
@@ -1385,6 +1386,7 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
     // Serial debug info
     // debugoutlnMemory();
 }
+
 
 // Call a web server to see if there is a manual initiation for watering the plant
 void CheckWateringInitiationStatus(boolean IsTimeToCallInitiationStatus){
