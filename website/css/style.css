@@ -8,11 +8,43 @@ table {
 
 td {
     border: 0px solid;
+    height: 100px;
+    text-align: center;
+    font-size: 30px;
+    font-style: bold;
+    font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
+}
+
+/* the styling of e.g. the table row of the watering button */
+.buttonTableData {
+    
+    border: 0px solid;
     height: 200px;
     text-align: center;
     font-size: 30px;
     font-style: bold;
     font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
+    
+}
+
+/* the styling of e.g. the timestamp of the last watering event */
+.mediumTableData {
+
+    border: 0px solid;
+    height: 50px;
+    text-align: center;
+    font-size: 15px;
+    font-style: medium;
+    font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
+ }
+
+/* the little icon that indicates the waterin can and the last manual watering initiation timestamp */
+#wateringCanWithWateringTimestamp {
+
+    vertical-align: middle;
+    height: 50px;
+    width: auto;
+    
 }
 
 /* syling of the watering button */

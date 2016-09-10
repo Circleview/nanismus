@@ -3,10 +3,18 @@
 
 <head>
 
-<!-- some kind of header information will re-occur on may pages -->
+<!-- some kind of header information will re-occur on many pages -->
 <?php
  include ("src/page_metadata.php");
           ?>
+
+<!-- Define feature toogles -->
+<?php
+    
+    // feature toggle to display the last manual watering initiation timestamp
+    $showLastManualWateringInitiationTimestamp = true;
+    
+    ?>
 
 <!-- PHP load data from mySQL database to show on this page -->
 <?php
@@ -81,7 +89,7 @@
             </td>
         </tr>
         <tr>
-            <td>
+            <td class="buttonTableData">
                 <!-- check if we need to include the watering button -->
                 <?php
                     include ("src/watering_button.php");
@@ -89,6 +97,12 @@
 
             </td>
         </tr>
+
+        <! -- build up the table row that displays the last manual watering intiation timestamp - if the feature toggle has been set -->
+            <?php
+                include ("src/last_manual_watering_timestamp.php");
+                ?>
+
     </table>
 
 
