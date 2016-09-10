@@ -31,7 +31,11 @@
     }
     else {
         
-        // no, don't show the button
+        // no, don't show the button but show a nice little plant icon
+        
+        // show a nice little picture
+        echo "<img id='centralPlantIcon' src ='../images/naniplant_pot.svg'>";
+        
     }
     
 ?>

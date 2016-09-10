@@ -3,16 +3,26 @@ table {
     width: 100%;
     height: 100%;
     position: relative;
-    padding-top: 10%;
+    padding-top: 5%;
 }
 
 td {
     border: 0px solid;
     height: 100px;
     text-align: center;
+    vertical-align: middle;
     font-size: 30px;
     font-style: bold;
     font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
+}
+
+/* the icon that indicates the moisture of the plant */
+#waterdropForMoisture {
+    
+    vertical-align: middle;
+    height: 65px;
+    width: auto;
+    
 }
 
 /* the styling of e.g. the table row of the watering button */
@@ -21,29 +31,10 @@ td {
     border: 0px solid;
     height: 200px;
     text-align: center;
+    vertical-align: middle;
     font-size: 30px;
     font-style: bold;
     font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
-    
-}
-
-/* the styling of e.g. the timestamp of the last watering event */
-.mediumTableData {
-
-    border: 0px solid;
-    height: 50px;
-    text-align: center;
-    font-size: 15px;
-    font-style: medium;
-    font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
- }
-
-/* the little icon that indicates the waterin can and the last manual watering initiation timestamp */
-#wateringCanWithWateringTimestamp {
-
-    vertical-align: middle;
-    height: 50px;
-    width: auto;
     
 }
 
@@ -59,4 +50,34 @@ td {
     padding: 10px 20px 10px 20px;
     border: solid #ffffff 4px;
     text-decoration: none;
+}
+
+/* the plant icon that is displayed instead of the watering button */
+#centralPlantIcon{
+    
+    vertical-align: middle;
+    height: 170px;
+    width: auto;
+    
+}
+
+/* the styling of e.g. the timestamp of the last watering event */
+.mediumTableData {
+    
+    padding-top: 45px;
+    border: 0px solid;
+    height: 50px;
+    text-align: center;
+    font-size: 15px;
+    font-style: medium;
+    font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
+}
+
+/* the little icon that indicates the waterin can and the last manual watering initiation timestamp */
+#wateringCanWithWateringTimestamp {
+    
+    vertical-align: middle;
+    height: 50px;
+    width: auto;
+    
 }

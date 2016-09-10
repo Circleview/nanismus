@@ -85,7 +85,10 @@
     <table>
         <tr>
             <td>
-                Feuchtigkeit: <?php echo "$Feuchte %"; ?>
+                <! -- build up the content of this row and show an icon of a waterdrop and the current moisture value -->
+                <?php
+                    include ("src/moisture_value_display.php");
+                    ?>
             </td>
         </tr>
         <tr>
