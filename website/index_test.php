@@ -25,9 +25,16 @@
     include ("src/dbabfrage.php");
     
     /* for tests */
-    // $Feuchte = 18;
+    $Feuchte = 38;
     
 ?>
+
+<!-- include aditional data -->
+<!-- text constants which will be displayed as labels -->
+<?php
+    
+    include ("src/text_constants.php");
+    ?>
 
 <!-- dynamic styles based on database value -->
 <style>

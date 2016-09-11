@@ -28,6 +28,13 @@
     
 ?>
 
+<!-- include aditional data -->
+<!-- text constants which will be displayed as labels -->
+<?php
+    
+    include ("src/text_constants.php");
+    ?>
+
 <!-- dynamic styles based on database value -->
 <style>
     

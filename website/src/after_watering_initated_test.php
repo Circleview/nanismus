@@ -72,7 +72,15 @@
         <table>
             <tr>
                 <td>
-                    Die Nani wird gleich gegossen.
+                    <?php
+    
+                        
+                        include ("text_constants.php");
+                        
+                        echo "$wateringInitiationSuccessText";
+                        
+                        ?>
+
                 </td>
             </tr>
             <tr>

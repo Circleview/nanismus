@@ -4,6 +4,7 @@
 <form action=
 
 <?php
+    
     if ($name == "Test"){
         
         // return to the test index page
@@ -16,5 +17,11 @@
     ?>
 
      method="post">
-    <input type="submit" value="zur&uuml;ck" id="watering_button"/></p>
+
+        <input type="submit" value=
+
+        <?php include("text_constants.php"); echo "$submitButtonLabelBackText"; ?>
+
+        id="watering_button"/></p>
+
 </form>
