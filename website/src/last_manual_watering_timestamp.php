@@ -163,32 +163,32 @@
         }
         
         // erery druation with more than 30 hours to 3 days will be displayed in a certain way
-        else if ($timePassed > hoursToSeconds(30) && $timePassed <= daysToSeconds(3)){
+        else if ($timePassed > hoursToSeconds(30) && $timePassed <= daysToSeconds(2)){
             
             $timestampString = "vor wenigen Tagen";
             
         }
         
-        // every duration with more than 3 days and less or egal 5 days will be displayed in a certain way
-        else if ($timePassed > daysToSeconds(3) && $timePassed <= daysToSeconds(5)){
+        // every duration with more than 2 days and less or egal 4 days will be displayed in a certain way
+        else if ($timePassed > daysToSeconds(2) && $timePassed <= daysToSeconds(4)){
             
             $timestampString = "vor einigen Tagen";
             
         }
         
-        // every duration with more than 5 days will be displayed in a certain way
-        elseif ($timePassed > daysToSeconds(5) && $timePassed <= daysToSeconds(10)){
+        // every duration with more than 4 days will be displayed in a certain way
+        elseif ($timePassed > daysToSeconds(4) && $timePassed <= daysToSeconds(7)){
             
             $timestampString = "am letzten ";
             $timestampString .= timestampWeekday($timestamp);
             
         }
         
-        // every duration with more that 10 days
-        elseif ($timePassed > daysToSeconds(10)){
+        // every duration with more that 7 days
+        elseif ($timePassed > daysToSeconds(7)){
             
             $timestampString = "am ";
-            $timestampString .= date('d.m.Y',$timestamp); 
+            $timestampString .= date('d.m.Y',$timestamp);
             
         }
         
