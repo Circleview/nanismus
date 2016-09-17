@@ -35,6 +35,45 @@
         
     }
     
+    
+    function timestampWeekday($timestamp){
+        
+        // echo "timestamp: "; echo $timestamp; echo " ";
+        
+        $weekdayInt = date('w', $timestamp);
+        // echo "weekdayInt: "; echo $weekdayInt; echo " ";
+        
+        $weekdayString = "";
+        
+        switch ($weekdayInt) {
+                
+            case 1:
+                $weekdayString = "Montag";
+                break;
+            case 2:
+                $weekdayString = "Dienstag";
+                break;
+            case 3:
+                $weekdayString = "Mittwoch";
+                break;
+            case 4:
+                $weekdayString = "Donnerstag";
+                break;
+            case 5:
+                $weekdayString = "Freitag";
+                break;
+            case 6:
+                $weekdayString = "Sonnabend";
+                break;
+            case 0:
+                $weekdayString = "Sonntag";
+                break;
+        }
+        
+        return $weekdayString;
+    }
+    
+    
     function lastManualWateringInitiationTimestamp ($plantname){
         
         // Get the timestamp of the last manual watering intitiation
@@ -130,10 +169,26 @@
             
         }
         
-        // every duration with more than 3 days will be displayed in a certain way
-        else if ($timePassed > daysToSeconds(3)){
+        // every duration with more than 3 days and less or egal 5 days will be displayed in a certain way
+        else if ($timePassed > daysToSeconds(3) && $timePassed <= daysToSeconds(5)){
             
             $timestampString = "vor einigen Tagen";
+            
+        }
+        
+        // every duration with more than 5 days will be displayed in a certain way
+        elseif ($timePassed > daysToSeconds(5) && $timePassed <= daysToSeconds(10)){
+            
+            $timestampString = "am letzten ";
+            $timestampString .= timestampWeekday($timestamp);
+            
+        }
+        
+        // every duration with more that 10 days
+        elseif ($timePassed > daysToSeconds(10)){
+            
+            $timestampString = "am ";
+            $timestampString .= date('d.m.Y',$timestamp); 
             
         }
         
