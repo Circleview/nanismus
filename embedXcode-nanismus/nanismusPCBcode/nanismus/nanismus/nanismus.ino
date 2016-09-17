@@ -84,19 +84,19 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
  30 minutes * 60 seconds * 1000 milliseconds
  ; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
  */
-unsigned long MoistMeasureInterval[2] = {1800000, 120000}; // 0 == production 1 == test
+unsigned long MoistMeasureInterval[2] = {1800000, 60000}; // 0 == production 1 == test
 
 /* Every how many milliseconds are we going to perform a call to the web server to check the watering initiation status?
  currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
  15 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
 */
-unsigned long WateringInitiationCallInterval[2] = {900000, 120000}; // 0 == production 1 == test
+unsigned long WateringInitiationCallInterval[2] = {900000, 60000}; // 0 == production 1 == test
 
 /* if we initiate a manual watering action over the website we switch on the waterpump. After we watered the plant we try to reset the watering status in the web server database from "initiate" to "reset" to make watering over the website possible again and to avoid an immediate watering action after the first watering action took place. 
  * however what happens if we try to reset the status on the web server but are not able to because of a problem with the connection?
  * technically after one loop cycle the manual watering check would think that a new manual watering would be intended. To avoid that we use a small timer that prevents immediate watering actions
  */
-unsigned long manualWateringInitiationInterval[2] = {3600000, 120000}; // milliseconds // 0 == production 1 == test
+unsigned long manualWateringInitiationInterval[2] = {3600000, 60000}; // milliseconds // 0 == production 1 == test
 long lastManualWateringActionTime = -1 * manualWateringInitiationInterval[istest]; // the first manual watering should be possible immediately after program start
 
 
@@ -116,6 +116,8 @@ long lastWateringInitiationCallTime = -1 * WateringInitiationCallInterval[istest
 // define the variable that stores the data input that is sent by the soil moisture sensor for reuseage
 int MoistureMeasurementResultAnalogInput;
 
+// define the variable that stores the moisture percentage value that is calculated out of the analog input moisture value
+int lastMoistureResultPercentageValue = 0;
 
 // Define the thresholds of different analog input values to decide if they can be considered as dry, moist and so on...
 /* This array shall be extended later if we want a more granular distinction between dry, moist, toomoist soil
@@ -1361,6 +1363,57 @@ void DecisionToSwitchWaterPump(char * Indicator){
 }
 
 
+int percentMoistureValueToSendToWebserver(int inputAnalogInputValue){
+    
+    /* We check if it is a good choice to send out the current percentage moisture value to the webserver or if we use the last one that was stored globally. 
+     * Why do we do that? I've experienced some disappointment by the user when she received the information that the moisture dropped below a certain threshold and that she is requested to water the plant but when she actually opened the website to water the plant the percentage moisture value just increased slightly and there was no longer an option to water the plant. This frustration decreased the likelyhood of using the website. 
+     * So I want the displayed moisture to remain stable for a longer period of time. 
+     * The idea is: 
+     * If the moisture drops, send this lower value to the webserver. 
+     * If the moisture increased slightly, take the last (dropped) value and re-send it to the webserver.
+     * If the moisture increased significantly I assume that there was a watering event and I surely want this to be displayed on the website. 
+     * So I have to find a threshold that - in absolute percent numbers - is allowed to increase before I assume that there was a watering event. 
+     * Using this threshold I can then calculate the actual percentage value I want to send to the webserver. 
+     */
+    
+    // use a temporary value to be returned to the function
+    int percentMoistureValueToSendToWebserverTemp;
+    
+    int threshold = 4; // percent points
+    
+    // calculate the current percentage moisture
+    int currentPercentMoisture = PercentMoistureValue(inputAnalogInputValue);
+    
+    // Serial debug info
+    // debugoutlnInt("currentPercentMoisture", currentPercentMoisture);
+    
+    // Serial debung info
+    // debugoutlnInt("lastMoistureResultPercentageValue", lastMoistureResultPercentageValue);
+    
+    // check if the current moisture is lower or significantly higher then the last percentage moisture value
+    if (currentPercentMoisture < lastMoistureResultPercentageValue | currentPercentMoisture > (lastMoistureResultPercentageValue + threshold)) {
+        
+        // overwrite the last percentage moisture value with the current, lower or significantly higher percentage moisture value
+        lastMoistureResultPercentageValue = currentPercentMoisture;
+        
+        // return the current percentage moisture value
+        percentMoistureValueToSendToWebserverTemp = currentPercentMoisture;
+        
+    }
+    else {
+        
+        percentMoistureValueToSendToWebserverTemp = lastMoistureResultPercentageValue;
+        
+    }
+    
+    // Serial debug info
+    // debugoutlnInt("percentMoistureValueToSendToWebserverTemp", percentMoistureValueToSendToWebserverTemp);
+    
+    return (percentMoistureValueToSendToWebserverTemp);
+    
+}
+
+
 // Transform the current moisture value into a percentage value and send it to a database using http://
 void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
     
@@ -1370,13 +1423,14 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
     // Serial debug info
     // debugoutlnMemory();
     
+    // Check if the moisture decreased and if it is time again to send out the moisture value
     if (IsTimeToSendData){
         
         // Serial debug info
         // debugoutln("IsTimeToSendData");
         
         // Transform the current analogInput value for the moisture of the soil into a percentage value
-        FullHttpPostTransmission(PercentMoistureValue(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
+        FullHttpPostTransmission(percentMoistureValueToSendToWebserver(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
         
     }
 

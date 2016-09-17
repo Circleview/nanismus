@@ -162,7 +162,7 @@
                 // echo "<br>";
         
                 // Get the name of the plant from $name - defined in the index.php
-                echo lastManualWateringInitiationTimestamp($name);
+                echo " "; echo lastManualWateringInitiationTimestamp($name);
         
             echo "</td>";
         echo "</tr>";
