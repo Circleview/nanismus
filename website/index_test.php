@@ -17,6 +17,9 @@
     // feature toggle to display the twitter timeline for nanismusKW
     $showTwitterTimeline = true;
     
+    // feature toggle to display the moisture chart
+    $showMoistureChart = true;
+    
     ?>
 
 <!-- PHP load data from mySQL database to show on this page -->
@@ -51,16 +54,10 @@
         background:
 
         <?php
-
-            if ($Feuchte >=41){
-                echo "#82c837;"; /* green */
-            }
-            else if ($Feuchte >=21){
-                echo "#FFFF33;"; /* "#F2EC38;"; /* yellow */
-            }
-            else {
-                echo "#C8373A;"; /* red */
-            }
+        
+        include ("src/background_color.php");
+        
+            echo backgroundColor($Feuchte); echo ";"; /* red */
     
         ?>
     }
@@ -72,22 +69,25 @@
         color:
 
         <?php
-
-        if ($Feuchte >=41){
-            echo "#ffffff;"; /* green */
-        }
-        else if ($Feuchte >=21){
-            echo "#000000;"; /* "#F2EC38;"; /* yellow */
-        }
-        else {
-            echo "#ffffff;"; /* red */
-    
-        }
-
+        
+        include ("src/text_color.php");
+        
+            echo textColor($Feuchte); echo ";"; /* red */
+        
         ?>
+
     }
 
 </style>
+
+<!-- if the feature toggle is swiched on include all the data that is needed to display the moisture diagram -->
+<?php
+    if ($showMoistureChart) {
+        
+        include ("src/moistchart_setup.php");
+        
+    }
+    ?>
 
 </head>
 
@@ -117,6 +117,12 @@
             <?php
                 include ("src/last_manual_watering_timestamp.php");
                 ?>
+        <! -- build up the table row that displays the moisture data as a graph -
+            if the feature toggle has been set -->
+            <?php
+                include ("src/moistchart.php");
+                ?>
+
 
         <! -- build up the table row that displays the twitter timeline for nanismusKW -
             if the feature toggle has been set -->
