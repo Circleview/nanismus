@@ -73,6 +73,18 @@ td {
     font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
 }
 
+/* the styling of e.g. the timestamp of the last watering event */
+.twitterTableData {
+    
+    padding-top: 80px;
+    border: 0px solid;
+    height: 50px;
+    text-align: center;
+    font-size: 15px;
+    font-style: medium;
+    font-family: Verdana, Geneva, sans-serif; /*http://www.w3schools.com/cssref/css_websafe_fonts.asp */
+}
+
 /* the little icon that indicates the waterin can and the last manual watering initiation timestamp */
 #wateringCanWithWateringTimestamp {
     

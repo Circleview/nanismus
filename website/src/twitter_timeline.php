@@ -5,7 +5,7 @@
 if ($showTwitterTimeline){
 
     echo "<tr>";
-        echo "<td class = 'mediumTableData'>";
+        echo "<td class = 'twitterTableData'>";
 
 // How to embedd twitter feeds https://dev.twitter.com/web/embedded-timelines
 
