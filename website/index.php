@@ -14,6 +14,9 @@
     // feature toggle to display the last manual watering initiation timestamp
     $showLastManualWateringInitiationTimestamp = true;
     
+    // feature toggle to display the twitter timeline for nanismusKW
+    $showTwitterTimeline = true;
+    
     ?>
 
 <!-- PHP load data from mySQL database to show on this page -->
@@ -111,6 +114,12 @@
         <! -- build up the table row that displays the last manual watering intiation timestamp - if the feature toggle has been set -->
             <?php
                 include ("src/last_manual_watering_timestamp.php");
+                ?>
+
+        <! -- build up the table row that displays the twitter timeline for nanismusKW -
+            if the feature toggle has been set -->
+            <?php
+                include ("src/twitter_timeline.php");
                 ?>
 
     </table>

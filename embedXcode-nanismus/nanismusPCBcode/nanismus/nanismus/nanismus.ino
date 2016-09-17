@@ -1379,7 +1379,7 @@ int percentMoistureValueToSendToWebserver(int inputAnalogInputValue){
     // use a temporary value to be returned to the function
     int percentMoistureValueToSendToWebserverTemp;
     
-    int threshold = 4; // percent points
+    int threshold = 5; // percent points
     
     // calculate the current percentage moisture
     int currentPercentMoisture = PercentMoistureValue(inputAnalogInputValue);
