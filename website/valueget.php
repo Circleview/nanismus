@@ -42,11 +42,11 @@
         $sql = "
         INSERT INTO $tabelle
         (
-         sensorname , logtype , value , timestamp
+         sensorname , logtype , value
          )
         VALUES
         (
-         '$name', '$type', $value, '$timestamp'
+         '$name', '$type', $value
          )
         ";
         

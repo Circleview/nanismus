@@ -1,5 +1,6 @@
 <?php
     
+    // http://www.colorpicker.com/37c8c5
     
     function backgroundColor($moisturePercentValue){
         

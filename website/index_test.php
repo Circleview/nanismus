@@ -3,6 +3,8 @@
 
 <head>
 
+<!-- http://www.responsinator.com/?url=http://nanismus.no-ip.org&device=iphone-6&orientation=portrait --> 
+
 <!-- some kind of header information will re-occur on may pages -->
 <?php
  include ("src/page_metadata.php");
