@@ -161,7 +161,19 @@
         // echo " timePassed: $timePassed";
         
         // every duration between 0 seconds and 45 minutes will be displayed in a certain way
-        if ($timePassed > 0 && $timePassed <= minutesToSeconds(45)){
+        if ($timePassed > 0 && $timePassed <= minutesToSeconds(1)){
+            
+            $timestampString = " jetzt";
+            
+        }
+        
+        else if ($timePassed > minutesToSeconds(1) && $timePassed <= minutesToSeconds(5)){
+            
+            $timestampString = " gerade eben";
+            
+        }
+        
+        else if ($timePassed > minutesToSeconds(5) && $timePassed <= minutesToSeconds(45)){
             
             $timestampString = " vor wenigen Minuten";
             
