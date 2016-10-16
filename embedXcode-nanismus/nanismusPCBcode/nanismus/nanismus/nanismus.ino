@@ -7,8 +7,8 @@
 // Author 		Stefan Willuda
 // 				Stefan Willuda
 //
-// Date			01.08.16 14:31
-// Version		0.69.0
+// Date			17.09.2016
+// Version		0.70.0
 //
 // Copyright	© Stefan Willuda, 2016
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
@@ -1379,7 +1379,7 @@ int percentMoistureValueToSendToWebserver(int inputAnalogInputValue){
     // use a temporary value to be returned to the function
     int percentMoistureValueToSendToWebserverTemp;
     
-    int threshold = 5; // percent points
+    int threshold = 10; // percent points
     
     // calculate the current percentage moisture
     int currentPercentMoisture = PercentMoistureValue(inputAnalogInputValue);
