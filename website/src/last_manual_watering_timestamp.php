@@ -1,5 +1,9 @@
 <?php
     
+    //connect to database
+    //------------------------------
+    // include ("db.php");
+    
     function minutesToSeconds ($inputMinutes){
         
         return $inputMinutes * 60;
@@ -34,7 +38,6 @@
         }
         
     }
-    
     
     function timestampWeekday($timestamp){
         
@@ -73,6 +76,36 @@
         return $weekdayString;
     }
     
+    function lastWateringInitiationStatus ($plantname){
+
+        // Get the status of the watering intitiation to check if the watering event was just initiated or if the watering already took place
+
+        //connect to database
+        //------------------------------
+        include ("db.php");
+        
+        $tabelle = "initiate_watering_events";
+        
+        $sql = "
+        SELECT $tabelle.watering_initiated
+        FROM $tabelle
+        WHERE ($tabelle.name = '$plantname')
+        ORDER BY $tabelle.ID DESC LIMIT 1
+        ";
+        
+        $db_erg = mysqli_query( $db_link, $sql );
+        if ( ! $db_erg )
+        {
+            die('invalid request: ' . mysqli_error($db_link));
+        }
+
+        while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
+        {
+            $status = $row['watering_initiated'];
+        }
+        
+        return $status;
+    }
     
     function lastManualWateringInitiationTimestamp ($plantname){
         
@@ -87,7 +120,7 @@
         $sql = "
         SELECT $tabelle.timestamp
         FROM $tabelle
-        WHERE ($tabelle.name = '$plantname') && ($tabelle.watering_initiated = 'initiat')
+        WHERE ($tabelle.name = '$plantname') && ($tabelle.watering_initiated = 'reseted')
         ORDER BY $tabelle.ID DESC LIMIT 1
         ";
         
@@ -200,7 +233,7 @@
     
     // Check if this feature is toogled true - The feature toogle is received from the index page
     
-    if ($showLastManualWateringInitiationTimestamp) {
+    if (showLastManualWateringInitiationTimestamp) {
         
         echo "<tr>";
             echo "<td class = 'mediumTableData'>";
@@ -211,13 +244,30 @@
                 echo ">";
         
             // echo "</td>";
-            //echo "<td class = 'mediumTableData'>";
+            // echo "<td class = 'mediumTableData'>";
         
                 // echo "$name";
                 // echo "<br>";
         
-                // Get the name of the plant from $name - defined in the index.php
-                echo " "; echo lastManualWateringInitiationTimestamp($name);
+                // If the last status of the manual watering initiation was "initiated", which means that the watering event just recently was initiated but did not acually took place in the pot of the plant then show that the watering was only initiated otherwise show the true timestamp of the watering event
+        
+        if (lastWateringInitiationStatus($name) == "initiat"){
+            
+            // Show that the watering was initiated but physically did not took place
+            
+            //fetch the string that says that the watering was initiated but currently did not took place
+            include ("text_constants.php");
+            
+            echo " "; echo $wateringInitiationStatusInformation;
+            
+        }
+        elseif (lastWateringInitiationStatus($name) == "reseted"){
+        
+            // show the timestamp of the real watering event that physically took place in the plant pot
+            
+            // Get the name of the plant from $name - defined in the index.php
+            echo " "; echo lastManualWateringInitiationTimestamp($name);
+        }
         
             echo "</td>";
         echo "</tr>";

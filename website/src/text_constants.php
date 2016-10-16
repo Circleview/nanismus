@@ -16,4 +16,10 @@
      /Users/stefanwilluda/github/nanismus/website/src/after_watering_initated_test.php
      /Users/stefanwilluda/github/nanismus/website/src/after_watering_initated.php
      */
+    
+    // Text that says that the watering was initiated but currently did not took place
+    $wateringInitiationStatusInformation = "Gie&szlig;auftrag erhalten. <br> <br> Die Nani wird gleich gegossen.";
+    /* Used in: 
+     /Users/stefanwilluda/github/nanismus/website/src/last_manual_watering_timestamp.php
+     */
 ?>
