@@ -25,7 +25,7 @@
     include("db.php");
     
     
-    // pump initiation by use
+    // pump initiation by user
     $valueString = "initiat";
     
     // we receive the name from the calling page
@@ -33,13 +33,13 @@
     
     
     $sql = "
-    INSERT INTO $tabelle
-    (
-     name , watering_initiated
-     )
-    VALUES
-    (
-     '$name', '$valueString'
+        INSERT INTO $tabelle
+        (
+         name , watering_initiated
+         )
+        VALUES
+        (
+         '$name', '$valueString'
      )
     ";
     
@@ -58,9 +58,5 @@
         // If we performed a successful data transmission that will initiate a watering event, we want to display a nice green background. To do so we simply manipulate the moisture value to 100%
         $Feuchte = 100;
     }
-
-    
-    
-
     
     ?>

@@ -6,11 +6,42 @@
             //some kind of header information will re-occur on may pages
             include ("page_metadata.php");
             
+            
+            // receive the values of the form which was sent earlier and interprete the value
+            
+            // try to prevent bots from inputing and watering the plant
+            // http://stackoverflow.com/questions/8472/practical-non-image-based-captcha-approaches
+
+            // what was in the input field?
+            $botname = $_POST[name];
+            
+            /* 
+             If AntiSpam = A Integer
+                If AntiSpam >= 10
+                    Comment = Approved
+                Else
+                    Comment = Spam
+             Else
+                Comment = Spam
+             */
+            
+            if (is_numeric($name)){
+                if ($botname >= 2){
+                    $botname = "human";
+                }
+                else {
+                    $botname = "bot";
+                }
+            }
+            else {
+                $botname = "notnumeric";
+            }
+            
             // receive and post test data
             $name = "Test";
             
             // Send to the database that the watering event was initiated manually
-            include ("initiate_watering_manually.php");
+            include ("initiate_watering_manually_test.php");
             // $Feuchte = 100;
             
             ?>
