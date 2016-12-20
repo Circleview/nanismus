@@ -18,7 +18,7 @@ function drawChart() {
     include ("moistdata.php"); ?>
     
     
-    var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }
 

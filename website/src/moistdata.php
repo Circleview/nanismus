@@ -13,7 +13,7 @@
          */
         //http://www.ayom.com/topic-7692.html
         //http://de.php.net/strtotime
-        $auswertzeitraum = 15; // Wie viele Tage wollen wir in die Vergangenheit gucken?
+        $auswertzeitraum = 29; // Wie viele Tage wollen wir in die Vergangenheit gucken?
         $vergleichsdatum = "-".$auswertzeitraum." days";
         $vergleichsdatum = strtotime($vergleichsdatum);
         $datum = date("Y-m-d H:i:s", $vergleichsdatum);
@@ -36,7 +36,7 @@
         $sql = "
         SELECT Day(timestamp) AS tag, Avg($tabelle.value) AS avgmoisture
         FROM $tabelle
-        WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Prozentfeuchte') AND (($tabelle.timestamp) > '$datum'))
+        WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Prozentfeuchte') AND (($tabelle.timestamp) > '$datum') AND (($tabelle.value) is not null))
         GROUP BY Day(timestamp)
         ORDER BY ($tabelle.ID)
         ";
@@ -145,13 +145,16 @@
 
         
         // https://developers.google.com/chart/interactive/docs/gallery/areachart#configuration-options
+        // https://developers.google.com/chart/interactive/docs/gallery/linechart
         
         echo "var options = {";
+        echo "curveType: 'function',";
         echo "title: 'Feuchte im Zeitverlauf',";
         
         echo "hAxis: {";
             echo "textStyle: {";
-                echo "color: '"; echo textColor($Feuchte); echo "'";
+                echo "color: '"; echo textColor($Feuchte); echo "',";
+                echo "fontSize: 8";
             echo "},";
             echo "gridlines: {";
                 echo "count: 5";
@@ -186,7 +189,7 @@
         echo "series: {";
             echo "0: {";
                 echo "visibleInLegend: false,";
-                echo "lineWidth: 4,";
+                echo "lineWidth: 6,";
                 echo "color: '"; echo datalineColor($Feuchte); echo "',";
                 echo "areaOpacity: 0.3"; 
                 echo "}";
