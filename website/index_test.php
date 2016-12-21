@@ -22,6 +22,9 @@
     // feature toggle to display the moisture chart
     $showMoistureChart = true;
     
+    // feature toogle to display the last picture of the ip cam
+    $showIpCamPicture = true; 
+    
     ?>
 
 <!-- PHP load data from mySQL database to show on this page -->
@@ -144,12 +147,19 @@
             <?php
                 include ("src/last_manual_watering_timestamp.php");
                 ?>
+
+        <! -- build up the table row that displays the moisture data as a graph - if the feature toggle has been set -->
+
+            <?php
+                include ("src/ipcamfotos.php");
+                ?>
+
+
         <! -- build up the table row that displays the moisture data as a graph -
             if the feature toggle has been set -->
             <?php
                 include ("src/moistchart.php");
                 ?>
-
 
         <! -- build up the table row that displays the twitter timeline for nanismusKW -
             if the feature toggle has been set -->

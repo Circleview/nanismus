@@ -43,6 +43,9 @@ int PumpVoltagePin[2] = {11, 13}; // in production we switch 11 with the pump, i
 // D13
 #define CurrentlyMoistureMeasurementIndicatorLED 13 // LED that indicates that right now a moisture measurement is performed
 
+// A3
+#define TemperatureMeasurementAnalogInputPin A3
+
 // A4
 #define MoistureMeasurementAnalogInputPin 4
 
@@ -68,7 +71,7 @@ int PumpVoltagePin[2] = {11, 13}; // in production we switch 11 with the pump, i
 
 
 // define if this is a test build or a production build
-#define istest 0 // 0 == production ; 1 == test
+#define istest 1 // 0 == production ; 1 == test
 /* the interpretation of this value will currently lead to a different http POST statement
  * which writes differently attributed data to the database
  */
@@ -83,8 +86,17 @@ unsigned long SoilMoistureMeasurementWaitDuration = 1000; // milliseconds 1.000 
  currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
  30 minutes * 60 seconds * 1000 milliseconds
  ; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+ currently 30 minutes
  */
 unsigned long MoistMeasureInterval[2] = {1800000, 60000}; // 0 == production 1 == test
+
+/* Every how many milliseconds are we going to perform a temperature measurement?
+ currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
+ 30 minutes * 60 seconds * 1000 milliseconds
+ ; // 30 * 60 * 1000; // milliseconds 1.000 milliseconds = 1 second
+ currently every 6 hours
+ */
+unsigned long TempMeasureInterval[2] = {21600000, 10000};// 0 == production 1 == test
 
 /* Every how many milliseconds are we going to perform a call to the web server to check the watering initiation status?
  currently I use millis() because I don't need the exact time and millis() is easier to simulate than now()
@@ -106,6 +118,12 @@ long lastManualWateringActionTime = -1 * manualWateringInitiationInterval[istest
  */
 long lastMoistMeasureTime = -1 * MoistMeasureInterval[istest];
 
+// store the most recent time when the temperature measurement took place
+/* When we start the first iteration of the code loop than we use the current time minus one interval
+ * which leads to an immediate measurement of the temperature when the board is connected to the power supply
+ */
+long lastTempMeasureTime = -1 * TempMeasureInterval[istest];
+
 // store the most recent time when call of the watering initiation status took place
 /* When we start the first iteration of the code loop than we use the current time minus one interval
  * which leads to an immediate call when the board is connected to the power supply
@@ -115,6 +133,9 @@ long lastWateringInitiationCallTime = -1 * WateringInitiationCallInterval[istest
 
 // define the variable that stores the data input that is sent by the soil moisture sensor for reuseage
 int MoistureMeasurementResultAnalogInput;
+
+// define the variable that stores the data input that is sent by the temperature sensor for reuseage
+float TemperatureMeasurementResultCelsius;
 
 // define the variable that stores the moisture percentage value that is calculated out of the analog input moisture value
 int lastMoistureResultPercentageValue = 0;
@@ -211,8 +232,23 @@ void debugoutlnUnsignedLong(char *s, unsigned long value){
 #endif
 }
 
-// debug output function for char * values
+// debug output function for int values
 void debugoutlnInt(char *s, int value){
+#if defined(__AVR_ATmega32U4__)
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+#else
+    RedFly.disable();
+    Serial.print(s);
+    Serial.print(": ");
+    Serial.println(value);
+    RedFly.enable();
+#endif
+}
+
+// debug output function for float values
+void debugoutlnFloat(char *s, float value){
 #if defined(__AVR_ATmega32U4__)
     Serial.print(s);
     Serial.print(": ");
@@ -704,7 +740,7 @@ const char * switchBetweenDifferentWebsiteURLs(int websiteSelector) {
 /* This function puts together all the different parts of the POST request
  * that is sent to the webserver
  */
-char * assembleThePostRequest(long value, int websiteSelector) {
+char * assembleThePostRequest(long value, const char * type_string, int websiteSelector) {
     
     // Serial debug info
     // debugoutln("assembleThePostRequest()");
@@ -724,8 +760,8 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     }
     
     // one is the kind of value we are transmitting
-    const char * type_string;
-    type_string = "Prozentfeuchte";
+    // const char * type_string;
+    // type_string = "Prozentfeuchte";
     
     
     //String GetRequest;
@@ -928,7 +964,7 @@ void StartTheWaterPump(){
 
 
 // Here we do the  Http POST request and check if the transmission was successful
-const char * ResultOfHttpPostRequest(long value, int websiteSelector){
+const char * ResultOfHttpPostRequest(long value, const char * type_string, int websiteSelector){
     
     // Serial debug info
     // debugoutln("SuccessResultOfHttpPostRequest - Start");
@@ -944,7 +980,10 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector){
     // initialize the client
     RedFlyClient client(server, 80);
     
-    char * PostRequest = assembleThePostRequest(value, websiteSelector);
+    // const char * type_string;
+    // type_string = "Prozentfeuchte";
+    
+    char * PostRequest = assembleThePostRequest(value, type_string, websiteSelector);
     
     // Serial debug info
     // debugoutlnChar("PostRequest", PostRequest);
@@ -997,7 +1036,6 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector){
 
 /*const char * webServerInitiationStatus(boolean webServerSuccessResult, int websiteSelector){
     
-    
     /* If we receive a "initiate" status from the webserver, we know, that a watering action
      * was initiated manually over the website. If we have this information, we can "manually"
      * switch on the waterpump.
@@ -1027,7 +1065,7 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector){
  * if this again does not work out, we try to re-establish the whole Wifi connection
  * unfortunately we currently cannot do more than that because we don't have access to
  * the server */
-void FullHttpPostTransmission(long value, int websiteSelector){
+void FullHttpPostTransmission(long value, const char * type_string, int websiteSelector){
     
     // Serial debug info
     // debugoutln("FullHttpPostTransmission - Start");
@@ -1050,8 +1088,11 @@ void FullHttpPostTransmission(long value, int websiteSelector){
         // count the number of attempts up
         numberAttempts++;
         
+        // const char * type_string;
+        // type_string = "Prozentfeuchte";
+        
         // The Post request is done in the statement below
-        tempRequestSuccessTrue = ResultOfHttpPostRequest(value, websiteSelector);
+        tempRequestSuccessTrue = ResultOfHttpPostRequest(value, type_string, websiteSelector);
         
         // Serial debug info
         // debugoutlnConstChar("tempRequestSuccessTrue", tempRequestSuccessTrue);
@@ -1100,7 +1141,7 @@ void resetTheWateringInitiationStatusOnWebserver(){
     // Serial debug info
     // debugoutln("resetTheWateringInitiationStatusOnWebserver()");
     
-    FullHttpPostTransmission(1, 3); // The int value 1 == reset // The 3 is the value for the webSiteselector watering.php
+    FullHttpPostTransmission(1, "ResetInitiation", 3); // The int value 1 == reset // The 3 is the value for the webSiteselector watering.php
 
 }
 
@@ -1212,7 +1253,7 @@ void checkForManualWateringInitiation(const char * startWatering){
         
         /* and send the current moisture value to the database to make clear that the watering event took place and 
          * made a difference */
-        FullHttpPostTransmission(PercentMoistureValue(MoistureMeasurementResultAnalogInput), 1); // 1 is the websiteSelector for valueget.php
+        FullHttpPostTransmission(PercentMoistureValue(MoistureMeasurementResultAnalogInput), "Prozentfeuchte", 1); // 1 is the websiteSelector for valueget.php
 
     }
     
@@ -1229,6 +1270,14 @@ void setup() {
     
     // Statuslog
     // debugoutln("void setup()");
+    
+    // Write in Serial Monitor, if we use real data or test data, just to indicate in test, that we can expect test data
+    if (istest == 0) {
+        debugoutln("production data");
+    }
+    else if (istest == 1){
+        debugoutln("test data");
+    }
     
     // Define pins and functions of these pins
     pinMode(SoilDryWarningLED, OUTPUT);  // to switch on or off the LED for dryness indication
@@ -1283,6 +1332,52 @@ void DefineTheCurrentMoistureIndicator(boolean IsTimeForMoistureMeasurement) {
     }
 }
 
+/* Measure the temperature of the room air
+ * but only if it is already time to do the measurement
+ */
+void MeasureTheCurrentTemperature(boolean IsTimeForMeasurement) {
+    
+    // Serial debug info
+    // debugoutln("MoistureMeasurement()");
+    
+    // is it already time to perform a new moisture check?
+    if(IsTimeForMeasurement) {
+        
+        // Serial debug info
+        // debugoutln("IsTimeForMeasurement == true");
+        
+        /* Store the current time to "remember" when the last moisture measurement took place
+         * This information will be needed to decide in later loops of the code if it is time
+         * to perform a new measurement
+         */
+        lastTempMeasureTime = millis();
+        
+        /* Start the measurement of the current soil moisture
+         * and interprete this value into an Moisture indicator
+         */
+
+        float temp; // value of the temperature sensor
+        //If you're using a LM35 or similar, use line 'a' in the image above and the formula: Temp in °C = (Vout in mV) / 10
+        // https://learn.adafruit.com/tmp36-temperature-sensor
+            
+        temp = analogRead(TemperatureMeasurementAnalogInputPin); // sensorvalue
+        
+        // Serial debug info
+        debugoutlnFloat("temp analog input", temp);
+        
+        // converting that reading to voltage, for 3.3v arduino use 3.3
+        TemperatureMeasurementResultCelsius = (5.0 * temp * 100.0) / 1024; // (temp * (5000/1024)/10); // sensorvalue in millivolts in °C including a correction value due to some measure errors
+        
+        // Serial debug info
+        debugoutlnFloat("TemperatureMeasurementResultCelsius", TemperatureMeasurementResultCelsius);
+        
+    }
+    else{
+        
+        // Serial debug info
+        // debugoutln("IsTimeForMoistureMeasurement == false");
+    }
+}
 
 // Decide if we need to switch the Dryness Warning LED on or off based on the interpretation of the moisture sensor analog input
 void DecisionToSwitchSoilDryWaringLED(char * Indicator){
@@ -1415,7 +1510,7 @@ int percentMoistureValueToSendToWebserver(int inputAnalogInputValue){
 
 
 // Transform the current moisture value into a percentage value and send it to a database using http://
-void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAnalogValue){
+void SendValueToDatabase(boolean IsTimeToSendData, const char * type_string, int MoistAnalogValue){
     
     // Serial log info
     // debugoutln("SendMoisturePercentageValueToDatabase - Start");
@@ -1429,9 +1524,11 @@ void SendMoisturePercentageValueToDatabase(boolean IsTimeToSendData, int MoistAn
         // Serial debug info
         // debugoutln("IsTimeToSendData");
         
-        // Transform the current analogInput value for the moisture of the soil into a percentage value
-        FullHttpPostTransmission(percentMoistureValueToSendToWebserver(MoistAnalogValue), 1); // 1 is the websiteSelector for valueget.php
+        // const char * type_string;
+        // type_string = "Prozentfeuchte";
         
+        // Transform the current analogInput value for the moisture of the soil into a percentage value
+        FullHttpPostTransmission(MoistAnalogValue, type_string, 1); // 1 is the websiteSelector for valueget.php
     }
 
     // Serial log info
@@ -1457,7 +1554,7 @@ void CheckWateringInitiationStatus(boolean IsTimeToCallInitiationStatus){
         lastWateringInitiationCallTime = millis();
         
         // Call the web server to receive the current initiation status (initiate or reset)
-        FullHttpPostTransmission(1, 2); // The int value is random, because we currently don't need it to just call the URL // The 2 is the value for the webSiteselector call_initiation.php
+        FullHttpPostTransmission(1, "CheckInitiation", 2); // The int value is random, because we currently don't need it to just call the URL // The 2 is the value for the webSiteselector call_initiation.php
         
     }
 }
@@ -1479,24 +1576,34 @@ void loop() {
      */
     boolean WateringInitiationStatusTime = IsTimeForSomething(lastWateringInitiationCallTime, WateringInitiationCallInterval[istest]);
     
+    /* Check if it is time to check the current temperature in the room */
+    boolean MeasureAndDataTransmissionTimeTemperature = IsTimeForSomething(lastTempMeasureTime, TempMeasureInterval[istest]);
+    
     /* Start the moisture measurement
      * Cosider the TRUE or FALSE statement from the time check before
      * The return of this moisture measurement is an analog input value
      * This analog input value is then interpreted into an moisture indicator 
      * of the current moisture status of the soil
      */
-    DefineTheCurrentMoistureIndicator(MeasureAndDataTransimitionTime);
+    // DefineTheCurrentMoistureIndicator(MeasureAndDataTransimitionTime);
+    
+    /* Start the temperature measurement
+     * Cosider the TRUE or FALSE statement from the time check before
+     * The return of this measurement is an analog input value
+     * of the current temperature of the room air
+     */
+    MeasureTheCurrentTemperature(MeasureAndDataTransmissionTimeTemperature);
     
     /* Decide if the red dryness warning indication LED needs to be swiched on or off based on the moisture
      * interpretation
      */
-    DecisionToSwitchSoilDryWaringLED(MoistureIndicator);
+    // DecisionToSwitchSoilDryWaringLED(MoistureIndicator);
     
     /* Decide if the water pump to water the soil automatically should be switched on
      * This decision will be based on the last moisture measurement of the moisture sensor
      * If the soil is "urgently dry" the waterpump will immediately start watering the soil
      */
-    DecisionToSwitchWaterPump(MoistureIndicator);
+    // DecisionToSwitchWaterPump(MoistureIndicator);
     
     /* Check from time to time if a watering event was initiated manually over the website
      * Therefore we make a http:// request to our webserver and call the current status
@@ -1504,21 +1611,27 @@ void loop() {
      * If we receive that a manual watering event was initiated, then we start the waterpump
      * After that we reset the watering initiation status with a web server call
      */
-    CheckWateringInitiationStatus(WateringInitiationStatusTime);
+    // CheckWateringInitiationStatus(WateringInitiationStatusTime);
     
     /* Check if there was a manual watering action over the website 
      */
-    checkForManualWateringInitiation(manualWateringInitiationStatus);
+    // checkForManualWateringInitiation(manualWateringInitiationStatus);
     
     /* Send the moisture data to a central database 
      * from there the moisture value can be displayed in an app or on a website
      * we only store the current percentage value for the moisture in that database
      */
-    SendMoisturePercentageValueToDatabase(MeasureAndDataTransimitionTime, MoistureMeasurementResultAnalogInput);
+    // SendValueToDatabase(MeasureAndDataTransimitionTime, "Prozentfeuchte", percentMoistureValueToSendToWebserver(MoistureMeasurementResultAnalogInput));
     
-    /* After one cycle of the loop has taken place reset the value of the MeasureAndDataTransimitionTime 
+    /* Send the temperature data to the central database
+     * from there the temperature value can be displayed on a website 
+     */
+    SendValueToDatabase(MeasureAndDataTransmissionTimeTemperature, "Temperatur", TemperatureMeasurementResultCelsius);
+    
+    /* After one cycle of the loop has taken place reset the value of the MeasureAndDataTransimitionTime and the MeasureAndDataTransmissionTimeTemperature
      * to avoid unnecessary measures or data transmitions
      */
     MeasureAndDataTransimitionTime = false;
+    MeasureAndDataTransmissionTimeTemperature = false;
     
 }
