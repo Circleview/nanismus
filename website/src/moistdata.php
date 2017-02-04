@@ -242,8 +242,16 @@
             $datum = date('j', $vergleichsdatum);
             $datum = str_pad($datum, 2,'0', STR_PAD_LEFT); // Führende Null beim Datum
 
+            if ($diagdata["day"][$datum] == "") {
+                
+                // skip this day to avoid a broken diagram
+                
+            }
+            else {
+                
+                echo ",['". $diagdata["day"][$datum] . "', " . $diagdata["moisture"][$datum] . "] ";   // Aufbau des Arrays für die GoogleChart Daten
+            }
 
-            echo ",['". $diagdata["day"][$datum] . "', " . $diagdata["moisture"][$datum] . "] ";   // Aufbau des Arrays für die GoogleChart Daten
         }
 
         echo "]);";
