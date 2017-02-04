@@ -25,7 +25,7 @@
     }
     
     // build the input button
-    echo "<input type='submit' value='";
+    echo "<button type='submit' ";
     
     
     // it depends on moisture thresholds if the watering button will be enabled or not
@@ -36,25 +36,35 @@
     if ($Feuchte <= $ColorThreshold1 && $watering_initiated == "reseted"){
         
         // yes, show the button
-    
-        echo "$submitButtonLabelTextWateringEnabled '"; // Button label
         
         echo " id='watering_button_enabled'/>"; // choose the css styling for an enabled button
+        
+        echo "$submitButtonLabelTextWateringEnabled"; // Button label
+        
+        
         
     }
     else {
         
         // no, don't show the button but show a nice little plant icon
         
-        echo "$submitButtonLabelTextWateringDisabled '"; // Button label
+        
+        // echo "$submitButtonLabelTextWateringDisabled '"; // Button label
         
         echo " disabled"; // disable the button
         
         echo " id='watering_button_disabled'/>"; // choose the css styling for an disabled button
         
+        // recall the Javascript value that we generated in the moistchart_setup.php by using the moistdata.php and write this as a value for the button
+        echo "<script type='text/javascript'>document.write(anticipatedWateringDayJS);</script>";
+        
+        // recall the Javascript value that we generated in the moistchart_setup.php by using the moistdata.php and write this as a value for the button
+        // echo "<script type='text/javascript'>document.getElementById('watering_button_disabled').value = 'Gießen voraussichtlich <br /> am ' + anticipatedWateringDayJS;</script>";
+        
     }
     
     // build the rest of the form
+    echo "</button>";
     echo "</p>";
     echo "</form>";
 ?>

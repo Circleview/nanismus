@@ -1,4 +1,4 @@
-﻿	<?php
+	<?php
 
         //Datenbank-Verbindung herstellen
         //------------------------------
@@ -50,6 +50,17 @@
         // Wie fülle ich mit PHP führende Nullen auf?
         // http://www.strassenprogrammierer.de/php-nullen-auffuellen_tipp_505.html
 
+        
+        // We need a counter for the selected rows to calculate the average drying rate of the soil
+        $RowCounter = 0;
+        
+        // We set the default last measured moisture for the first round of the while loop
+        $lastMoisture = 999; // This number cannot be fetched from the database, since we only store up to 100 pecent mositure
+        
+        // We define a basis value for the cumulative amount of droped moisture
+        $cumulativeMoistureDrop = 0;
+        
+        
         while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
         {
             $t = $row['tag'];
@@ -63,7 +74,8 @@
             // Ermittle die Durchschnittsfeuchte
             // http://php.net/manual/de/function.round.php
             $moisture = (round($row['avgmoisture'], 1))/100;
-
+            
+            
             // Wenn der heutige Tag angezeigt wird, dann soll das Wort "Jetzt" angezeigt werden
 
             $heuteTag = str_pad(date('d', time()), 2,'0', STR_PAD_LEFT);
@@ -97,8 +109,113 @@
             $diagdata["moisture"][$t] = $moisture;
 
             // echo("Tag / Feuchte " . $diagdata["day"][$t] . "/" . $diagdata["moisture"][$t] . " ");
+            
+            
+            
+            
+            
+            
+            // We calculate the speed of drying of the plant soil to anticipate when the next watering event eventually needs to take place
+            
+            
+            // On the first time when the while loop is performed we just skip the calculation, since we have no values to compare
+            
+            // echo "lastMoisture: $lastMoisture";
+            // echo " .... ";
+            
+            if ($lastMoisture == 999) {
+                
+                // nothing needs to happen here
+                
+            }
+            else {
+                
+                // We check if the avgerage moisture is going up or down
+                
+                if ($lastMoisture < $moisture) {
+                    
+                    // we asume that a watering event took place
+                    
+                    // we don't use that data to calculate a burn rate, since it would mean an inverse burn rate
+                    
+                    // echo "$lastMoisture > $moisture -> true";
+                    // echo " .... ";
+                    
+                }
+                else {
+                
+                    
+                    // If the moisture goes down we check the speed of the moisture decline
+                    
+                    $cumulativeMoistureDrop = $cumulativeMoistureDrop + ($lastMoisture - $moisture);
+                    
+                    // Increase the row counter by 1
+                    $RowCounter = $RowCounter+1;
+                    
+                }
+                
+            }
+            
+            // We store the last moisture to compare it with the moisture of the upcoming loop
+            $lastMoisture = $moisture;
 
+            // echo "cumulativeMoistureDrop: $cumulativeMoistureDrop";
+            // echo " .... ";
+            // echo "RowCounter: $RowCounter";
+            // echo " .... ";
+            
         }
+        
+        
+        // We calculate the average moisture burn-rate per day and save this burn rate to calculate the upcoming watering event
+        $avgMoistureDrop = $cumulativeMoistureDrop / $RowCounter;
+        // echo "avgMoistureDrop: $avgMoistureDrop ... ";
+        
+        
+        // We take the last moisture value that was selected from the database and calculate the amount of days that will be needed until the next watering event eventually takes place
+        
+        
+        // We define the treshold when the next watering event technically will be possible again
+        include ("color_threshold_configuration.php");
+        $aimedMoistureToAllowWateringEvent = $ColorThreshold1/100;
+        
+        
+        // We calculate the real calendar date of the anticipated next watering event
+        
+        $daysUntilWateringIsAllowedAgain = round((($moisture - $aimedMoistureToAllowWateringEvent) / $avgMoistureDrop), 0);
+        
+        $anticipatedWateringDay = "+".$daysUntilWateringIsAllowedAgain." days";
+        
+        
+        // If the anticipated watering event is near in the future we just calculate the weekday name
+        if ($daysUntilWateringIsAllowedAgain >= 7){
+            
+            // we need to display the date not the name of the day
+            $anticipatedWateringDay = date('d.m.', strtotime($anticipatedWateringDay));
+            
+        }
+        else if ($daysUntilWateringIsAllowedAgain > 2) {
+            
+            // we display the name of the upcoming day
+            $anticipatedWateringDay = weekdayToGermanWeekdayNameString(date('2', strtotime($anticipatedWateringDay)));
+            
+        }
+        else if ($daysUntilWateringIsAllowedAgain = 2){
+            
+            // we display the name of the upcoming day
+            $anticipatedWateringDay = "Übermorgen";
+            
+        }
+        else {
+            
+            // we display the name of the upcoming day
+            $anticipatedWateringDay = "Morgen";
+            
+        }
+        
+        $anticipatedWateringDay = "Gie&szlig;en voraussichtlich " . $anticipatedWateringDay . " m&ouml;glich";
+        
+        
 
         // Jetzt muss das Array für den Google Grafen aufgebaut werden
         // So erwartet GoogleCharts seine Daten
@@ -195,6 +312,47 @@
                 echo "}";
             echo "}";
         
-        echo "};";
+        echo "};"
 
      ?>
+
+
+
+<?php
+    
+    function weekdayToGermanWeekdayNameString($weekdayInt){
+        
+        // echo "timestamp: "; echo $timestamp; echo " ";
+        // echo "weekdayInt: "; echo $weekdayInt; echo " ";
+        
+        $weekdayString = "";
+        
+        switch ($weekdayInt) {
+                
+            case 1:
+                $weekdayString = "Montag";
+                break;
+            case 2:
+                $weekdayString = "Dienstag";
+                break;
+            case 3:
+                $weekdayString = "Mittwoch";
+                break;
+            case 4:
+                $weekdayString = "Donnerstag";
+                break;
+            case 5:
+                $weekdayString = "Freitag";
+                break;
+            case 6:
+                $weekdayString = "Sonnabend";
+                break;
+            case 0:
+                $weekdayString = "Sonntag";
+                break;
+        }
+        
+        return "am " . $weekdayString;
+    }
+    
+    ?>

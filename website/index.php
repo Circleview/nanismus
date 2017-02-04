@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="de" lang="de">
 
+
+<!-- Test the layout of the page on different mobile devices with
+http://www.responsinator.com
+
+index_test : http://www.responsinator.com/?url=http%3A%2F%2Fnanismus.no-ip.org%2Findex_test.php
+
+index : http://www.responsinator.com/?url=nanismus.de
+-->
+
+
 <head>
 
 <!-- some kind of header information will re-occur on may pages -->
@@ -89,7 +99,7 @@ background-image: url(<?php echo "'" . LastIpCamPicturePath() . "'" ?>);
 background-repeat: no-repeat; background-size: 280px;
 border: 0px solid black;
 background-position: 50% 50%;
-text-shadow: 0px 0px 10px rgba(255, 255, 255, 1); // https://css3gen.com/text-shadow/
+text-shadow: 0px 0px 10px rgba(255, 255, 255, 1); /* https://css3gen.com/text-shadow/*/
 
 }
 

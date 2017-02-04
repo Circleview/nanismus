@@ -67,6 +67,9 @@ td {
     padding: 10px 20px 10px 20px;
     border: solid #ffffff 4px;
     text-decoration: none;
+    width: 280px;
+    height: 100px;
+    opacity: 1.0;
 }
 
 /* syling of the watering button whent the watering is currently not needed*/
@@ -81,6 +84,9 @@ td {
     padding: 10px 20px 10px 20px;
     border: solid #ffffff 2px;
     text-decoration: none;
+    width: 280px;
+    height: 100px;
+    opacity: 0.6;
 }
 
 /* the plant icon that is displayed instead of the watering button */
