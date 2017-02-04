@@ -21,7 +21,7 @@
     $showMoistureChart = true;
     
     // feature toogle to display the last picture of the ip cam
-    $showIpCamPicture = true;
+    $showIpCamPicture = false;
     
     ?>
 
@@ -57,11 +57,8 @@ body {
 background:
     
     <?php
-    
     include ("src/background_color.php");
-    
     echo backgroundColor($Feuchte); echo ";"; /* red */
-    
     ?>
 }
 
@@ -72,16 +69,33 @@ td {
 color:
     
     <?php
-    
     include ("src/text_color.php");
-    
     echo textColor($Feuchte); echo ";"; /* red */
-    
     ?>
     
 }
 
+    /*Include a script that fetches the path to the latest picture of the plant taken by a ip cam */
+    <?php
+    include ("src/ipcam_picture_path.php");
+    ?>
+
+
+    /* define the style for the td that contains the moisture drop icon and the latest moisture value*/
+#moisture_drop_icon_with_ip_cam_picutre_background {
+
+    height: 200px;
+    background-image: url(<?php echo "'" . LastIpCamPicturePath() . "'" ?>);
+    background-repeat: no-repeat; background-size: 280px;
+    border: 0px solid black;
+    background-position: 50% 50%;
+    text-shadow: 0px 0px 10px rgba(255, 255, 255, 1); // https://css3gen.com/text-shadow/
+
+}
+
+
 </style>
+
 
 <!-- if the feature toggle is swiched on include all the data that is needed to display the moisture diagram -->
 <?php
@@ -98,13 +112,12 @@ color:
 
 <table>
 <tr>
-<td>
 
 <! -- build up the content of this row and show an icon of a waterdrop and the current moisture value -->
 <?php
     include ("src/moisture_value_display.php");
     ?>
-</td>
+
 </tr>
 <tr>
 <td class="buttonTableData">
@@ -124,7 +137,7 @@ color:
 <! -- build up the table row that displays the moisture data as a graph - if the feature toggle has been set -->
 
 <?php
-    include ("src/ipcamfotos.php");
+    include ("src/ipcam_picture.php");
     ?>
 
 

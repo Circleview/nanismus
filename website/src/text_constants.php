@@ -1,7 +1,11 @@
 <?php
 
     // Button label to initiate the watering action
-    $submitButtonLabelText = "Gie&szlig;en";
+    $submitButtonLabelTextWateringEnabled = "Gie&szlig;en";
+    // used in: /Users/stefanwilluda/github/nanismus/website/src/watering_button.php
+    
+    // Button label to initiate the watering action
+    $submitButtonLabelTextWateringDisabled = "Gie&szlig;en nicht n&ouml;tig";
     // used in: /Users/stefanwilluda/github/nanismus/website/src/watering_button.php
     
     // Button label to jump back to the index page after the watering initiation

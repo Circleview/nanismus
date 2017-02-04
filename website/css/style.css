@@ -22,14 +22,17 @@ td {
     vertical-align: middle;
     height: 65px;
     width: auto;
+    -webkit-filter: drop-shadow(0px 0px 10px #fff);
+    filter: drop-shadow(0px 0px 10px #fff);
     
 }
+
 
 /* the styling of e.g. the table row of the watering button */
 .buttonTableData {
     
     border: 0px solid;
-    height: 200px;
+    height: 220px;
     text-align: center;
     vertical-align: middle;
     font-size: 30px;
@@ -38,8 +41,8 @@ td {
     
 }
 
-/* syling of the watering button */
-#watering_button {
+/* syling of the back to index button after the watering event was initiated. This button should look similar to the watering_button_enabled*/
+#back_to_index_button {
     -webkit-appearance: none;
     -webkit-border-radius: 5;
     -moz-border-radius: 5;
@@ -49,6 +52,34 @@ td {
     background: #3d3d3d;
     padding: 10px 20px 10px 20px;
     border: solid #ffffff 4px;
+    text-decoration: none;
+}
+
+/* syling of the watering button when the watering is needed and the watering action can be performed*/
+#watering_button_enabled {
+    -webkit-appearance: none;
+    -webkit-border-radius: 5;
+    -moz-border-radius: 5;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 23px;
+    background: #3d3d3d;
+    padding: 10px 20px 10px 20px;
+    border: solid #ffffff 4px;
+    text-decoration: none;
+}
+
+/* syling of the watering button whent the watering is currently not needed*/
+#watering_button_disabled {
+    -webkit-appearance: none;
+    -webkit-border-radius: 5;
+    -moz-border-radius: 5;
+    border-radius: 5px;
+    color: #666666;
+    font-size: 23px;
+    background: #d9d9d9;
+    padding: 10px 20px 10px 20px;
+    border: solid #ffffff 2px;
     text-decoration: none;
 }
 
@@ -64,7 +95,7 @@ td {
 /* the styling of e.g. the timestamp of the last watering event */
 .mediumTableData {
     
-    padding-top: 45px;
+    padding-top: 10px;
     border: 0px solid;
     height: 50px;
     text-align: center;
@@ -76,7 +107,7 @@ td {
 /* the styling of e.g. the timestamp of the last watering event */
 .twitterTableData {
     
-    padding-top: 150px;
+    padding-top: 130px;
     border: 0px solid;
     height: 50px;
     text-align: center;

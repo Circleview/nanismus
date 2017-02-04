@@ -22,6 +22,6 @@
 
         <?php include("text_constants.php"); echo "$submitButtonLabelBackText"; ?>
 
-        id="watering_button"/></p>
+        id="back_to_index_button"/></p>
 
 </form>
