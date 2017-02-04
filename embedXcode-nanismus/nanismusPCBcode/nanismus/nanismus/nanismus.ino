@@ -934,7 +934,7 @@ void StartTheWaterPump(){
     
     unsigned long CurrentMillis = millis(); // recurring check of the current time
     unsigned long PumpBeginningMillis = CurrentMillis; // this value serves to compare start and end time of the watering action
-    unsigned long PumpDurationMillis = 30000; // water for 30 seconds.
+    unsigned long PumpDurationMillis = 20000; // duration in which the pump is pumping the water // water for 20 seconds.
     
     // Serial debug info
     // debugoutlnUnsignedLong("PumpBeginningMillis", PumpBeginningMillis);
