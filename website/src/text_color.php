@@ -3,12 +3,14 @@
     
     function textColor($moisturePercentValue){
         
+        include ("color_threshold_configuration.php");
+        
         $textColorString = "";
         
-        if ($moisturePercentValue >=41){
+        if ($moisturePercentValue >= $ColorThreshold1 ){
             $textColorString = "#ffffff"; /* green */
         }
-        else if ($moisturePercentValue >=21){
+        else if ($moisturePercentValue >= $ColorThreshold2){
             $textColorString = "#000000"; /* "#F2EC38;"; /* yellow */
         }
         else {

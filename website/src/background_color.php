@@ -2,15 +2,17 @@
     
     // http://www.colorpicker.com/37c8c5
     
+    
     function backgroundColor($moisturePercentValue){
         
+        include ("color_threshold_configuration.php");
         
         $bgcolor = "";
         
-        if ($moisturePercentValue >=41){
+        if ($moisturePercentValue >= $ColorThreshold1){
             $bgcolor = "#82c837"; /* green */
         }
-        else if ($moisturePercentValue >=21){
+        else if ($moisturePercentValue >= $ColorThreshold2){
             $bgcolor = "#FFFF33"; /* "#F2EC38;"; /* yellow */
         }
         else {

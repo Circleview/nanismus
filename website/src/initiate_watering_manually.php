@@ -56,7 +56,10 @@
     else {
         
         // If we performed a successful data transmission that will initiate a watering event, we want to display a nice green background. To do so we simply manipulate the moisture value to 100%
-        $Feuchte = 100;
+        
+        include ("color_threshold_configuration.php");
+        
+        $Feuchte = $ColorThreshold0; // 100%
     }
     
     ?>

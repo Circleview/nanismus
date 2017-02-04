@@ -24,12 +24,14 @@
     
     function pathToPicture ($inputMoistureValue) {
         
+        include ("color_threshold_configuration.php");
+        
         // The picture that will be displayed, depends on the moisture of the plant
         
-        if ($inputMoistureValue >=41){
+        if ($inputMoistureValue >= $ColorThreshold1 ){
             echo "'../images/plantwatering_white.svg'"; /* green */
         }
-        else if ($inputMoistureValue >=21){
+        else if ($inputMoistureValue >= $ColorThreshold2 ){
             echo "'../images/plantwatering_black.svg';"; /* "#F2EC38;"; /* yellow */
         }
         else {

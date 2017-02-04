@@ -9,7 +9,9 @@
     // for test we can manipulate the database result
     // $watering_initiated = reset;
     
-    if ($Feuchte <= 40 && $watering_initiated == "reseted"){
+    include ("color_threshold_configuration.php");
+    
+    if ($Feuchte <= $ColorThreshold1 && $watering_initiated == "reseted"){
         
         // yes, show the button
     
@@ -25,30 +27,6 @@
             echo "<form action='src/after_watering_initated.php' method='post'>";
         
         }
-        
-        // try to prevent bots from inputing and watering the plant
-        // http://stackoverflow.com/questions/8472/practical-non-image-based-captcha-approaches
-        echo "<input type='text' name='name' id='name' value='name' />";
-        
-        /*
-        echo "<script>";
-        
-            echo "var antiSpam = function() {";
-                echo "if (document.getElementById('name')) {";
-                    echo "a = document.getElementById('name');";
-                    echo "if (isNaN(a.value) == true) {";
-                        echo "a.value = 0;";
-                    echo "} else {";
-                        echo "a.value = parseInt(a.value) + 1;";
-                    echo "}";
-                echo "}";
-                echo "setTimeout('antiSpam()', 1000);";
-            echo "}";
-        
-            echo "antiSpam();";
-        
-        echo "</script>";
-         */
         
         // the rest of the normal web form
         echo "<input type='submit' value='";

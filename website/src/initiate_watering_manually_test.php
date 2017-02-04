@@ -24,31 +24,23 @@
     //--------------------------------
     include("db.php");
     
-    if ($botname == "bot"){
-        
-        // pump initiation by user
-        $valueString = "bot-initiat";
-        
-    }
-    else if ($botname == "human"){
-        
-        // pump initiation by user
-        $valueString = "initiat";
-        
-    }
+    
+    // pump initiation by user
+    $valueString = "initiat";
     
     // we receive the name from the calling page
     // $name = "Banane";
     
+    
     $sql = "
-        INSERT INTO $tabelle
-        (
-         name , watering_initiated, sender
-         )
-        VALUES
-        (
-        '$name', '$valueString', '$botname'
-         )
+    INSERT INTO $tabelle
+    (
+     name , watering_initiated
+     )
+    VALUES
+    (
+     '$name', '$valueString'
+     )
     ";
     
     //http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
@@ -64,7 +56,10 @@
     else {
         
         // If we performed a successful data transmission that will initiate a watering event, we want to display a nice green background. To do so we simply manipulate the moisture value to 100%
-        $Feuchte = 100;
+        
+        include ("color_threshold_configuration.php");
+        
+        $Feuchte = $ColorThreshold0; // 100%
     }
     
     ?>

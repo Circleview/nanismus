@@ -11,7 +11,10 @@
             
             // Send to the database that the watering event was initiated manually
             include ("initiate_watering_manually.php");
-            $Feuchte = 100;
+            
+            include ("color_threshold_configuration.php");
+            
+            $Feuchte = $ColorThreshold0; // 100% green
             
             ?>
         
@@ -28,10 +31,12 @@
                 
                 <?php
                 
-                if ($Feuchte >=41){
+                include ("color_threshold_configuration.php");
+                
+                if ($Feuchte >= $ColorThreshold1 ){
                     echo "#82c837;"; /* green */
                 }
-                else if ($Feuchte >=21){
+                else if ($Feuchte >= $ColorThreshold2 ){
                     echo "#FFFF33;"; /* "#F2EC38;"; /* yellow */
                 }
                 else {
@@ -49,10 +54,12 @@
             
             <?php
             
-            if ($Feuchte >=41){
+            include ("color_threshold_configuration.php");
+            
+            if ($Feuchte >= $ColorThreshold1 ){
                 echo "#ffffff;"; /* green */
             }
-            else if ($Feuchte >=21){
+            else if ($Feuchte >= $ColorThreshold2 ){
                 echo "#000000;"; /* "#F2EC38;"; /* yellow */
             }
             else {
