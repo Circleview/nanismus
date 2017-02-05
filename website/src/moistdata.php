@@ -107,11 +107,6 @@
 
             $diagdata["day"][$t] = $anzeigetag;
             $diagdata["moisture"][$t] = $moisture;
-
-            // echo("Tag / Feuchte " . $diagdata["day"][$t] . "/" . $diagdata["moisture"][$t] . " ");
-            
-            
-            
             
             
             
@@ -119,10 +114,6 @@
             
             
             // On the first time when the while loop is performed we just skip the calculation, since we have no values to compare
-            
-            // echo "lastMoisture: $lastMoisture";
-            // echo " .... ";
-            
             if ($lastMoisture == 999) {
                 
                 // nothing needs to happen here
@@ -134,17 +125,13 @@
                 
                 if ($lastMoisture < $moisture) {
                     
-                    // we asume that a watering event took place
+                    // we asume that a watering event took place, because the current moisture is higher than the last.
                     
                     // we don't use that data to calculate a burn rate, since it would mean an inverse burn rate
-                    
-                    // echo "$lastMoisture > $moisture -> true";
-                    // echo " .... ";
                     
                 }
                 else {
                 
-                    
                     // If the moisture goes down we check the speed of the moisture decline
                     
                     $cumulativeMoistureDrop = $cumulativeMoistureDrop + ($lastMoisture - $moisture);
@@ -156,20 +143,14 @@
                 
             }
             
-            // We store the last moisture to compare it with the moisture of the upcoming loop
+            // We store the last moisture to compare it with the moisture of the while upcoming loop
             $lastMoisture = $moisture;
-
-            // echo "cumulativeMoistureDrop: $cumulativeMoistureDrop";
-            // echo " .... ";
-            // echo "RowCounter: $RowCounter";
-            // echo " .... ";
             
         }
         
         
         // We calculate the average moisture burn-rate per day and save this burn rate to calculate the upcoming watering event
         $avgMoistureDrop = $cumulativeMoistureDrop / $RowCounter;
-        // echo "avgMoistureDrop: $avgMoistureDrop ... ";
         
         
         // We take the last moisture value that was selected from the database and calculate the amount of days that will be needed until the next watering event eventually takes place
@@ -181,29 +162,30 @@
         
         
         // We calculate the real calendar date of the anticipated next watering event
-        
         $daysUntilWateringIsAllowedAgain = round((($moisture - $aimedMoistureToAllowWateringEvent) / $avgMoistureDrop), 0);
-        
         $anticipatedWateringDay = "+".$daysUntilWateringIsAllowedAgain." days";
         
+        
+        // To make the anticipated watering date in the future more naturally readable we convert the date into words
         
         // If the anticipated watering event is near in the future we just calculate the weekday name
         if ($daysUntilWateringIsAllowedAgain >= 7){
             
             // we need to display the date not the name of the day
             $anticipatedWateringDay = date('d.m.', strtotime($anticipatedWateringDay));
+            $anticipatedWateringDay = "am " . $anticipatedWateringDay;
             
         }
         else if ($daysUntilWateringIsAllowedAgain > 2) {
             
             // we display the name of the upcoming day
-            $anticipatedWateringDay = weekdayToGermanWeekdayNameString(date('2', strtotime($anticipatedWateringDay)));
+            $anticipatedWateringDay = "am " . weekdayToGermanWeekdayNameString(date('w', strtotime($anticipatedWateringDay)));
             
         }
         else if ($daysUntilWateringIsAllowedAgain = 2){
             
             // we display the name of the upcoming day
-            $anticipatedWateringDay = "Übermorgen";
+            $anticipatedWateringDay = "&Uuml;bermorgen";
             
         }
         else {
@@ -360,7 +342,7 @@
                 break;
         }
         
-        return "am " . $weekdayString;
+        return $weekdayString;
     }
     
     ?>

@@ -96,7 +96,7 @@ color:
 
     height: 200px;
     background-image: url(<?php echo "'" . LastIpCamPicturePath() . "'" ?>);
-    background-repeat: no-repeat; background-size: 280px;
+    background-repeat: no-repeat; background-size: 290px;
     border: 0px solid black;
     background-position: 50% 50%;
     text-shadow: 0px 0px 10px rgba(255, 255, 255, 1); /* https://css3gen.com/text-shadow/*/
