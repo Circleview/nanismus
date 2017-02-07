@@ -9,10 +9,10 @@
         
         $bgcolor = "";
         
-        if ($moisturePercentValue >= $ColorThreshold1){
+        if ($moisturePercentValue > $ColorThreshold1){
             $bgcolor = "#82c837"; /* green */
         }
-        else if ($moisturePercentValue >= $ColorThreshold2){
+        else if ($moisturePercentValue > $ColorThreshold2){
             $bgcolor = "#FFFF33"; /* "#F2EC38;"; /* yellow */
         }
         else {

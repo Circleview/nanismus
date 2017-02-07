@@ -33,10 +33,10 @@ background:
     
     include ("color_threshold_configuration.php");
     
-    if ($Feuchte >= $ColorThreshold1 ){
+    if ($Feuchte > $ColorThreshold1 ){
         echo "#82c837;"; /* green */
     }
-    else if ($Feuchte >= $ColorThreshold2 ){
+    else if ($Feuchte > $ColorThreshold2 ){
         echo "#FFFF33;"; /* "#F2EC38;"; /* yellow */
     }
     else {
@@ -56,10 +56,10 @@ color:
     
     include ("color_threshold_configuration.php");
     
-    if ($Feuchte >= $ColorThreshold1 ){
+    if ($Feuchte > $ColorThreshold1 ){
         echo "#ffffff;"; /* green */
     }
-    else if ($Feuchte >= $ColorThreshold2 ){
+    else if ($Feuchte > $ColorThreshold2 ){
         echo "#000000;"; /* "#F2EC38;"; /* yellow */
     }
     else {
