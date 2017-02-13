@@ -135,22 +135,14 @@ int lastMoistureResultPercentageValue = 0;
  * If the moisture sensor sticks in a glass of water I can measure with a multimeter 2.6 Volts input
  *		water moist = 2.6 V = 532 analogInput
  
- * This definition was adjusted on the 15th August to
+ * This definition was adjusted to the values below
  
- * Used thresholds
- 
- * "zero" : 0% : 310
- * "urgently dry" : 20% : 360
- * "moist" : 40% : 400
- * "very moist" : 80% : 442
- * "hundred" : 100% : 481
- */
-/* line 121
+ * line 121
  *     ThresholdsForAnalogInputValues[] = {zero, urgently dry, moist, very moist, hundred};
  *     ThresholdsForAnalogInputValues[] = {0%  , 20%         , 40%  , 80%       , 100%   };
  *     ThresholdsForAnalogInputValues[] = {0   , 1           , 2    , 3         , 4      };
  */
-int ThresholdsForAnalogInputValues[] = {310 , 360         , 400  , 442       , 481    };
+int ThresholdsForAnalogInputValues[] =    {340 , 370         , 430  , 470       , 490    };
 
 // Store the indicator of the soil moisture
 char * MoistureIndicator;
