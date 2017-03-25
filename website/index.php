@@ -94,7 +94,7 @@ color:
 /* define the style for the td that contains the moisture drop icon and the latest moisture value*/
 #moisture_drop_icon_with_ip_cam_picutre_background {
 
-height: 250px;
+height: 200px;
 background-image: url(<?php echo "'" . LastIpCamPicturePath() . "'" ?>);
 background-repeat: no-repeat; background-size: 100%;
 border: 0px solid black;
