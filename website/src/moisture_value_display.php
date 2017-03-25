@@ -21,11 +21,10 @@ function pathToWaterdropIcon ($inputMoistureValue) {
     
     
     // HTML
-    // echo "<tr>";
-    
+
     echo "<td id='moisture_drop_icon_with_ip_cam_picutre_background'>";
     
-            // show a nice little picture
+    // show a nice little picture
     if ($showMoistureChart) {
         echo "<a href='#chart_div' id='linkToMoistChart' rel='' style='color: "; echo textColor($Feuchte); echo "; text-decoration: none;'>";
     }
@@ -40,6 +39,5 @@ function pathToWaterdropIcon ($inputMoistureValue) {
     }
 
     echo "</td>";
-    // echo "</tr>";
     
 ?>
