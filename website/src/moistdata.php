@@ -1,6 +1,12 @@
 	<?php
 
-        //Datenbank-Verbindung herstellen
+        
+        
+        // conversion of the date when watering is allowed again into a german name of a weekday
+        include("weekdayToGermanWeekdayNameString.php");
+        
+        
+        Ç◊Ç//Datenbank-Verbindung herstellen
         //------------------------------
         include ("db.php");
 
@@ -16,9 +22,13 @@
         $auswertzeitraum = 29; // Wie viele Tage wollen wir in die Vergangenheit gucken?
         $vergleichsdatum = "-".$auswertzeitraum." days";
         $vergleichsdatum = strtotime($vergleichsdatum);
-        $datum = date("Y-m-d H:i:s", $vergleichsdatum);
+        $datum = date("Y-m-d", $vergleichsdatum);
 
-
+        
+        //echo "datum: " . $datum . "\n";
+        // datum: 2017-02-24
+        
+        
         // Baue das Array auf, das die Diagrammdaten hält
         // http://www.php.net/manual/de/language.types.array.php
         // http://www.php.net/manual/de/function.array.php
@@ -29,15 +39,14 @@
           );
 
 
-        //echo "datum: ".$datum."<br />";
         // Ermittlung der Prozentfeuchtedaten
         // http://technet.microsoft.com/de-de/library/ee634550.aspx
         
         $sql = "
-        SELECT Day(timestamp) AS tag, Avg($tabelle.value) AS avgmoisture
+        SELECT DATE_FORMAT($tabelle.timestamp, '%d.%m.%Y') AS 'timeStampDate', round(Avg($tabelle.value),1) AS avgmoisture
         FROM $tabelle
         WHERE ((($tabelle.sensorname)='Banane') AND (($tabelle.logtype)='Prozentfeuchte') AND (($tabelle.timestamp) > '$datum') AND (($tabelle.value) is not null))
-        GROUP BY Day(timestamp)
+        GROUP BY timeStampDate
         ORDER BY ($tabelle.ID)
         ";
 
@@ -52,19 +61,28 @@
 
         
         // We need a counter for the selected rows to calculate the average drying rate of the soil
-        $RowCounter = 0;
+        $RowCounter = 1;
         
-        // We set the default last measured moisture for the first round of the while loop
-        $lastMoisture = 999; // This number cannot be fetched from the database, since we only store up to 100 pecent mositure
+        
+        $lastMoisture = 999;
+        
         
         // We define a basis value for the cumulative amount of droped moisture
         $cumulativeMoistureDrop = 0;
         
         
+        // Wenn der heutige Tag angezeigt wird, dann soll das Wort "Jetzt" angezeigt werden
+        $heuteTag = (date('d.m.Y', time()));
+        //echo "heuteTag: " . $heuteTag . "\n";
+        // heuteTag: 25.03.2017
+        
+        
         while($row = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
         {
-            $t = $row['tag'];
-            $t = str_pad($t, 2,'0', STR_PAD_LEFT); // der Tag des Monats soll mit einer führenden Null geschrieben werden
+            $dayOfDatabaseRowTimestamp = $row['timeStampDate'];
+            // echo "dayOfDatabaseRowTimestamp: " . $dayOfDatabaseRowTimestamp . " ";
+            
+            $t = substr($dayOfDatabaseRowTimestamp,0,2); // der Tag des Monats soll mit einer führenden Null geschrieben werden
             // speichere den Tag in einem Array, der String der Tageszahl ist der Ident des Arrays
 
             // der im Diagramm angezeigte Tag soll einen Punkt haben 01 => 01.
@@ -73,13 +91,14 @@
             // Als nächstes ermittle ich die Feuchtigkeitswerte im Auswertungszeitraum
             // Ermittle die Durchschnittsfeuchte
             // http://php.net/manual/de/function.round.php
-            $moisture = (round($row['avgmoisture'], 1))/100;
+            $moisture = ($row['avgmoisture']);
             
             
-            // Wenn der heutige Tag angezeigt wird, dann soll das Wort "Jetzt" angezeigt werden
-
-            $heuteTag = str_pad(date('d', time()), 2,'0', STR_PAD_LEFT);
-            if ($heuteTag == $t)
+            // echo "heuteTag: " . $heuteTag . "\n";
+            // echo "dayOfDatabaseRowTimestamp: " . $dayOfDatabaseRowTimestamp . "\n";
+            // dayOfDatabaseRowTimestamp: 24.02.2017
+            
+            if ($heuteTag == $dayOfDatabaseRowTimestamp)
             {
                 $anzeigetag = "Jetzt";
 
@@ -101,22 +120,35 @@
 
                 while($rowjetzt = mysqli_fetch_array($db_erg, MYSQL_ASSOC))
                 {
-                     $moisture = $rowjetzt['value']/100;
+                     $moisture = $rowjetzt['value'];
                 }
             }
 
+            
             $diagdata["day"][$t] = $anzeigetag;
-            $diagdata["moisture"][$t] = $moisture;
+            $diagdata["moisture"][$t] = $moisture/100;
             
             
             
             // We calculate the speed of drying of the plant soil to anticipate when the next watering event eventually needs to take place
+            
+            /*
+            echo "dayOfDatabaseRowTimestamp: " . $dayOfDatabaseRowTimestamp . " // ";
+            echo "RowCounter: " . $RowCounter  . " // ";
+            echo "moisture: " . $moisture . " // ";
+            echo "lastMoisture: " . $lastMoisture;
+            echo "\n";
+            */
             
             
             // On the first time when the while loop is performed we just skip the calculation, since we have no values to compare
             if ($lastMoisture == 999) {
                 
                 // nothing needs to happen here
+                
+                // echo "skip the first row \n";
+                
+                // we just store the last moisture value
                 
             }
             else {
@@ -129,15 +161,24 @@
                     
                     // we don't use that data to calculate a burn rate, since it would mean an inverse burn rate
                     
+                    // echo "lastMoisture is below current moisture --> we skip this value \n";
+                    
                 }
                 else {
                 
                     // If the moisture goes down we check the speed of the moisture decline
                     
+                    /*
+                    echo "last moisture is higher than current moisture --> moisture drop";
+                    echo " // ";
+                    */
+                     
                     $cumulativeMoistureDrop = $cumulativeMoistureDrop + ($lastMoisture - $moisture);
                     
+                    // echo "cumulativeMoistureDrop: " . $cumulativeMoistureDrop . "\n";
+                    
                     // Increase the row counter by 1
-                    $RowCounter = $RowCounter+1;
+                    $RowCounter = $RowCounter + 1;
                     
                 }
                 
@@ -151,6 +192,11 @@
         
         // We calculate the average moisture burn-rate per day and save this burn rate to calculate the upcoming watering event
         $avgMoistureDrop = $cumulativeMoistureDrop / $RowCounter;
+        // echo "avgMoistureDrop: " . $avgMoistureDrop . "\n";
+        
+        
+        // To avoid a devision by zero check if the average moisture drop is zero
+        if ($avgMoistureDrop == 0) {$avgMoistureDrop = 1;}
         
         
         // We take the last moisture value that was selected from the database and calculate the amount of days that will be needed until the next watering event eventually takes place
@@ -158,12 +204,16 @@
         
         // We define the treshold when the next watering event technically will be possible again
         include ("color_threshold_configuration.php");
-        $aimedMoistureToAllowWateringEvent = $ColorThreshold1/100;
+        $aimedMoistureToAllowWateringEvent = $ColorThreshold1;
+        // echo "aimedMoistureToAllowWateringEvent: " . $aimedMoistureToAllowWateringEvent . "\n";
         
         
         // We calculate the real calendar date of the anticipated next watering event
-        $daysUntilWateringIsAllowedAgain = round((($moisture - $aimedMoistureToAllowWateringEvent) / $avgMoistureDrop), 0);
+        $daysUntilWateringIsAllowedAgain = ceil((($moisture - $aimedMoistureToAllowWateringEvent) / $avgMoistureDrop));
+        // echo "daysUntilWateringIsAllowedAgain: " . $daysUntilWateringIsAllowedAgain . "\n";
+        
         $anticipatedWateringDay = "+".$daysUntilWateringIsAllowedAgain." days";
+        // echo "anticipatedWateringDay: " . $anticipatedWateringDay . "\n";
         
         
         // To make the anticipated watering date in the future more naturally readable we convert the date into words
@@ -171,21 +221,26 @@
         // If the anticipated watering event is near in the future we just calculate the weekday name
         if ($daysUntilWateringIsAllowedAgain >= 7){
             
+            
+            /*
+            echo "daysUntilWateringIsAllowedAgain (" . $daysUntilWateringIsAllowedAgain . ") is larger than 7 --> we need to display the date not the name of the day \n";
+            */
+            
+            
             // we need to display the date not the name of the day
             $anticipatedWateringDay = date('d.m.', strtotime($anticipatedWateringDay));
             $anticipatedWateringDay = "am " . $anticipatedWateringDay;
+            // echo "anticipatedWateringDay: " . $anticipatedWateringDay . "\n";
             
         }
-        else if ($daysUntilWateringIsAllowedAgain > 2) {
+        else if ($daysUntilWateringIsAllowedAgain > 1) {
+            
+            
+            // echo "daysUntilWateringIsAllowedAgain (" . $daysUntilWateringIsAllowedAgain . ") is larger than 1 --> we display the name of the upcoming day \n";
             
             // we display the name of the upcoming day
             $anticipatedWateringDay = "am " . weekdayToGermanWeekdayNameString(date('w', strtotime($anticipatedWateringDay)));
-            
-        }
-        else if ($daysUntilWateringIsAllowedAgain = 2){
-            
-            // we display the name of the upcoming day
-            $anticipatedWateringDay = "&Uuml;bermorgen";
+            // echo "anticipatedWateringDay: " . $anticipatedWateringDay . "\n";
             
         }
         else {
@@ -237,112 +292,9 @@
         }
 
         echo "]);";
-        
-        
-        
-        /*
-        var data = google.visualization.arrayToDataTable([
-                                                         ['Year', 'Sales', 'Expenses'],
-                                                         ['2013',  1000,      400],
-                                                         ['2014',  1170,      460],
-                                                         ['2015',  660,       1120],
-                                                         ['2016',  1030,      540]
-                                                         ]);
-        */
 
         
-        // https://developers.google.com/chart/interactive/docs/gallery/areachart#configuration-options
-        // https://developers.google.com/chart/interactive/docs/gallery/linechart
+        // the google api moist chart is configured in src/moistchart_configuration.php
+        include("moistchart_configuration.php");
         
-        echo "var options = {";
-        echo "curveType: 'function',";
-        echo "title: 'Feuchte im Zeitverlauf',";
-        
-        echo "hAxis: {";
-            echo "textStyle: {";
-                echo "color: '"; echo textColor($Feuchte); echo "',";
-                echo "fontSize: 8";
-            echo "},";
-            echo "gridlines: {";
-                echo "count: 5";
-            echo "}";
-        echo "},";
-        
-        echo "vAxis: {";
-            echo "minValue: 0.35,";
-            echo "textStyle: {";
-                echo "color: '"; echo textColor($Feuchte);
-            echo "'},";
-            echo "format: 'percent',";
-            echo "gridlines: {";
-                echo "color: '"; echo backgroundColor($Feuchte); echo "',";
-                echo "count: 2";
-            echo "},";
-            echo "textPosition: 'in'"; 
-        echo "},";
-        
-        echo "titleTextStyle: {";
-            echo "color: '"; echo textColor($Feuchte);  echo "',";
-            echo "fontSize: 15";
-        echo "},";
-        
-        echo "backgroundColor: '"; echo backgroundColor($Feuchte); echo "',";
-        
-        echo "chartArea:{left:0,top:20,width:'100%',height:'85%'},";
-        
-        // color script based on moisture
-        include ("dataline_color.php");
-        
-        echo "series: {";
-            echo "0: {";
-                echo "visibleInLegend: false,";
-                echo "lineWidth: 6,";
-                echo "color: '"; echo datalineColor($Feuchte); echo "',";
-                echo "areaOpacity: 0.3"; 
-                echo "}";
-            echo "}";
-        
-        echo "};"
-
-     ?>
-
-
-
-<?php
-    
-    function weekdayToGermanWeekdayNameString($weekdayInt){
-        
-        // echo "timestamp: "; echo $timestamp; echo " ";
-        // echo "weekdayInt: "; echo $weekdayInt; echo " ";
-        
-        $weekdayString = "";
-        
-        switch ($weekdayInt) {
-                
-            case 1:
-                $weekdayString = "Montag";
-                break;
-            case 2:
-                $weekdayString = "Dienstag";
-                break;
-            case 3:
-                $weekdayString = "Mittwoch";
-                break;
-            case 4:
-                $weekdayString = "Donnerstag";
-                break;
-            case 5:
-                $weekdayString = "Freitag";
-                break;
-            case 6:
-                $weekdayString = "Sonnabend";
-                break;
-            case 0:
-                $weekdayString = "Sonntag";
-                break;
-        }
-        
-        return $weekdayString;
-    }
-    
     ?>

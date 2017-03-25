@@ -46,7 +46,7 @@
     }
     else {
         
-        // no, don't show the button but show a nice little plant icon
+        // no, don't show the button but show a text when watering is possible again
         
         
         // echo "$submitButtonLabelTextWateringDisabled '"; // Button label
