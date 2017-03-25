@@ -25,7 +25,7 @@ index : http://www.responsinator.com/?url=nanismus.de
     $showLastManualWateringInitiationTimestamp = true;
     
     // feature toggle to display the twitter timeline for nanismusKW
-    $showTwitterTimeline = true;
+    $showTwitterTimeline = false;
     
     // feature toggle to display the moisture chart
     $showMoistureChart = true;
