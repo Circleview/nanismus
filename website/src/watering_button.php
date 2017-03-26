@@ -65,6 +65,5 @@
     
     // build the rest of the form
     echo "</button>";
-    echo "</p>";
     echo "</form>";
 ?>

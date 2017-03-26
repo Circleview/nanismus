@@ -145,7 +145,6 @@ text-shadow: 0px 0px 10px rgba(255, 255, 255, 1); /* https://css3gen.com/text-sh
     ?>
 
 <! -- build up the table row that displays the moisture data as a graph - if the feature toggle has been set -->
-
 <?php
     include ("src/ipcam_picture.php");
     ?>
