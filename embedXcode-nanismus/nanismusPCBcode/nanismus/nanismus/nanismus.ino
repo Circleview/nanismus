@@ -52,6 +52,7 @@ int PumpVoltagePin[2] = {11, 13}; // in production we switch 11 with the pump, i
 
 // Include libraries to allow WiFi Connection with the RedFly Wifi shield
 // https://github.com/watterott/Arduino-Libs/tree/master/RedFly
+// https://github.com/watterott/Arduino-Libs/tree/master/digitalWriteFast
 #include <RedFly.h>
 #include <RedFlyClient.h>
 #include <RedFlyServer.h>
@@ -699,7 +700,7 @@ char * assembleThePostRequest(long value, int websiteSelector) {
     // debugoutln("assembleThePostRequest()");
     
     // Host IP of web server. We use the static IP and avoid DNS resolution because we know the static IP of the server
-#define HOSTNAME "192.168.178.24" // "173.194.219.94" // google.de
+#define HOSTNAME "192.168.178.23" // "173.194.219.94" // google.de
     
     // one is the name of the sensor (plant)
     const char * sensor_string;
@@ -928,7 +929,7 @@ const char * ResultOfHttpPostRequest(long value, int websiteSelector){
     /* Server IP adress - we remain with a local IP because currently the web server is
      * in the same network as the RedFly WiFi shield
      */
-    byte server[] = { 192, 168, 178, 24 }; // {173, 194, 219 ,94}; google.de //  //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+    byte server[] = { 192, 168, 178, 23 }; // {173, 194, 219 ,94}; google.de //  //{  85, 13,145,242 }; //ip from www.watterott.net (server)
     
     // initialize the client
     RedFlyClient client(server, 80);
@@ -1290,8 +1291,7 @@ void DecisionToSwitchSoilDryWaringLED(char * Indicator){
         // debugoutln("Switch ON LED");
         
         // switch on the red dryness indication LED
-        // currently switched off, because it seems to consume too much current
-        // digitalWrite(SoilDryWarningLED, HIGH);
+        digitalWrite(SoilDryWarningLED, HIGH);
         
     }
     else if (Indicator == "dry"){
@@ -1300,8 +1300,7 @@ void DecisionToSwitchSoilDryWaringLED(char * Indicator){
         // debugoutln("Switch ON LED");
         
         // switch on the red dryness indication LED
-        // currently switched off, because it seems to consume too much current
-        // digitalWrite(SoilDryWarningLED, HIGH);
+        digitalWrite(SoilDryWarningLED, HIGH);
         
     }else {
         
