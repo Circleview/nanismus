@@ -5,7 +5,6 @@
 // Developed with [embedXcode](http://embedXcode.weebly.com)
 //
 // Author 		Stefan Willuda
-// 				Stefan Willuda
 //
 // Copyright	© Stefan Willuda, 2017
 // Licence		Creative Commons - Attribution - ShareAlike 3.0
@@ -162,8 +161,7 @@ const char * manualWateringInitiationStatus = "reset"; // the default value is r
 
 //debug output functions (9600 Baud, 8N2)
 //Leonardo boards use USB for communication, so we dont need to disable the RedFly
-void debugout(char *s)
-{
+void debugout(char *s){
     
     RedFly.disable();
     Serial.print(s);
@@ -175,8 +173,7 @@ void debugout(char *s)
  * serial communication. That is why we have do shortly disable the RedFly Shield when
  * doing a serial print
  */
-void debugoutln(char *s)
-{
+void debugoutln(char *s){
 #if defined(__AVR_ATmega32U4__)
     Serial.println(s);
 #else
@@ -247,8 +244,8 @@ void debugoutlnChar(char *s, char * value){
 }
 
 
-int currentMemoryFree()
-{
+int currentMemoryFree(){
+    
     int mem = freeMemory();
     return (mem);
     
@@ -1226,10 +1223,13 @@ void setup() {
     pinMode(CurrentlyMoistureMeasurementIndicatorLED, OUTPUT); // to switch on or off the LED for measurement indication
     pinMode(PumpVoltagePin[istest], OUTPUT);
     
-    // Blink once to show that we have the new version of the code
+    // Blink to show that we have a working LED
     digitalWrite(SoilDryWarningLED, HIGH);
-    delay(400);
+    digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, HIGH);
+    
+    delay(1000);
     digitalWrite(SoilDryWarningLED, LOW);
+    digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
     
     // initially connect to the WiFi network using the RedFly WiFi Shield
     EstablishWifiConnectionWithRedFlyShield();
