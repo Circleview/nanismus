@@ -937,7 +937,6 @@
 		AAAA160803180306AA0001F7 /* nlao_interrupts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nlao_interrupts.h; sourceTree = "<group>"; };
 		AAAA160803180306AA0001F8 /* nlao_io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nlao_io.h; sourceTree = "<group>"; };
 		AAAA160803180306AA0001F9 /* nlao_usart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nlao_usart.h; sourceTree = "<group>"; };
-		F09AB4B51EBF98DC006D3152 /* Arduino */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Arduino; path = ../../../../../Arduino; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -960,7 +959,6 @@
 		86A232CE1D524D0500BBC8C7 /* nanismus */ = {
 			isa = PBXGroup;
 			children = (
-				F09AB4B51EBF98DC006D3152 /* Arduino */,
 				86F5FAB71D621747002E1616 /* fritzing files */,
 				86F0C5851D5A4FEF00DF21F9 /* pcb code */,
 				864D3A851D6923310057C367 /* website */,
