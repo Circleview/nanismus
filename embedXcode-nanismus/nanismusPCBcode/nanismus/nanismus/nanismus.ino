@@ -29,7 +29,7 @@
 #define SoilMeasureVoltagePin 5 // Pin to start the moisture measurement
 
 // D7
-#define SoilDryWarningLED 7 // LED that indicated dryness in the soil
+#define SoilDryWarningLED 13 // LED that indicated dryness in the soil
 
 // D11
 // Pin to start the waterpump to water the soil
@@ -142,7 +142,7 @@ int lastMoistureResultPercentageValue = 0;
  *     ThresholdsForAnalogInputValues[] = {0%  , 20%         , 40%  , 80%       , 100%   };
  *     ThresholdsForAnalogInputValues[] = {0   , 1           , 2    , 3         , 4      };
  */
-int ThresholdsForAnalogInputValues[] =    {340 , 370         , 430  , 470       , 490    };
+int ThresholdsForAnalogInputValues[] =    {340 , 430         , 450  , 470       , 490    };
 
 // Store the indicator of the soil moisture
 char * MoistureIndicator;
@@ -1230,7 +1230,7 @@ void setup() {
     digitalWrite(CurrentlyMoistureMeasurementIndicatorLED, LOW);
     
     // initially connect to the WiFi network using the RedFly WiFi Shield
-    EstablishWifiConnectionWithRedFlyShield();
+    // EstablishWifiConnectionWithRedFlyShield();
     
 }
 
@@ -1463,7 +1463,7 @@ void loop() {
     
     /* Check if it is time to start calling the web server for a watering initiation status
      */
-    boolean WateringInitiationStatusTime = IsTimeForSomething(lastWateringInitiationCallTime, WateringInitiationCallInterval[istest]);
+    // boolean WateringInitiationStatusTime = IsTimeForSomething(lastWateringInitiationCallTime, WateringInitiationCallInterval[istest]);
     
     /* Start the moisture measurement
      * Cosider the TRUE or FALSE statement from the time check before
@@ -1476,7 +1476,7 @@ void loop() {
     /* Decide if the red dryness warning indication LED needs to be swiched on or off based on the moisture
      * interpretation
      */
-    DecisionToSwitchSoilDryWaringLED(MoistureIndicator);
+    // DecisionToSwitchSoilDryWaringLED(MoistureIndicator);
     
     /* Decide if the water pump to water the soil automatically should be switched on
      * This decision will be based on the last moisture measurement of the moisture sensor
@@ -1490,21 +1490,19 @@ void loop() {
      * If we receive that a manual watering event was initiated, then we start the waterpump
      * After that we reset the watering initiation status with a web server call
      */
-    CheckWateringInitiationStatus(WateringInitiationStatusTime);
+    // CheckWateringInitiationStatus(WateringInitiationStatusTime);
     
     /* Check if there was a manual watering action over the website
      */
-    checkForManualWateringInitiation(manualWateringInitiationStatus);
+    // checkForManualWateringInitiation(manualWateringInitiationStatus);
     
     /* Send the moisture data to a central database
      * from there the moisture value can be displayed in an app or on a website
      * we only store the current percentage value for the moisture in that database
      */
-    SendMoisturePercentageValueToDatabase(MeasureAndDataTransimitionTime, MoistureMeasurementResultAnalogInput);
+    // SendMoisturePercentageValueToDatabase(MeasureAndDataTransimitionTime, MoistureMeasurementResultAnalogInput);
     
     /* After one cycle of the loop has taken place reset the value of the MeasureAndDataTransimitionTime
      * to avoid unnecessary measures or data transmitions
      */
     MeasureAndDataTransimitionTime = false;
-    
-}
