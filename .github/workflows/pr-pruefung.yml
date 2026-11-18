@@ -1,0 +1,55 @@
+name: PR-Prüfung
+
+# Pflicht-Check je Pull Request: sucht im Diff nach nachgeladenem oder ungeprüftem Code (werkzeuge/pr-pruefen.mjs).
+# Absichtlich ohne Checkout und ohne uses: – es läuft kein PR-Code, Dependabot ändert diese Datei nie.
+# Das Skript kommt vom Standard-Branch. Restrisiko: Bei pull_request gilt diese Datei im PR-Stand; Änderungen daran meldet die Regel pruef-datei und der Sicherheits-Nachtlauf.
+# In allen eigenen Repos identisch (Verteilung: werkzeuge/pr-pruefung-verteilen.mjs). Doku: docs/sicherheit-dauerbetrieb.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-pruefung:
+    name: pr-pruefung
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Diff prüfen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          R: ${{ github.repository }}
+          NR: ${{ github.event.pull_request.number }}
+          STD: ${{ github.event.repository.default_branch }}
+          PAUSE_S: "5"
+        run: |
+          set -euo pipefail
+          # Abruf bis 3 Versuche; HTTP 406 (Diff zu groß) sofort aufgeben.
+          holen() {
+            local ziel="$1"; shift
+            local i err
+            for i in 1 2 3; do
+              if err=$(gh api "$@" 2>&1 >"$ziel"); then return 0; fi
+              case "$err" in *"HTTP 406"*) return 2 ;; esac
+              if [ "$i" -lt 3 ]; then sleep "$PAUSE_S"; fi
+            done
+            printf 'Abruf fehlgeschlagen: %s\n' "$err"
+            return 1
+          }
+          skript="$RUNNER_TEMP/pr-pruefen.mjs"
+          diff="$RUNNER_TEMP/pr.diff"
+          holen "$skript" "repos/$R/contents/werkzeuge/pr-pruefen.mjs?ref=$STD" -H 'Accept: application/vnd.github.raw' || { echo "Skript nicht abrufbar"; exit 1; }
+          rc=0
+          holen "$diff" "repos/$R/pulls/$NR" -H 'Accept: application/vnd.github.diff' || rc=$?
+          if [ "$rc" -eq 2 ]; then echo "diff-unlesbar: GitHub liefert den Diff nicht (zu groß), ein Mensch muss den PR lesen"; exit 1; fi
+          if [ "$rc" -ne 0 ]; then echo "Diff nicht abrufbar"; exit 1; fi
+          # Fail-closed: grün nur bei exit 0 und genau der Erfolgszeile.
+          rc=0
+          out=$(node "$skript" < "$diff") || rc=$?
+          printf '%s\n' "$out"
+          if [ "$rc" -eq 0 ] && [ "$out" = "PR-Prüfung: keine Befunde" ]; then exit 0; fi
+          echo "PR-Prüfung rot (exit $rc)"
+          exit 1
